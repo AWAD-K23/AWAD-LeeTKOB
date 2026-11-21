@@ -116,3 +116,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** Frontend lint, formatting, TypeScript checks, production build, and the Playwright login-screen check passed. Lint reported two non-blocking Fast Refresh warnings in generated shadcn component exports.
 - **Evidence:** `frontend/src/App.tsx`, `frontend/src/components/ui/`, `frontend/src/style.css`, `frontend/components.json`, and `frontend/e2e/app-shell.spec.ts`.
+
+## 2026-11-21 — PA3 isolated C++ sandbox
+
+- **Tool:** Codex.
+- **Asked for:** Implement and verify a sandbox that compiles and executes C++ submissions while enforcing all nine PA3 isolation and resource requirements.
+- **Kept:** A non-root, read-only Docker container with no network, host mounts, Docker socket, or application secrets; explicit CPU, memory/swap, process, wall-time, and output limits; streamed source input; and forced whole-container cleanup.
+- **Changed:** Added a dedicated runner image and nine real C++ attack submissions. Compilation and syntax analysis also run inside the restricted container.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** All nine Docker attack tests passed. A further wall-time check confirmed the timed-out container is removed; the memory test writes and reads its allocation, and output capture is bounded to 64 KiB.
+- **Evidence:** `sandbox/Dockerfile`, `backend/internal/sandbox/runner.go`, and `backend/internal/sandbox/testdata/`.
