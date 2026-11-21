@@ -126,3 +126,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** All nine Docker attack tests passed. A further wall-time check confirmed the timed-out container is removed; the memory test writes and reads its allocation, and output capture is bounded to 64 KiB.
 - **Evidence:** `sandbox/Dockerfile`, `backend/internal/sandbox/runner.go`, and `backend/internal/sandbox/testdata/`.
+
+## 2026-11-21 — PA3 syntax-aware hard rules
+
+- **Tool:** Codex.
+- **Asked for:** Implement syntax-aware ban-list decisions before semantic model checking, with tests for compliant traps and evidence lines.
+- **Kept:** A libclang-based scanner running in the sandbox, generic backtick ban-list parsing, resolved call targets, and exact source-line evidence. Semantic constraints return `unsure` with `semantic_pending`; this package has no model dependency.
+- **Changed:** Added a reusable Go checker interface for the worker and Member 2. The checker analyzes all ban-list constraints together and separates their decisions from semantic work.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Real Docker syntax tests passed for actual calls, comments, strings, a student's namespace, an include used only for `std::swap`, using declarations, and macros. Ban-list format tests also passed.
+- **Evidence:** `backend/internal/hardrules/check.go`, `backend/internal/hardrules/check_test.go`, and `sandbox/scan.cpp`.
