@@ -124,6 +124,13 @@ func TestSubmissionContract(t *testing.T) {
 	if _, err = db.Exec(ctx, strings.Split(string(second), "-- +goose Down")[0]); err != nil {
 		t.Fatal(err)
 	}
+	third, err := os.ReadFile(filepath.Join("..", "..", "migrations", "00003_labs_and_classes.sql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(ctx, strings.Split(string(third), "-- +goose Down")[0]); err != nil {
+		t.Fatal(err)
+	}
 	student, other, ta, admin, lab := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
 	password, err := HashPassword("test-password")
 	if err != nil {
@@ -204,6 +211,41 @@ func TestSubmissionContract(t *testing.T) {
 	otherCookie := login("other@example.test")
 	taCookie := login("ta@example.test")
 	adminCookie := login("admin@example.test")
+
+	t.Run("lab creation access and persistence", func(t *testing.T) {
+		classID, otherClass := uuid.NewString(), uuid.NewString()
+		if _, err := db.Exec(ctx, "INSERT INTO classes (id,name) VALUES ($1,'A'),($2,'B')", classID, otherClass); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.Exec(ctx, "INSERT INTO class_tas (class_id,ta_id) VALUES ($1,$2)", classID, ta); err != nil {
+			t.Fatal(err)
+		}
+		body := `{"title":"Sorting","statement":"Use merge sort","tests":[{"input":"3 1","expectedOutput":"1 3"}],"constraints":[{"description":"Use merge sort","deduction":3}]}`
+		path := "/classes/" + classID + "/labs"
+		if got := request("POST", path, body, cookie, "", "http://localhost:5173"); got.Code != 403 {
+			t.Fatal(got.Code, got.Body.String())
+		}
+		if got := request("POST", "/classes/"+otherClass+"/labs", body, taCookie, "", "http://localhost:5173"); got.Code != 404 {
+			t.Fatal(got.Code, got.Body.String())
+		}
+		if got := request("POST", path, `{}`, taCookie, "", "http://localhost:5173"); got.Code != 400 {
+			t.Fatal(got.Code, got.Body.String())
+		}
+		got := request("POST", path, body, taCookie, "", "http://localhost:5173")
+		if got.Code != 201 {
+			t.Fatal(got.Code, got.Body.String())
+		}
+		var result struct {
+			ID string `json:"id"`
+		}
+		if err := json.Unmarshal(got.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		var tests, constraints int
+		if err := db.QueryRow(ctx, "SELECT (SELECT count(*) FROM lab_tests WHERE lab_id=$1), (SELECT count(*) FROM lab_constraints WHERE lab_id=$1)", result.ID).Scan(&tests, &constraints); err != nil || tests != 1 || constraints != 1 {
+			t.Fatalf("tests=%d constraints=%d error=%v", tests, constraints, err)
+		}
+	})
 	path := "/labs/" + lab + "/submissions"
 	origin := "http://localhost:5173"
 	t.Run("unauthenticated", func(t *testing.T) {

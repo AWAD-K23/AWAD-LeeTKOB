@@ -86,3 +86,13 @@ Rejected: treating the rubric's ±10 self-assessment tolerance as permission to 
 Tool: Codex, following read-only review of the PA#2 evidence changes.
 Changed: separated the Playwright test command from browser installation in README and clarified that Windows/macOS and Linux CI need different browser setup flags, while both run the same `npm run e2e --prefix frontend` check.
 Kept: the existing local test result and the CI workflow command; no application or test files changed.
+
+## 2026-11-21 — PA3 lab creation backend
+
+- **Tool:** Codex.
+- **Asked for:** Implement the Member 1 lab creation backend so a TA can create a lab in their assigned class, including the statement, test cases, constraints, and TA-selected deductions.
+- **Kept:** A versioned migration for classes, TA membership, lab statements, test cases, and constraints; a class-scoped lab creation endpoint; server-side TA membership checks; and one transaction for the lab and its related rows.
+- **Changed:** Extended the existing lab structure while preserving local data and the existing submission contract. Added PostgreSQL tests for student refusal, another class's refusal, invalid input, and saved tests and constraints.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** `go -C backend test ./... -count=1` passed with `TEST_DATABASE_URL` pointing to local PostgreSQL on port 5433. The suite ran in an isolated temporary schema, including the new lab creation test.
+- **Evidence:** `backend/migrations/00003_labs_and_classes.sql`, `backend/internal/api/lab.go`, `backend/internal/api/server.go`, and `backend/internal/api/api_test.go`.
