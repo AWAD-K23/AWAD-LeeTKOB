@@ -1,0 +1,19 @@
+[Unit]
+Description=LeeTKOB judging queue worker
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=leetkob
+Group=leetkob
+SupplementaryGroups=docker
+WorkingDirectory=/opt/leetkob
+EnvironmentFile=/etc/leetkob/worker.env
+ExecStart=/opt/leetkob/bin/worker
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

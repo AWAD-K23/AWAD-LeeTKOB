@@ -57,7 +57,7 @@ From `backend`, run `go test ./...` for unit checks. Set `TEST_DATABASE_URL` to 
 
 For initial development accounts, set `USER_EMAIL`, `USER_PASSWORD` (at least 12 bytes), and `USER_ROLE` (`admin`, `ta`, or `student`) in the shell, then run `go run ./cmd/create-user`. Remove the password environment variable afterwards. Labs currently need to be created in PostgreSQL; an authenticated admin can enroll a student using `POST /labs/{labId}/enrollments` with JSON `{ "studentId": "<uuid>" }`.
 
-`POST /auth/login` accepts `email` and `password`; `POST /auth/logout` ends the session. These endpoints and enrollment require the configured `Origin` header. Submission details are in [the contract](docs/contract/submissions.md). No registration UI, judging worker, or sandbox is implemented yet.
+`POST /auth/login` accepts `email` and `password`; `POST /auth/logout` ends the session. These endpoints and enrollment require the configured `Origin` header. Submission details are in [the contract](docs/contract/submissions.md). PA3 adds class/lab forms, a separate judging worker, and a tested C++ sandbox. Account creation still uses the administrator CLI.
 
 For a walkthrough with example requests, see [manual backend testing](docs/MANUAL-TESTING.md).
 
@@ -84,10 +84,18 @@ Use Node.js 22.13.1 and Go 1.26 or newer. From the repository root, run the same
 
 The database-backed Go tests require `TEST_DATABASE_URL`; CI starts PostgreSQL and sets it so the integration suite cannot silently skip. Before the first browser smoke test, install Chromium: use `npx --prefix frontend playwright install chromium` on Windows/macOS; Linux CI uses `npx --prefix frontend playwright install --with-deps chromium` to install system packages too. The test command itself is the same locally and in CI. The browser smoke test checks that the app shell renders; it does not replace API contract tests.
 
-CI runs the `gates`, `secret-history`, and `e2e` jobs on pull requests, pushes to `main`, and the `pa2` tag. Configure `gates`, `secret-history`, and `e2e` as required checks in GitHub branch protection. A passing workflow run alone does not configure branch protection.
+CI runs the `gates`, `secret-history`, `e2e`, and `sandbox` jobs on pull requests, pushes to `main`, and the `pa2`/`pa3` tags. The sandbox job enables `SANDBOX_TESTS=1`, builds the runner image, and runs the full backend suite against PostgreSQL and Docker. Configure these jobs as required checks in GitHub branch protection. A passing workflow run alone does not configure branch protection.
 
 `npm audit` checks the frontend dependency tree. The evaluated lint-toolchain versions in `package.json` use a targeted `minimatch` override to avoid the advisory in the compatible upstream dependency range; review the override when upgrading that toolchain.
 
 ## Spending cap status
 
 Google AI Studio currently displays the `AWAD-LeeTKOB` project's monthly spend cap as **₫100,000**. The cap is project-level and the Spend page was set to **All API Keys**; it is not an application-side hard limit. Google documents the project cap as experimental and warns that billing processing can lag by about 10 minutes, so a small overage is possible. Keep this limitation in mind before enabling model calls. See the [saved cap screenshot](img/evidence/gemini-monthly-cap.png) and [Google's billing documentation](https://ai.google.dev/gemini-api/docs/billing#project-spend-caps). The model integration is not implemented.
+
+## PA3 worker, sandbox, and local deployment
+
+- Follow [Member 1 handoff](docs/PA3/MEMBER1-HANDOFF.md) for the API contracts, worker start command, Docker deployment, and receiving-member checks.
+- See [current database structure](docs/DATABASE.md) for classes, labs, durable jobs, judge results, and separate constraint verdicts.
+- For full backend checks, build `leetkob-sandbox:pa3`, set `TEST_DATABASE_URL` and `SANDBOX_TESTS=1`, and run the same Go format/vet/test commands above. PowerShell users can run `scripts/test-pa3.ps1` from the root.
+- `MODEL_OFF=1` is the default deployment setting. The Member 1 build performs hard rules and records pending semantic work; it makes no real model calls.
+- The local deployment uses `compose.pa3.yaml`; PostgreSQL remains on host port 5433. The handoff explains the environment settings for local HTTP and public HTTPS.

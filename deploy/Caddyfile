@@ -1,0 +1,12 @@
+{$PUBLIC_ADDRESS::80} {
+    encode gzip
+    @api path /auth/* /me /classes /classes/* /labs /labs/* /submissions/*
+    handle @api {
+        reverse_proxy api:8080
+    }
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}

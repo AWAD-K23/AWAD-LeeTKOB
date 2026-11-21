@@ -166,3 +166,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** Local Go format/vet and the full PostgreSQL/Docker suite passed, including all nine attacks, syntax traps, worker recovery, and API-to-worker judging. The follow-up failure-handling test also passed. Remote tag CI is configured; no remote run is claimed here.
 - **Evidence:** `.github/workflows/gates.yml`, `backend/internal/api/api_test.go`, and `backend/internal/worker/worker_test.go`.
+
+## 2026-11-21 — PA3 deployment environment and handoff
+
+- **Tool:** Codex.
+- **Asked for:** Prepare and verify the Member 1 deployment environment and document the worker, sandbox, and next-member interfaces.
+- **Kept:** Separate web/API/migration images, PostgreSQL on host port 5433, Caddy routing, a host-worker service template, ignored secret configuration, and model calls off by default. Retained the provider project cap already documented in README.
+- **Changed:** Added deployment Compose and Docker files, the full-check PowerShell script, server-only model configuration names, and the Member 1 handoff guide. Documented the custom sandbox choice and how the next members consume verdicts.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Deployment images built and the local stack started successfully. The frontend returned HTTP 200 and the protected identity endpoint returned HTTP 401 without a session. The standalone worker built. The documented backend script passed Go format/vet, PostgreSQL checks, all nine Docker attacks, syntax traps, and worker tests.
+- **Evidence:** `compose.pa3.yaml`, `deploy/`, `scripts/test-pa3.ps1`, and `docs/PA3/MEMBER1-HANDOFF.md`. This verifies local setup; no public-host provisioning or remote tag CI run is claimed.
