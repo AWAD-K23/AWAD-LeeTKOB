@@ -1,3 +1,4 @@
+// Configures frontend code-quality checks.
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";

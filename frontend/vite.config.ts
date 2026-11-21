@@ -1,9 +1,11 @@
+// Starts React and forwards API requests to the local Go server.
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
   server: {
+    // Send these paths to Go while developing locally.
     proxy: {
       "/api": "http://localhost:8080",
       "/auth": "http://localhost:8080",

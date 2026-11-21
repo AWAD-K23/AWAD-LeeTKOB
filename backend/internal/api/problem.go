@@ -13,10 +13,13 @@ type problem struct {
 }
 
 func fail(w http.ResponseWriter, status int, slug, title, detail string) {
+
+	// Send errors in the same problem-details JSON shape across the API.
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(problem{"https://leetkob.example/problems/" + slug, title, status, detail})
 }
+
 func internal(w http.ResponseWriter) {
 	fail(w, 500, "internal", "Internal error", "The request could not be completed.")
 }

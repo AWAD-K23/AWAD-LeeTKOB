@@ -1,3 +1,4 @@
+// Checks that the placeholder home page appears in a browser.
 import { expect, test } from "@playwright/test";
 
 test("home page shows the LeeTKOB app shell", async ({ page }) => {

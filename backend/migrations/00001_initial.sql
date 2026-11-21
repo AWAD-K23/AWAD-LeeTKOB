@@ -1,3 +1,4 @@
+-- Create the first application tables.
 -- +goose Up
 CREATE TABLE users (
     id uuid PRIMARY KEY,
@@ -13,5 +14,6 @@ CREATE TABLE submissions (id uuid PRIMARY KEY, lab_id uuid NOT NULL REFERENCES l
 CREATE TABLE jobs (id uuid PRIMARY KEY, submission_id uuid NOT NULL UNIQUE REFERENCES submissions(id), status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')), created_at timestamptz NOT NULL DEFAULT now());
 CREATE TABLE idempotency_keys (student_id uuid NOT NULL REFERENCES users(id), lab_id uuid NOT NULL REFERENCES labs(id), key text NOT NULL, fingerprint bytea NOT NULL, response json NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), PRIMARY KEY (student_id, lab_id, key));
 
+-- Remove those tables when rolling back.
 -- +goose Down
 DROP TABLE idempotency_keys, jobs, submissions, enrollments, labs, sessions, users;
