@@ -106,3 +106,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** The complete Go test suite passed against local PostgreSQL with an isolated temporary schema, including class setup, automatic enrollment, status ownership, class-list privacy, and the existing submission contract.
 - **Evidence:** `backend/internal/api/workspace.go`, `backend/internal/api/api_test.go`, and `backend/migrations/00004_judging.sql`.
+
+## 2026-11-21 — PA3 shadcn/ui and Tailwind screens
+
+- **Tool:** Codex and the official shadcn CLI.
+- **Asked for:** Build the Member 1 frontend screens using shadcn/ui and Tailwind CSS while retaining the Go backend integration.
+- **Kept:** Generated shadcn components, Tailwind's Vite integration, a dark theme, role-based class and lab forms, editable test cases and constraints, student C++ submission, and protected status polling.
+- **Changed:** Replaced the placeholder page and temporary JSON forms with the connected application screens. Added the Vite API proxy paths needed by class lists and submission polling.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Frontend lint, formatting, TypeScript checks, production build, and the Playwright login-screen check passed. Lint reported two non-blocking Fast Refresh warnings in generated shadcn component exports.
+- **Evidence:** `frontend/src/App.tsx`, `frontend/src/components/ui/`, `frontend/src/style.css`, `frontend/components.json`, and `frontend/e2e/app-shell.spec.ts`.

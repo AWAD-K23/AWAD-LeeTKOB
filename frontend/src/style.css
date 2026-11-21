@@ -1,0 +1,91 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--secondary);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--secondary);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: #ef4743;
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-ring: var(--primary);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+}
+
+:root {
+  color-scheme: dark;
+  --background: #1a1a1a;
+  --foreground: #eff1f6;
+  --card: #262626;
+  --primary: #ffa116;
+  --primary-foreground: #1a1a1a;
+  --secondary: #333333;
+  --muted-foreground: #adb5c4;
+  --border: #424242;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply m-0 bg-background text-foreground;
+  }
+  main {
+    @apply mx-auto max-w-5xl p-4 sm:p-6;
+  }
+  header {
+    @apply mb-6 flex flex-wrap items-center gap-4 border-b pb-4;
+  }
+  h1 {
+    @apply mr-auto text-2xl font-semibold text-primary;
+  }
+  h2 {
+    @apply text-xl font-semibold;
+  }
+  h3 {
+    @apply text-lg font-medium;
+  }
+  form {
+    @apply grid gap-5;
+  }
+  label {
+    @apply grid gap-2 text-sm font-medium;
+  }
+  fieldset {
+    @apply grid min-w-0 gap-4 rounded-lg border p-4;
+  }
+  legend {
+    @apply px-2 text-sm text-muted-foreground;
+  }
+  select {
+    @apply w-full rounded-md border bg-secondary px-3 py-2 text-base;
+  }
+}
+
+.statement {
+  @apply whitespace-pre-wrap leading-7;
+}
+.code {
+  @apply min-h-80 font-mono;
+}
+.notice {
+  @apply mb-4;
+}
