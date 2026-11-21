@@ -136,3 +136,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** Real Docker syntax tests passed for actual calls, comments, strings, a student's namespace, an include used only for `std::swap`, using declarations, and macros. Ban-list format tests also passed.
 - **Evidence:** `backend/internal/hardrules/check.go`, `backend/internal/hardrules/check_test.go`, and `sandbox/scan.cpp`.
+
+## 2026-11-21 — PA3 persistent queue worker
+
+- **Tool:** Codex.
+- **Asked for:** Add a separate judging worker that recovers queued submissions after restart and stores exactly one result set.
+- **Kept:** PostgreSQL row-lock claims, renewable leases, fencing tokens, bounded infrastructure retries, sandbox judging, and hard-rule checks only after Accepted. Semantic work remains explicitly pending for Member 2.
+- **Changed:** Added `cmd/worker` and a worker package. Results and constraint verdicts are stored in a transaction guarded by the current lease token and database unique keys.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** PostgreSQL/Docker integration tests passed for queued work with no worker, a new worker processing real C++ to Accepted, one stored result set, no second claim of a live lease, recovery of an expired lease, and refusal of stale or duplicate completion.
+- **Evidence:** `backend/cmd/worker/main.go`, `backend/internal/worker/worker.go`, and `backend/internal/worker/worker_test.go`.
