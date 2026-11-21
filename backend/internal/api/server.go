@@ -15,6 +15,11 @@ type Server struct {
 
 func (s *Server) Routes() http.Handler {
 	r := chi.NewRouter()
+	r.Get("/me", s.me)
+	r.Get("/classes", s.classes)
+	r.Post("/classes", s.createClass)
+	r.Get("/labs", s.labs)
+	r.Get("/submissions/{submissionId}", s.submissionStatus)
 	r.Post("/classes/{classId}/labs", s.createLab)
 	r.Post("/auth/login", s.login)
 	r.Post("/auth/logout", s.logout)

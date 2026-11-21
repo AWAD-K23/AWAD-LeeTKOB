@@ -106,6 +106,11 @@ func (s *Server) createLab(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// Students assigned to the class can submit to every newly created lab.
+	if _, err = tx.Exec(ctx, "INSERT INTO enrollments(lab_id,student_id) SELECT $1,student_id FROM class_students WHERE class_id=$2", id, classID); err != nil {
+		internal(w)
+		return
+	}
 	if err = tx.Commit(ctx); err != nil {
 		internal(w)
 		return

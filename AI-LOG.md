@@ -96,3 +96,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** `go -C backend test ./... -count=1` passed with `TEST_DATABASE_URL` pointing to local PostgreSQL on port 5433. The suite ran in an isolated temporary schema, including the new lab creation test.
 - **Evidence:** `backend/migrations/00003_labs_and_classes.sql`, `backend/internal/api/lab.go`, `backend/internal/api/server.go`, and `backend/internal/api/api_test.go`.
+
+## 2026-11-21 — PA3 class setup and submission status
+
+- **Tool:** Codex.
+- **Asked for:** Implement the Member 1 class and submission backend, including class assignment, student enrollment, and protected judging-status access.
+- **Kept:** Admin-only class creation, server-side class membership, automatic enrollment in newly created labs, class/lab lists, session identity lookup, and student-owned submission status. The status endpoint exposes judging results without constraint deductions.
+- **Changed:** Added class-student membership, persistent judging result storage, job lease fields, and a separate constraint-verdict table for the worker handoff.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** The complete Go test suite passed against local PostgreSQL with an isolated temporary schema, including class setup, automatic enrollment, status ownership, class-list privacy, and the existing submission contract.
+- **Evidence:** `backend/internal/api/workspace.go`, `backend/internal/api/api_test.go`, and `backend/migrations/00004_judging.sql`.
