@@ -17,6 +17,8 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"leetkob/backend/internal/sandbox"
+	"leetkob/backend/internal/worker"
 )
 
 func TestPassword(t *testing.T) {
@@ -244,7 +246,7 @@ func TestSubmissionContract(t *testing.T) {
 		if err := json.Unmarshal(out.Body.Bytes(), &created); err != nil {
 			t.Fatal(err)
 		}
-		out = request("POST", "/labs/"+created.ID+"/submissions", `{"source":"int main(){}"}`, cookie, "class-flow", origin)
+		out = request("POST", "/labs/"+created.ID+"/submissions", `{"source":"#include <iostream>\nint main(){std::cout << 1 << ' ' << 2;}"}`, cookie, "class-flow", origin)
 		if out.Code != 201 {
 			t.Fatal(out.Code, out.Body.String())
 		}
@@ -259,7 +261,12 @@ func TestSubmissionContract(t *testing.T) {
 			t.Fatal(out.Code, out.Body.String())
 		}
 		expectProblem(t, request("GET", statusPath, "", otherCookie, "", origin), 404, "not-found", "Submission not found")
-		if _, err := db.Exec(ctx, "INSERT INTO judge_results(submission_id,verdict,detail) VALUES($1,'Accepted','All tests passed.')", submitted.ID); err != nil {
+		if os.Getenv("SANDBOX_TESTS") == "1" {
+			w := worker.Worker{DB: db, Runner: sandbox.Runner{}}
+			if found, err := w.ProcessOne(ctx); err != nil || !found {
+				t.Fatal(found, err)
+			}
+		} else if _, err := db.Exec(ctx, "INSERT INTO judge_results(submission_id,verdict,detail) VALUES($1,'Accepted','All tests passed.')", submitted.ID); err != nil {
 			t.Fatal(err)
 		}
 		out = request("GET", statusPath, "", cookie, "", origin)

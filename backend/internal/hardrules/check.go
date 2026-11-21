@@ -42,6 +42,9 @@ func bannedNames(text string) []string {
 	return names
 }
 
+// IsBanList lets the worker keep failed hard-rule checks out of model work.
+func IsBanList(text string) bool { return len(bannedNames(text)) > 0 }
+
 // All unresolved semantic work is explicit. Member 2 can call a model only for
 // semantic_pending records, keeping hard-rule decisions out of model prompts.
 func Check(ctx context.Context, scanner Scanner, source []byte, constraints []Constraint) ([]Verdict, error) {

@@ -187,7 +187,11 @@ func (w Worker) judge(ctx context.Context, job Job) error {
 		// A failed syntax check is uncertain, never an automatic pass or deduction.
 		checks = []hardrules.Verdict{}
 		for _, c := range constraints {
-			checks = append(checks, hardrules.Verdict{ConstraintID: c.ID, Verdict: "unsure", Evidence: []hardrules.Evidence{}, Source: "semantic_pending"})
+			source := "semantic_pending"
+			if hardrules.IsBanList(c.Text) {
+				source = "hard_rule"
+			}
+			checks = append(checks, hardrules.Verdict{ConstraintID: c.ID, Verdict: "unsure", Evidence: []hardrules.Evidence{}, Source: source})
 		}
 	}
 	return w.Complete(ctx, job, "Accepted", "All test cases passed.", checks)

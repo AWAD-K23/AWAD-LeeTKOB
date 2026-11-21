@@ -15,6 +15,15 @@ import (
 
 type fakeRunner struct{}
 
+type failedAnalyzer struct{}
+
+func (failedAnalyzer) Run(_ context.Context, _ []byte, _, mode string) (sandbox.Result, error) {
+	if mode == "analyze" {
+		return sandbox.Result{}, errors.New("analysis unavailable")
+	}
+	return sandbox.Result{Verdict: "Executed", Output: "1 3"}, nil
+}
+
 func (fakeRunner) Run(_ context.Context, _ []byte, _, mode string) (sandbox.Result, error) {
 	if mode == "analyze" {
 		return sandbox.Result{Verdict: "Executed", Output: "std::sort\t2\n"}, nil
@@ -150,6 +159,20 @@ func TestDurableWorker(t *testing.T) {
 		var count int
 		if err = db.QueryRow(ctx, "SELECT count(*) FROM judge_results WHERE submission_id=$1", id).Scan(&count); err != nil || count != 1 {
 			t.Fatal(count, err)
+		}
+	})
+
+	t.Run("analysis failure remains unsure without sending bans to model", func(t *testing.T) {
+		id := enqueue()
+		failed := Worker{DB: db, Runner: failedAnalyzer{}}
+		if found, err := failed.ProcessOne(ctx); err != nil || !found {
+			t.Fatal(found, err)
+		}
+		var uncertain, hard, pending int
+		if err := db.QueryRow(ctx, `SELECT count(*) FILTER(WHERE verdict='unsure'),
+		 count(*) FILTER(WHERE source='hard_rule'),count(*) FILTER(WHERE source='semantic_pending')
+		 FROM constraint_verdicts WHERE submission_id=$1`, id).Scan(&uncertain, &hard, &pending); err != nil || uncertain != 2 || hard != 1 || pending != 1 {
+			t.Fatal(uncertain, hard, pending, err)
 		}
 	})
 }

@@ -156,3 +156,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** Frontend lint, formatting, types, production build, and all three Playwright tests passed. Generated-component Fast Refresh warnings remain non-blocking.
 - **Evidence:** `frontend/src/App.tsx` and `frontend/e2e/member-one.spec.ts`.
+
+## 2026-11-21 — PA3 CI and full pipeline checks
+
+- **Tool:** Codex.
+- **Asked for:** Run the Member 1 checks together and configure sandbox and worker checks for the `pa3` tag.
+- **Kept:** The existing required jobs, with a separate Docker/PostgreSQL sandbox job and no ignored failures. PRs, main, and `pa3` run the checks.
+- **Changed:** Extended the API test to submit real code through HTTP and process it through the worker when Docker tests are enabled. Kept failed hard-rule analysis as `unsure` without routing bans to a model.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Local Go format/vet and the full PostgreSQL/Docker suite passed, including all nine attacks, syntax traps, worker recovery, and API-to-worker judging. The follow-up failure-handling test also passed. Remote tag CI is configured; no remote run is claimed here.
+- **Evidence:** `.github/workflows/gates.yml`, `backend/internal/api/api_test.go`, and `backend/internal/worker/worker_test.go`.
