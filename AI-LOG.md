@@ -146,3 +146,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** PostgreSQL/Docker integration tests passed for queued work with no worker, a new worker processing real C++ to Accepted, one stored result set, no second claim of a live lease, recovery of an expired lease, and refusal of stale or duplicate completion.
 - **Evidence:** `backend/cmd/worker/main.go`, `backend/internal/worker/worker.go`, and `backend/internal/worker/worker_test.go`.
+
+## 2026-11-21 — PA3 form accessibility and browser flows
+
+- **Tool:** Codex.
+- **Asked for:** Verify the Member 1 shadcn forms and student result flow in the browser.
+- **Kept:** Explicit, unique label/control IDs, including repeated test-case and constraint fields, and separate labels so select options do not become label text.
+- **Changed:** Added browser tests that verify the TA's submitted tests and deductions, the student's retry key, and the polled Accepted result.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Frontend lint, formatting, types, production build, and all three Playwright tests passed. Generated-component Fast Refresh warnings remain non-blocking.
+- **Evidence:** `frontend/src/App.tsx` and `frontend/e2e/member-one.spec.ts`.

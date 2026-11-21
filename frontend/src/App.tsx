@@ -120,24 +120,26 @@ export default function App() {
               });
             }}
           >
-            <Label>
-              Email
+            <div className="grid gap-2">
+              <Label htmlFor={"field-1"}>Email</Label>
               <Input
+                id={"field-1"}
                 name="email"
                 type="email"
                 required
                 autoComplete="username"
               />
-            </Label>
-            <Label>
-              Password
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor={"field-2"}>Password</Label>
               <Input
+                id={"field-2"}
                 name="password"
                 type="password"
                 required
                 autoComplete="current-password"
               />
-            </Label>
+            </div>
             <Button disabled={busy}>Sign in</Button>
           </form>
         </Card>
@@ -166,18 +168,20 @@ export default function App() {
                   });
                 }}
               >
-                <Label>
-                  Class name
-                  <Input name="name" required />
-                </Label>
-                <Label>
-                  TA account ID
-                  <Input name="taId" required />
-                </Label>
-                <Label>
-                  Student account IDs (one per line)
-                  <Textarea name="studentIds" />
-                </Label>
+                <div className="grid gap-2">
+                  <Label htmlFor={"field-3"}>Class name</Label>
+                  <Input id={"field-3"} name="name" required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor={"field-4"}>TA account ID</Label>
+                  <Input id={"field-4"} name="taId" required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor={"field-5"}>
+                    Student account IDs (one per line)
+                  </Label>
+                  <Textarea id={"field-5"} name="studentIds" />
+                </div>
                 <Button disabled={busy}>Create class</Button>
               </form>
             </Card>
@@ -203,9 +207,14 @@ export default function App() {
                   });
                 }}
               >
-                <Label>
-                  Class
-                  <select name="classId" required defaultValue="">
+                <div className="grid gap-2">
+                  <Label htmlFor={"field-6"}>Class</Label>
+                  <select
+                    id={"field-6"}
+                    name="classId"
+                    required
+                    defaultValue=""
+                  >
                     <option value="" disabled>
                       Choose a class
                     </option>
@@ -215,22 +224,23 @@ export default function App() {
                       </option>
                     ))}
                   </select>
-                </Label>
-                <Label>
-                  Title
-                  <Input name="title" required />
-                </Label>
-                <Label>
-                  Statement
-                  <Textarea name="statement" required rows={6} />
-                </Label>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor={"field-7"}>Title</Label>
+                  <Input id={"field-7"} name="title" required />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor={"field-8"}>Statement</Label>
+                  <Textarea id={"field-8"} name="statement" required rows={6} />
+                </div>
                 <h3>Test cases</h3>
                 {tests.map((test, index) => (
                   <fieldset key={index}>
                     <legend>Case {index + 1}</legend>
-                    <Label>
-                      Input
+                    <div className="grid gap-2">
+                      <Label htmlFor={`field-9-${index}`}>Input</Label>
                       <Textarea
+                        id={`field-9-${index}`}
                         value={test.input}
                         onChange={(e) =>
                           setTests(
@@ -240,10 +250,13 @@ export default function App() {
                           )
                         }
                       />
-                    </Label>
-                    <Label>
-                      Expected output
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor={`field-10-${index}`}>
+                        Expected output
+                      </Label>
                       <Textarea
+                        id={`field-10-${index}`}
                         value={test.expectedOutput}
                         onChange={(e) =>
                           setTests(
@@ -255,7 +268,7 @@ export default function App() {
                           )
                         }
                       />
-                    </Label>
+                    </div>
                     {tests.length > 1 && (
                       <Button
                         type="button"
@@ -280,9 +293,10 @@ export default function App() {
                 {constraints.map((c, index) => (
                   <fieldset key={index}>
                     <legend>Constraint {index + 1}</legend>
-                    <Label>
-                      Rule
+                    <div className="grid gap-2">
+                      <Label htmlFor={`field-11-${index}`}>Rule</Label>
                       <Textarea
+                        id={`field-11-${index}`}
                         value={c.description}
                         required
                         onChange={(e) =>
@@ -295,10 +309,11 @@ export default function App() {
                           )
                         }
                       />
-                    </Label>
-                    <Label>
-                      Deduction
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor={`field-12-${index}`}>Deduction</Label>
                       <Input
+                        id={`field-12-${index}`}
                         type="number"
                         min="0"
                         step="0.01"
@@ -314,7 +329,7 @@ export default function App() {
                           )
                         }
                       />
-                    </Label>
+                    </div>
                     {constraints.length > 1 && (
                       <Button
                         type="button"
@@ -353,9 +368,10 @@ export default function App() {
             <Card className="mb-6 p-6">
               <h2>Your labs</h2>
               {!labs.length && <p>No labs are available yet.</p>}
-              <Label>
-                Lab
+              <div className="grid gap-2">
+                <Label htmlFor={"field-13"}>Lab</Label>
                 <select
+                  id={"field-13"}
                   value={selected}
                   onChange={(e) => setSelected(e.target.value)}
                 >
@@ -366,7 +382,7 @@ export default function App() {
                     </option>
                   ))}
                 </select>
-              </Label>
+              </div>
               {selected && (
                 <article>
                   <h3>{labs.find((l) => l.id === selected)?.title}</h3>
@@ -395,16 +411,17 @@ export default function App() {
                     });
                   }}
                 >
-                  <Label>
-                    C++ source
+                  <div className="grid gap-2">
+                    <Label htmlFor={"field-14"}>C++ source</Label>
                     <Textarea
+                      id={"field-14"}
                       className="code"
                       name="source"
                       required
                       rows={18}
                       spellCheck={false}
                     />
-                  </Label>
+                  </div>
                   <Button
                     className="bg-emerald-500 text-black hover:bg-emerald-400"
                     disabled={busy}
