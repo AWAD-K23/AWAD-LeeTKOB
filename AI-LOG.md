@@ -176,3 +176,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** Deployment images built and the local stack started successfully. The frontend returned HTTP 200 and the protected identity endpoint returned HTTP 401 without a session. The standalone worker built. The documented backend script passed Go format/vet, PostgreSQL checks, all nine Docker attacks, syntax traps, and worker tests.
 - **Evidence:** `compose.pa3.yaml`, `deploy/`, `scripts/test-pa3.ps1`, and `docs/PA3/MEMBER1-HANDOFF.md`. This verifies local setup; no public-host provisioning or remote tag CI run is claimed.
+
+## 2026-11-21 — PA3 database reference and completed Member 1 checklist
+
+- **Tool:** Codex.
+- **Asked for:** Update the current database reference and check the completed Member 1 plan items against the implemented work and passing checks.
+- **Kept:** A schema reference covering all four migrations, separate judge results and constraint verdicts, and a step-by-step submission/lease flow.
+- **Changed:** Updated `DATABASE.md` and checked the eleven Member 1 implementation/handoff items with linked evidence. Clarified that publishing the fixed interfaces belongs to Member 1, while receiving-member acceptance remains in Members 2 and 3's own tasks.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Reviewed the documented tables and fields against migrations `00001`–`00004`, and linked the completed checklist to passing backend, Docker, browser, and local deployment checks. Public hosting and the remote `pa3` CI run are explicitly not claimed.
+- **Evidence:** `docs/DATABASE.md`, `docs/PA3/PA3-PLAN.md`, and `docs/PA3/MEMBER1-HANDOFF.md`.
