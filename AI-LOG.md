@@ -1,5 +1,16 @@
 # AI log
 
+## 2026-11-22 — Member 2 flow explanation
+
+- **Tool:** Codex.
+- **Asked for:** Explain Member 2 as a visual flow matching the backend-mechanism documents, using Mermaid diagrams, tables, simple examples, and exact code excerpts.
+- **Kept:** The distinction between normal judging, hard rules, model findings, and TA review; actual saved smoke/evaluation data rather than invented successful results.
+- **Changed:** Added `MODEL-CHECKER-FLOW.md` with the runtime and evaluation paths, source links, budget/rate controls, failure behavior, and step-by-step snippets. Linked it from the existing backend connections guide and clarified that guide's Member 1 scope.
+- **Rejected:** Showing TA review as already implemented, treating model findings as deductions, or suggesting that the checker reads labels.
+- **By hand:** The user requested a visual explanation similar to the existing mechanism documents.
+- **Verified:** All local links resolved; all 16 Go excerpts matched current source after whitespace normalization. The saved worker result confirmed the example's model evidence at line 8. Git whitespace checks passed. Documentation-only change; no model calls or code changes were required.
+- **Evidence:** `docs/PA3/backend-mechanism/MODEL-CHECKER-FLOW.md` and `BACKEND-CONNECTIONS.md`.
+
 ## 2026-11-22 — Real checker smoke test
 
 - **Tool:** Codex.

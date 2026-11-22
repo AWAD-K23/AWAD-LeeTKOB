@@ -151,12 +151,15 @@ return w.Complete(ctx, job, "Accepted", "All test cases passed.", checks)
 | Published mark | Not produced here | Requires the separate TA review/publication workflow |
 
 - Accepted and a constraint violation can both be correct.
-- These parts make no real AI model calls in the Member 1 implementation.
-- Meaning-based rules remain `unsure` with source `semantic_pending`.
+- The diagram above describes the Member 1 base flow. Member 2 now adds optional
+  semantic model checks between hard rules and the final result save.
+- With model calls off, meaning-based rules remain `unsure` / `semantic_pending`.
+- See [model checker flow](MODEL-CHECKER-FLOW.md) for the current model path.
 - The student status endpoint does not expose protected constraint findings or deductions.
 
 ## 7. Read next
 
 - [Worker flow](WORKER-FLOW.md): job ownership, retries, and saving results.
 - [Hard-rule flow](HARD-RULE-FLOW.md): rule parsing, scanning, and evidence.
+- [Model checker flow](MODEL-CHECKER-FLOW.md): Member 2 checking and evaluation.
 - [Sandbox attacks](SANDBOX-ATTACKS.md): how the container protections are tested.
