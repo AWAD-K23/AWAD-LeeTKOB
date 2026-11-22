@@ -309,15 +309,35 @@
   background: var(--primary);
   color: #18181b;
   border-color: var(--primary);
+  background-image: linear-gradient(135deg, #ffc05b55, transparent);
+  box-shadow:
+    0 2px 8px #ffa11620,
+    inset 0 1px 0 #ffffff30;
 }
 .btn-primary:hover:not(:disabled) {
   background: #ffb340;
   border-color: #ffb340;
 }
 .btn-submit {
-  color: var(--success);
-  background: color-mix(in srgb, var(--success) 12%, var(--card));
-  border-color: color-mix(in srgb, var(--success) 25%, var(--border));
+  color: #092b1a;
+  background: linear-gradient(135deg, #85e7b3, #41c486);
+  border-color: #6bdda4;
+  box-shadow:
+    0 3px 12px #41c48625,
+    inset 0 1px 0 #ffffff40;
+  font-weight: 650;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #a0efc5, #63d49c);
+  border-color: #85e7b3;
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-submit:hover:not(:disabled) {
+  box-shadow:
+    0 4px 16px #0002,
+    inset 0 1px 0 #ffffff40;
 }
 .btn-small {
   padding: 4px 10px;
@@ -1015,6 +1035,180 @@ tbody tr:hover {
   font-family: inherit;
   tab-size: 4;
   outline-offset: -3px;
+}
+
+/* A real textarea owns input and selection; the aligned layer supplies colors. */
+.code-input-stack {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.code-input-stack textarea,
+.code-colors {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 20px 16px 20px 0;
+  border: 0;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: normal;
+  tab-size: 4;
+  white-space: pre;
+  overflow: auto;
+}
+.code-colors {
+  pointer-events: none;
+  color: var(--foreground);
+  scrollbar-width: none;
+}
+.code-colors::-webkit-scrollbar {
+  display: none;
+}
+.source-editor .code-input-stack textarea {
+  color: transparent;
+  caret-color: var(--foreground);
+  background: transparent;
+}
+.code-input-stack textarea::selection {
+  background: #548acb60;
+  color: transparent;
+}
+.hljs-keyword,
+.hljs-type,
+.hljs-literal {
+  color: #c7a0fa;
+}
+.hljs-string,
+.hljs-char {
+  color: #91d7a3;
+}
+.hljs-comment {
+  color: #8c93a2;
+  font-style: italic;
+}
+.hljs-number {
+  color: #edb873;
+}
+.hljs-meta {
+  color: #80bcec;
+}
+.hljs-title,
+.hljs-built_in {
+  color: #f2d28d;
+}
+:root[data-theme="light"] .hljs-keyword,
+:root[data-theme="light"] .hljs-type,
+:root[data-theme="light"] .hljs-literal {
+  color: #783ab4;
+}
+:root[data-theme="light"] .hljs-string {
+  color: #277044;
+}
+:root[data-theme="light"] .hljs-comment {
+  color: #647080;
+}
+:root[data-theme="light"] .hljs-number {
+  color: #a14b12;
+}
+:root[data-theme="light"] .hljs-meta {
+  color: #1c62a0;
+}
+:root[data-theme="light"] .hljs-title,
+:root[data-theme="light"] .hljs-built_in {
+  color: #865b08;
+}
+@media (forced-colors: active) {
+  .source-editor .code-input-stack textarea {
+    color: CanvasText;
+    caret-color: CanvasText;
+  }
+  .code-colors {
+    visibility: hidden;
+  }
+}
+
+/* Shared Markdown styles keep author previews and student statements identical. */
+.markdown-content {
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.markdown-content > * + * {
+  margin-top: 16px;
+}
+.markdown-content h1 {
+  font-size: 24px;
+}
+.markdown-content h2 {
+  font-size: 20px;
+  margin-top: 24px;
+}
+.markdown-content h3 {
+  font-size: 16px;
+}
+.markdown-content ul {
+  list-style: disc;
+  padding-left: 24px;
+}
+.markdown-content ol {
+  list-style: decimal;
+  padding-left: 24px;
+}
+.markdown-content li + li {
+  margin-top: 5px;
+}
+.markdown-content a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+.markdown-content blockquote {
+  border-left: 3px solid var(--primary);
+  padding: 10px 16px;
+  color: var(--muted);
+  background: var(--background);
+}
+.markdown-content code {
+  font-family: Consolas, monospace;
+  background: var(--secondary);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.markdown-content pre {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  overflow-x: auto;
+  white-space: pre;
+}
+.markdown-content pre code {
+  padding: 0;
+  background: transparent;
+}
+.markdown-content table {
+  display: block;
+  overflow-x: auto;
+  white-space: normal;
+}
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+}
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+.markdown-content hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
 }
 .editor-footer {
   display: flex;

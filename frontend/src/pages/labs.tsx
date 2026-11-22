@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LabMarkdown } from "@/components/markdown";
 import { useUnsavedChanges } from "@/lib/use-unsaved-changes";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "@/components/navigation";
@@ -300,7 +301,9 @@ export function LabForm() {
             </div>
             {preview && (
               <div className="statement-preview">
-                {statement || "Your statement preview will appear here."}
+                <LabMarkdown>
+                  {statement || "Your statement preview will appear here."}
+                </LabMarkdown>
               </div>
             )}
             <textarea
@@ -313,6 +316,10 @@ export function LabForm() {
               placeholder="Describe the task, input format, output format, and examples…"
               onChange={(e) => setStatement(e.target.value)}
             />
+            <p className="help-text">
+              Markdown supported: headings, lists, tables, links, and fenced
+              code blocks.
+            </p>
           </section>
           <section id="test-cases" className="panel form-section">
             <h2>Test cases</h2>
@@ -473,7 +480,9 @@ export function LabForm() {
             </p>
             <div className="statement-preview">
               <h3>{title || "Untitled lab"}</h3>
-              <p>{statement || "Your statement will appear here."}</p>
+              <LabMarkdown>
+                {statement || "Your statement will appear here."}
+              </LabMarkdown>
             </div>
             <p>
               {tests.length} private test cases · {constraints.length}{" "}

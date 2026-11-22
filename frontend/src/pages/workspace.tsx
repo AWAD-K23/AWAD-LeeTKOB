@@ -1,4 +1,6 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { LabMarkdown } from "@/components/markdown";
+import { highlightCpp } from "@/lib/highlight";
 import { useLocation, useParams } from "react-router-dom";
 import { Link } from "@/components/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -34,6 +36,8 @@ function SourceEditor({
   readOnly?: boolean;
 }) {
   const gutter = useRef<HTMLPreElement>(null);
+  const colors = useRef<HTMLPreElement>(null);
+  const highlighted = useMemo(() => highlightCpp(value + "\n"), [value]);
 
   return (
     <div className="source-editor">
@@ -43,20 +47,34 @@ function SourceEditor({
           .map((_, i) => i + 1)
           .join("\n")}
       </pre>
-      <textarea
-        aria-label={readOnly ? "Submitted C++ source" : "C++ source"}
-        value={value}
-        readOnly={readOnly}
-        spellCheck={false}
-        autoCapitalize="off"
-        autoComplete="off"
-        wrap="off"
-        onChange={(event) => change?.(event.target.value)}
-        onScroll={(event) => {
-          if (gutter.current)
-            gutter.current.scrollTop = event.currentTarget.scrollTop;
-        }}
-      />
+      <div className="code-input-stack">
+        <pre
+          ref={colors}
+          className="code-colors"
+          aria-hidden="true"
+          dangerouslySetInnerHTML={{ __html: highlighted }}
+        />
+        <textarea
+          style={{ outline: "none" }}
+          aria-label={readOnly ? "Submitted C++ source" : "C++ source"}
+          value={value}
+          readOnly={readOnly}
+          spellCheck={false}
+          autoCapitalize="off"
+          autoComplete="off"
+          wrap="off"
+          onChange={(event) => change?.(event.target.value)}
+          onScroll={(event) => {
+            if (gutter.current)
+              gutter.current.scrollTop = event.currentTarget.scrollTop;
+            // Keep the colored layer aligned with the actual editable text.
+            if (colors.current) {
+              colors.current.scrollTop = event.currentTarget.scrollTop;
+              colors.current.scrollLeft = event.currentTarget.scrollLeft;
+            }
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -237,9 +255,9 @@ function WorkspaceBody({
               <span className="small-tag">C++</span>
               <span className="small-tag">Class assignment</span>
             </div>
-            <div className="statement">
+            <LabMarkdown>
               {lab.statement || "No statement was provided."}
-            </div>
+            </LabMarkdown>
             {!!lab.requirements?.length && (
               <section className="assignment-rules">
                 <h2>Assignment requirements</h2>
