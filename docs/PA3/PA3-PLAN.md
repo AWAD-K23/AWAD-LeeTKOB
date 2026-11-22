@@ -38,14 +38,28 @@ to the deployment files or backend components they supplied.
 
 ## Member 2 — model checking and evaluation
 
-- [ ] Accept Member 1's handoff and run its checks before building on it.
-- [ ] Add a real model call for semantic constraints. Send only the statement, constraints, and code with comments and identity removed. Return a verdict and evidence per constraint; never let the model set deductions.
-- [ ] Add schema validation and a time limit. Invalid output and timeouts become `unsure`; test both with a fake model and no network.
-- [ ] Log provider request IDs, model, tokens, time, and cost per call without exposing secrets.
-- [ ] Add a checker command and Dockerfile. With `MODEL_OFF=1`, decide ban lists, return `unsure` for semantic constraints, and make no network calls. Accept a dataset folder without problem-specific setup.
-- [ ] Preserve the published dev set and evaluator unchanged. Add at least five labelled, tagged cases separately, including a trap and an injection.
-- [ ] Run the real model on the dev set and save predictions, the evaluator report, and call log. Report all three metrics honestly; calculate the cost for 80 submissions in `README` and `AI-LOG.md`.
-- [ ] **Handoff:** Demonstrate the checker on a real Accepted submission, the offline model-off image, fake-model guardrail tests, and the saved real-run evidence. Provide the verdict and evidence interface to Member 3.
+**Local delivery complete:** See [Member 2 handoff](MEMBER2-HANDOFF.md) for real
+checker/worker evidence, usage, costs, and interfaces. The real evaluation returned
+0 wrongful deductions, 56.8% recall, and 30.4% unsure; the original evaluator
+returned 1. These scores do not meet PA4 thresholds. Provider 503 errors, budget
+blocks, and rejected evidence are recorded honestly. Member 3 acceptance and final
+public provisioning remain separate tasks.
+
+**Offline evidence:** The checker image ran with `--network none`, memory/process
+limits, and `MODEL_OFF=1`. It produced 102 official predictions, decided all 55
+ban-list pairs, and caused zero wrongful deductions. All 47 semantic pairs stayed
+unsure. The unchanged evaluator returned 1 (40.5% recall, 46.1% unsure), honestly
+recorded under `eval/runs/offline/`. Five separate labelled/tagged cases were
+verified Accepted with `g++ -std=c++17 -O2` and checked with the same command.
+
+- [x] Accept Member 1's handoff and run its checks before building on it. User confirmed the checks were already run.
+- [x] Add a real model call for semantic constraints. Send only the statement, constraints, and code with comments and identity removed. Return a verdict and evidence per constraint; never let the model set deductions.
+- [x] Add schema validation and a time limit. Invalid output and timeouts become `unsure`; test both with a fake model and no network.
+- [x] Log provider request IDs, model, tokens, time, and cost per call without exposing secrets. Fake-transport tested and saved real logs supplied; HTTP 503 responses without IDs/usage are explicitly recorded as unknown.
+- [x] Add a checker command and Dockerfile. With `MODEL_OFF=1`, decide ban lists, return `unsure` for semantic constraints, and make no network calls. Accept a dataset folder without problem-specific setup.
+- [x] Preserve the published dev set and evaluator unchanged. Add at least five labelled, tagged cases separately, including a trap and an injection.
+- [x] Run the real model on the dev set and save predictions, the evaluator report, and call log. Report all three metrics honestly; calculate the cost for 80 submissions in `README` and `AI-LOG.md`.
+- [x] **Handoff:** Demonstrate the checker on a real Accepted submission, the offline model-off image, fake-model guardrail tests, and the saved real-run evidence. Provide the verdict and evidence interface to Member 3. Local demonstrations are recorded; Member 3 acceptance remains below.
 
 ## Member 3 — review, deployment walkthrough, and submission
 

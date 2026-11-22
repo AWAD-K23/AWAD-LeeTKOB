@@ -2,20 +2,29 @@ package worker
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"leetkob/backend/internal/sandbox"
+	"leetkob/backend/internal/semantic"
 )
 
 type fakeRunner struct{}
 
 type failedAnalyzer struct{}
+
+type fakeSemanticModel func(context.Context, semantic.Request) ([]byte, error)
+
+func (f fakeSemanticModel) Generate(ctx context.Context, request semantic.Request) ([]byte, error) {
+	return f(ctx, request)
+}
 
 func (failedAnalyzer) Run(_ context.Context, _ []byte, _, mode string) (sandbox.Result, error) {
 	if mode == "analyze" {
@@ -221,6 +230,107 @@ func TestDurableWorker(t *testing.T) {
 		 count(*) FILTER(WHERE source='hard_rule'),count(*) FILTER(WHERE source='semantic_pending')
 		 FROM constraint_verdicts WHERE submission_id=$1`, id).Scan(&uncertain, &hard, &pending); err != nil || uncertain != 2 || hard != 1 || pending != 1 {
 			t.Fatal(uncertain, hard, pending, err)
+		}
+	})
+
+	t.Run("Accepted semantic findings are stored separately with fake model", func(t *testing.T) {
+		id := enqueue()
+		calls := 0
+		integrated := Worker{
+			DB: db, Runner: w.Runner,
+			SemanticFor: func(_, _ string) semantic.Checker {
+				return semantic.Checker{Enabled: true, Model: fakeSemanticModel(
+					func(_ context.Context, request semantic.Request) ([]byte, error) {
+						calls++
+						if len(request.Constraints) != 1 || request.Constraints[0].Text != "Use merge sort" ||
+							strings.Contains(request.Source, "worker@test.invalid") {
+							t.Fatalf("incorrect semantic request: %+v", request)
+						}
+
+						return json.Marshal(map[string]any{"verdicts": []any{map[string]any{
+							"constraintId": request.Constraints[0].ID, "verdict": "violation",
+							"evidence": []any{map[string]any{
+								"line": 3, "text": strings.Split(request.Source, "\n")[2],
+							}},
+						}}})
+					},
+				)}
+			},
+		}
+
+		if found, err := integrated.ProcessOne(ctx); err != nil || !found || calls != 1 {
+			t.Fatal(found, calls, err)
+		}
+
+		var modelFindings, hardFindings int
+		if err := db.QueryRow(ctx, `SELECT
+ count(*) FILTER(WHERE source='model' AND verdict='violation'),
+ count(*) FILTER(WHERE source='hard_rule')
+ FROM constraint_verdicts WHERE submission_id=$1`, id).
+			Scan(&modelFindings, &hardFindings); err != nil || modelFindings != 1 || hardFindings != 1 {
+			t.Fatal(modelFindings, hardFindings, err)
+		}
+	})
+
+	t.Run("lab reservations serialize and survive new worker instances", func(t *testing.T) {
+		id := enqueue()
+		budget := semantic.ReserveMicroUSD + 10
+		var group sync.WaitGroup
+		results := make(chan string, 2)
+
+		for i := 0; i < 2; i++ {
+			group.Add(1)
+			go func() {
+				defer group.Done()
+				callID := uuid.NewString()
+				if err := reserveCall(ctx, db, callID, lab, id, budget); err == nil {
+					results <- callID
+				} else {
+					results <- ""
+				}
+			}()
+		}
+		group.Wait()
+		close(results)
+
+		winner, successes := "", 0
+		for result := range results {
+			if result != "" {
+				winner = result
+				successes++
+			}
+		}
+		if successes != 1 {
+			t.Fatalf("concurrent budget admitted %d calls", successes)
+		}
+
+		if err := recordCall(ctx, db, winner, semantic.CallLog{
+			UsageKnown: true, CostMicroUSD: 7,
+		}); err != nil {
+			t.Fatal(err)
+		}
+
+		// Known usage releases only the unused reservation. A new instance can
+		// reserve the remaining amount; it cannot reset the database ledger.
+		unknown := uuid.NewString()
+		if err := reserveCall(ctx, db, unknown, lab, id, budget); err != nil {
+			t.Fatal(err)
+		}
+		if err := recordCall(ctx, db, unknown, semantic.CallLog{Outcome: "timeout"}); err != nil {
+			t.Fatal(err)
+		}
+		if err := reserveCall(ctx, db, uuid.NewString(), lab, id, budget); err == nil {
+			t.Fatal("unknown usage did not retain its reservation")
+		}
+		if err := recordCall(ctx, db, winner, semantic.CallLog{UsageKnown: true}); err == nil {
+			t.Fatal("audit replay overwrote an existing charge")
+		}
+
+		var charged int64
+		if err := db.QueryRow(ctx,
+			"SELECT sum(charged_micro_usd)::bigint FROM model_calls WHERE lab_id=$1", lab,
+		).Scan(&charged); err != nil || charged != semantic.ReserveMicroUSD+7 {
+			t.Fatal(charged, err)
 		}
 	})
 }

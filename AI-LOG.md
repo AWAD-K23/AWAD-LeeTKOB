@@ -1,5 +1,172 @@
 # AI log
 
+## 2026-11-22 — Project overview and reference documentation refresh
+
+- **Tool:** Codex.
+- **Asked for:** Check BACKEND.md and DATABASE.md against the current implementation, update outdated details, and rewrite README.md to describe the project as a whole.
+- **Kept:** Simple tables and short explanations; separate judge results, constraint findings, and future TA review; general control flow with detailed results retained in evaluation and handoff documents.
+- **Changed:** Reorganized README around roles, architecture, setup, judging, evaluation, checks, and documentation. Updated backend environment/CLI/model controls and moved mechanism links. Expanded database budget/audit states. Following the user's correction, removed model scores, measured usage/costs, and quota figures from these overview documents; kept the logic and links to detailed evidence.
+- **Rejected:** Keeping SQL-only lab creation instructions, an incomplete backend tree, outdated quota claims, or presenting retained cost reservations as provider bills.
+- **By hand:** The user requested the documentation refresh, then clarified that the guides should describe general logic rather than evaluation figures and requested a commit amend. Their separately staged `.env.example` change is outside this documentation task.
+- **Verified:** Reviewed command entry points, frontend scripts/proxy, deployment Dockerfile, migration 00005, and saved model evidence. All 29 revised local links resolved; overview evaluation figures were removed; Compose option and Git whitespace checks passed. Documentation-only changes; no model calls or database writes were needed.
+- **Evidence:** `README.md`, `docs/BACKEND.md`, and `docs/DATABASE.md`.
+
+## 2026-11-22 — Member 2 flow explanation
+
+- **Tool:** Codex.
+- **Asked for:** Explain Member 2 as a visual flow matching the backend-mechanism documents, using Mermaid diagrams, tables, simple examples, and exact code excerpts.
+- **Kept:** The distinction between normal judging, hard rules, model findings, and TA review; actual saved smoke/evaluation data rather than invented successful results.
+- **Changed:** Added `MODEL-CHECKER-FLOW.md` with the runtime and evaluation paths, source links, budget/rate controls, failure behavior, and step-by-step snippets. Linked it from the existing backend connections guide and clarified that guide's Member 1 scope.
+- **Rejected:** Showing TA review as already implemented, treating model findings as deductions, or suggesting that the checker reads labels.
+- **By hand:** The user requested a visual explanation similar to the existing mechanism documents.
+- **Verified:** All local links resolved; all 16 Go excerpts matched current source after whitespace normalization. The saved worker result confirmed the example's model evidence at line 8. Git whitespace checks passed. Documentation-only change; no model calls or code changes were required.
+- **Evidence:** `docs/PA3/backend-mechanism/MODEL-CHECKER-FLOW.md` and `BACKEND-CONNECTIONS.md`.
+
+## 2026-11-22 — Real checker smoke test
+
+- **Tool:** Codex.
+- **Asked for:** Verify the configured real model with one smoke request before running the dev set, while respecting the reported 15 RPM limit.
+- **Kept:** One sequential request, strict response/evidence validation, and no automatic retries.
+- **Changed:** Saved the prediction, provider audit, and usage summary for an Accepted extra solution.
+- **Rejected:** Starting the full evaluation before verifying that the configured provider returned a usable result.
+- **By hand:** The user entered the API key locally, enabled `MODEL_OFF=0`, and reported the account quota. The assistant did not change provider settings.
+- **Verified:** The semantic constraint returned pass with exact evidence and a provider request ID. The estimated cost was US$0.000220.
+- **Evidence:** `eval/runs/real-smoke/`.
+
+## 2026-11-22 — Real dev-set evaluation
+
+- **Tool:** Codex.
+- **Asked for:** Run the real model on the official dev set within the 15 RPM limit and preserve predictions, call logs, and the unchanged evaluator's report.
+- **Kept:** Sequential calls, strict evidence checks, no automatic retries, and retained reservations for unknown usage.
+- **Changed:** Saved all 102 predictions and the original evaluation output in `eval/runs/real-dev/`.
+- **Rejected:** Retrying 503s to hide failures, replacing predictions with hand-written answers, or modifying labels, evaluator rules, or guardrail tests to improve scores.
+- **By hand:** The user authorized continued real calls and supplied the account limit; no provider quota or spending setting was changed.
+- **Verified:** The evaluator returned 1: 0 wrongful deductions, 56.8% recall (21/37), and 30.4% unsure (31/102). Of 34 requests, 29 succeeded with provider IDs and known usage; five returned HTTP 503 without IDs or usage. Later budget blocks remained unsure. Peak request rate was 12 per rolling minute.
+- **Evidence:** `eval/runs/real-dev/predictions.jsonl`, `calls.jsonl`, `report.txt`, and `summary.json`. The original FAIL report is preserved.
+
+## 2026-11-22 — Model usage and cost accounting
+
+- **Tool:** Codex.
+- **Asked for:** Record measured model usage and calculate the estimated cost of 80 comparable submissions in README and AI-LOG.
+- **Kept:** Known token usage and unknown error usage are reported separately; retained reservations are not presented as provider bills.
+- **Changed:** Added `scripts/summarize-model-run.mjs` and saved reproducible usage summaries.
+- **Rejected:** Treating failed calls with missing usage as free or claiming the estimate is a measured bill for all requests.
+- **By hand:** No provider billing setting was changed; the user supplied the model configuration.
+- **Verified:** The 29 known-usage dev calls used 22,841 input and 2,536 output tokens, with zero reported thinking tokens. At US$0.30/US$2.50 per million respectively, rounded per-call estimates total US$0.013204. For 80 comparable calls, assuming one per submission: `0.013204 / 29 × 80 = US$0.036425`. Unknown usage on five 503 calls is excluded; its US$2.392065 retained reservation is a conservative budget charge. Across all 36 real requests, including both smoke tests, peak usage remained 12 per rolling minute.
+- **Evidence:** `scripts/summarize-model-run.mjs`, `eval/runs/real-dev/usage-summary.json`, and README's model/cost section.
+
+## 2026-11-22 — Real worker integration and identity removal
+
+- **Tool:** Codex.
+- **Asked for:** Demonstrate real semantic checking on an Accepted submission through the worker and verify that known student identity is removed before provider access.
+- **Kept:** Real sandbox execution, existing lease-checked result storage, and separate judge and constraint verdicts.
+- **Changed:** Added bounded `worker --once` operation and queued one labelled local smoke fixture for the enrolled manual-test student. Saved a read-only query and its result.
+- **Rejected:** Leaving a worker polling after the smoke test or treating model findings as published deductions.
+- **By hand:** No separate user edits were recorded for this step; the assistant prepared and processed the local fixture within the authorized verification work.
+- **Verified:** The worker stored Accepted, a hard-rule pass, and a model pass with exact comparison evidence. The provider prompt removed known identity text from both a comment and a literal. Estimated call cost was US$0.000444. No marks were published.
+- **Evidence:** `backend/cmd/worker/main.go` and `eval/runs/real-worker/`.
+
+## 2026-11-22 — Member 2 documentation and local handoff
+
+- **Tool:** Codex.
+- **Asked for:** Document the completed Member 2 work, maintain honest limitations, and check finished tasks in PA3-PLAN.
+- **Kept:** Actual metrics and failure evidence, with PA4 accuracy targets distinct from PA3 delivery requirements.
+- **Changed:** Added `MEMBER2-HANDOFF.md`; updated README, backend/progress documentation, and the remaining Member 2 checklist items.
+- **Rejected:** Claiming PA4-level accuracy, Member 3 acceptance, final public cap verification, or remote CI results from local checks.
+- **By hand:** The user requested regular commits and completed-task updates. No teammate acceptance was supplied.
+- **Verified:** Final Go format/vet, PostgreSQL-backed tests with fake models, official file hashes, and credential checks passed. No configured API key was found in saved evidence. Sandbox attacks passed in the preceding delivery and were not repeated for the pacing/CLI change.
+- **Evidence:** `docs/PA3/MEMBER2-HANDOFF.md`, `docs/PA3/PA3-PLAN.md`, `docs/PA3/MEMBER2-PROGRESS.md`, and README.
+
+## 2026-11-22 — Model request pacing
+
+- **Tool:** Codex.
+- **Asked for:** Continue real-model verification after the user enabled `MODEL_OFF=0`, while respecting the account's 15 requests-per-minute limit.
+- **Kept:** Sequential calls and no automatic retries. Provider requests in each process are spaced at least five seconds apart, below 15 RPM.
+- **Changed:** Added a shared cancellable limiter across Gemini instances and tests for spacing and cancellation. Audit start times now refer to the provider request after any rate wait.
+- **Rejected:** Launching parallel real-model tests or assuming the local limiter controls other applications using the same API key.
+- **By hand:** The user enabled model calls and reported the provider quota. No quota or provider setting was changed by the assistant.
+- **Verified:** Semantic package tests passed, including fake-transport provider tests, rate spacing, cancellation, schema validation, and timeout behavior. No real call had been made at this commit.
+- **Evidence:** `backend/internal/semantic/rate.go`, `rate_test.go`, and real-run evidence to follow.
+
+## 2026-11-22 — Generic checker command and model-off image
+
+- **Tool:** Codex.
+- **Asked for:** Implement the next Member 2 checker and evaluation tasks sequentially, keep regular commits, and check finished tasks in `docs/PA3/PA3-PLAN.md`.
+- **Kept:** Generic discovery from statement, constraint, and source files; labels are never checker input. The offline image has no network, database, Docker socket, host mounts, or credentials. Student source is analyzed, not executed.
+- **Changed:** Added `cmd/checker`, dataset and scanner packages, an isolated checker Dockerfile, offline scripts, saved predictions/reports, and CI steps in the existing jobs. Added a separate online audit-file path and per-problem evaluation-run cap; the production worker retains its durable database cap. Checked handoff acceptance, guardrails, logging implementation, checker, and dataset tasks; real-call and final handoff tasks remain open.
+- **Rejected:** Counting model-off scores as real-model results, reading labels to produce predictions, hiding the original evaluator's FAIL, or passing CI when bans are missed or cause wrongful deductions.
+- **By hand:** Provider-cap verification remains pending; no real model call was made. The user confirmed Member 1 checks were already run.
+- **Verified:** The offline Docker image generated 102 official predictions with 0 wrongful deductions, 40.5% recall (15/37), and 46.1% unsure (47/102). All 55 ban pairs were decided; every missed violation was semantic and unsure. The unchanged scorer returned 1. The five extra cases produced 10 predictions, 0 wrongful, 40.0% recall, and 50.0% unsure, also exit 1. Final Go format/vet, PostgreSQL-backed tests, all nine sandbox attacks, syntax tests, checker tests, and official hashes passed. The final image and stricter offline verifier passed on both datasets; remote CI was not run. An initial harness attempt lost tmpfs output after container exit; stdout capture fixed it. A tar buffer limit was then corrected without changing data or labels.
+- **Evidence:** `backend/cmd/checker/`, `backend/internal/checker/`, `deploy/Dockerfile.checker`, `eval/runs/`, and `scripts/run-offline-eval.mjs`.
+
+## 2026-11-22 — Pinned official evaluation data and independent cases
+
+- **Tool:** Codex.
+- **Asked for:** Continue Member 2 using the lecturer's published dataset, preserve its files unchanged, add independent labelled cases, and update completed PA3 checklist items.
+- **Kept:** All 128 upstream files at revision `552c811db2d35a23d641bc4fdffc1ac120be1a28`, including the original labels and evaluator.
+- **Changed:** Imported `eval/official`, recorded SHA-256 hashes and Git byte-preservation attributes, and added five separately labelled/tagged recursive-total solutions with test inputs. Cases include compliant recursion, a loop violation, a formula, a text trap, and prompt injection.
+- **Rejected:** Modifying official labels, using labels as checker input, or assuming extra cases are Accepted without executing them.
+- **By hand:** The user found the official source and requested completed tasks be checked in PA3-PLAN.
+- **Verified:** All 128 imported files matched the temporary upstream checkout byte for byte. All five additional solutions compiled with `g++ -std=c++17 -O2` and passed their three input/output cases in a restricted network-free container with no host mounts or credentials.
+- **Evidence:** `eval/official-sha256.json`, `scripts/verify-eval.mjs`, and `eval/extra/`.
+
+## 2026-11-22 — Generic statement and type ban coverage
+
+- **Tool:** Codex.
+- **Asked for:** Continue Member 2 against the official dev set, address scanner coverage gaps, and check completed PA3 plan tasks only after verification.
+- **Kept:** Syntax-based checks with no model calls for ban lists and exact source evidence.
+- **Changed:** Added statement cursors for loops and goto, type/template references, and canonical declaration types for aliases and inferred containers. The scanner accepts its actual source path for standalone use.
+- **Rejected:** Searching source text for keywords or treating included headers as student use of a banned facility. No problem IDs or solution text were added to production rules.
+- **By hand:** The user supplied the official repository URL and requested continued work and checklist updates.
+- **Verified:** Rebuilt the sandbox image; all seven original syntax cases and ten new statement/type cases passed using real libclang in restricted Docker containers. No labels or evaluator files were modified.
+- **Evidence:** `sandbox/scan.cpp` and `backend/internal/hardrules/check_test.go`.
+
+## 2026-11-22 — Official evaluation source inspection
+
+- **Tool:** Codex.
+- **Asked for:** Verify the user-supplied evaluation repository and compare its dataset and evaluator interface with the Member 2 implementation.
+- **Kept:** The lecturer's unchanged dataset and evaluator as the required evaluation source; no substitute labels or scorer were created.
+- **Changed:** Documented the upstream URL, inspected revision, file layout, JSONL prediction contract, and evaluator exit codes in the Member 2 progress record.
+- **Rejected:** Claiming complete ban-list coverage from call-reference scanning alone: the official data also includes loop-statement and container-type bans.
+- **By hand:** The user found and supplied the official GitHub URL.
+- **Verified:** Inspected upstream README, evaluator source, all six constraint files, and the local scanner. Downloaded a temporary checkout at `552c811db2d35a23d641bc4fdffc1ac120be1a28`. No dataset files were modified, no evaluation was run, and no real model calls were made.
+- **Evidence:** https://github.com/fithcmus/awad-leetkob-eval and `docs/PA3/MEMBER2-PROGRESS.md`.
+
+## 2026-11-22 — PA3 Member 2 worker integration and durable limits
+
+- **Tool:** Codex.
+- **Asked for:** Continue Member 2 tasks sequentially after local key configuration, integrate semantic checking with the durable worker, and maintain tested commits and formal implementation records.
+- **Kept:** Model calls off by default; a US$1 local cap per lab; conservative reservations before network access; existing job lease fencing and result transactions. Verdicts never select deductions.
+- **Changed:** Added migration 00005 and a lab-locked model-call ledger. Known usage replaces reserved cost; unknown usage and crashes retain the reservation. Added worker integration, known-identity redaction, shared automatic environment loading, stricter JSON validation, and concurrency/accounting tests. Removed model credentials from the API container configuration.
+- **Rejected:** In-memory-only spending counters, resetting budgets on worker restart, giving the sandbox credentials, and treating a saved key as proof of final provider-cap verification.
+- **By hand:** The user supplied local provider settings. No provider console setting was changed, and no real model call was made. The assistant started the existing local PostgreSQL service and applied additive migration 00005; Goose reported schema version 5.
+- **Verified:** Final Go format, vet, and PostgreSQL-backed tests passed, including fake-model worker integration, concurrent budget admission, retained unknown usage, audit replay refusal, duplicate JSON-key rejection, and comment-cleaning cases. Database tests used temporary schemas. Docker attack tests were not rerun. No real provider calls were made.
+- **Cost estimate:** For `gemini-3.5-flash-lite`, 80 calls with 2,000 input and 500 output tokens including thinking cost `80 × (2000 × 0.30 + 500 × 2.50) / 1000000 = US$0.148`. This is an illustrative standard-price estimate, not measured evaluation usage. The real dev-set run remains pending.
+- **Evidence:** `backend/internal/worker/model.go`, worker and semantic tests, migration `00005_model_calls.sql`, and `docs/PA3/MEMBER2-PROGRESS.md`.
+
+## 2026-11-22 — PA3 Member 2 Gemini adapter
+
+- **Tool:** Codex.
+- **Asked for:** Continue the Member 2 implementation after local model settings were supplied, maintain formal task records, and commit each tested part separately.
+- **Kept:** The configured `gemini-3.5-flash-lite` model and `MODEL_OFF=1`. A fixed Google HTTPS endpoint, header authentication, one bounded request, provider-side JSON schema, and mandatory local validation.
+- **Changed:** Added the Gemini REST adapter and fake-transport tests. Audit records include the sanitized prompt, response ID, model version, token counts, duration, and standard-price estimated cost including thinking tokens. Provider error bodies and authentication headers are excluded.
+- **Rejected:** Real provider calls in tests, automatic retries without another cost reservation, and unaudited model names with unknown rates.
+- **By hand:** The user entered local model settings; the key was not displayed. Final provider spending-cap verification is not inferred from the presence of a key.
+- **Verified:** Semantic package tests and vet passed. Provider tests use a fake HTTP transport, including successful usage accounting, rejected output, oversized responses, cancellation, and audit failure. No real model call has been made.
+- **Sources:** Google [generateContent reference](https://ai.google.dev/api/generate-content) and [standard pricing](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash-lite), checked November 22, 2026. Text input is $0.30 and output including thinking is $2.50 per million tokens.
+- **Evidence:** `backend/internal/semantic/gemini.go` and `gemini_test.go`.
+
+## 2026-11-22 — PA3 Member 2 semantic-checker foundation
+
+- **Tool:** Codex.
+- **Asked for:** Implement the Member 2 tasks sequentially, reuse the handoff checks already performed by the user, and pause with local configuration instructions when an API key or other manual provider setup is required. Maintain this log during implementation and commit tested parts separately.
+- **Kept:** A provider-independent checker, disabled by default, that preserves hard-rule findings and requests only pending semantic constraints. Model findings remain separate from TA deductions.
+- **Changed:** Added response and evidence validation, a context timeout, comment removal with source-line preservation, and fake-model tests. Added `docs/PA3/MEMBER2-PROGRESS.md` to distinguish the tested foundation from pending provider, worker, dataset, and evaluation work.
+- **Rejected:** Real model calls in unit tests and marking the entire Member 2 integration complete before provider and evaluation evidence exist.
+- **By hand:** The user confirmed Member 1 checks had already run and requested regular commits. No provider setup or key entry is claimed.
+- **Verified:** Go formatting, full Go vet, and `go -C backend test ./... -count=1` passed. The semantic tests use fakes and no network. PostgreSQL/Docker integration cases require their opt-in settings and were not rerun; the user supplied Member 1 acceptance. The first vet attempt hit a local cache permission denial; running the checks with cache access succeeded.
+- **Evidence:** `backend/internal/semantic/check.go`, `source.go`, `check_test.go`, and `docs/PA3/MEMBER2-PROGRESS.md`.
+
 Tool used: Codex, for planning and initial project setup.
 
 ## 1. Local PostgreSQL port

@@ -41,6 +41,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: node scripts/check-go-format.mjs
+      - run: node scripts/verify-eval.mjs
       - run: go -C backend vet ./...
       - run: go -C backend test ./... -count=1 -v
       - run: npm ci --prefix frontend
@@ -108,3 +109,12 @@ jobs:
           cache-dependency-path: backend/go.sum
       - run: docker build -t leetkob-sandbox:pa3 sandbox
       - run: go -C backend test ./... -count=1 -v
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.13.1'
+      - run: docker build -f deploy/Dockerfile.checker -t leetkob-checker:pa3 .
+      - run: node scripts/verify-extra.mjs
+      - name: Offline contracts and ban accuracy (semantic work stays unsure)
+        run: |
+          node scripts/run-offline-eval.mjs eval/official /tmp/leetkob-official
+          node scripts/run-offline-eval.mjs eval/extra /tmp/leetkob-extra

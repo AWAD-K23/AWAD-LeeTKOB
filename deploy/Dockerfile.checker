@@ -1,0 +1,21 @@
+FROM golang:1.26-bookworm AS build
+WORKDIR /src
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+COPY backend/ ./
+RUN CGO_ENABLED=0 go build -trimpath -o /out/checker ./cmd/checker
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    clang libclang-14-dev g++ ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY sandbox/scan.cpp /tmp/scan.cpp
+RUN clang++ -std=c++17 /tmp/scan.cpp -I/usr/lib/llvm-14/include \
+    -L/usr/lib/llvm-14/lib -lclang -Wl,-rpath,/usr/lib/llvm-14/lib \
+    -o /usr/local/bin/scan && rm /tmp/scan.cpp
+COPY --from=build /out/checker /usr/local/bin/checker
+COPY eval/official/ /data/
+USER 65534:65534
+ENV MODEL_OFF=1
+ENTRYPOINT ["/usr/local/bin/checker", "--scanner", "/usr/local/bin/scan"]
+CMD ["--data", "/data", "--predictions", "-"]

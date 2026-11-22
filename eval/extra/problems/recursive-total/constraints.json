@@ -1,0 +1,4 @@
+[
+  {"id":"C1","text":"Do not use loop statements: `for`, `while`, `do`, or `goto`.","deduction":3},
+  {"id":"C2","text":"Compute the total using a recursive function that calls itself for a smaller input until it reaches zero.","deduction":2}
+]

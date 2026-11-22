@@ -1,0 +1,46 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "reservedCalls": 34,
+  "recordedCalls": 34,
+  "knownUsageCalls": 29,
+  "unknownUsageCalls": 5,
+  "unfinishedReservations": 0,
+  "successfulResponses": 29,
+  "errors": [
+    {
+      "solution": "binary-search/s03",
+      "outcome": "http_503"
+    },
+    {
+      "solution": "gcd-euclid/s01",
+      "outcome": "http_503"
+    },
+    {
+      "solution": "gcd-euclid/s04",
+      "outcome": "http_503"
+    },
+    {
+      "solution": "sort-merge/s03",
+      "outcome": "http_503"
+    },
+    {
+      "solution": "sort-merge/s07",
+      "outcome": "http_503"
+    }
+  ],
+  "providerRequestIds": 29,
+  "inputTokens": 22841,
+  "outputTokens": 2536,
+  "thinkingTokens": 0,
+  "knownEstimatedCostMicroUsd": 13204,
+  "unknownUsageReservedMicroUsd": 2392065,
+  "estimatedUsdFor80SimilarCalls": 0.036424827586206895,
+  "minimumStartGapMs": 5000,
+  "peakRequestsIn60Seconds": 12,
+  "predictionPairs": 102,
+  "verdictCounts": {
+    "pass": 49,
+    "violation": 22,
+    "unsure": 31
+  }
+}
