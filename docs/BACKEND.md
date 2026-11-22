@@ -170,5 +170,7 @@ backend/
   and [sandbox attacks](PA3/SANDBOX-ATTACKS.md) explain the code in detail.
 - [Manual test](PA3/MANUAL-FLOW-TEST.md) provides accounts and UI steps.
 - [Member 1 handoff](PA3/MEMBER1-HANDOFF.md) tracks delivery and remaining work.
-- Real model evaluation evidence, TA review, publication, and appeals remain pending.
+- Real-model evidence is in [Member 2 handoff](PA3/MEMBER2-HANDOFF.md).
+  Semantic accuracy still needs improvement before PA4. TA review, publication,
+  and appeals remain pending.
 - See [Member 2 progress](PA3/MEMBER2-PROGRESS.md) for model configuration and limits.

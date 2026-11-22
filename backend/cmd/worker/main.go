@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -19,6 +20,9 @@ import (
 
 // main runs judging separately from the HTTP server.
 func main() {
+	once := flag.Bool("once", false, "process at most one job and exit")
+	flag.Parse()
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -64,6 +68,15 @@ func main() {
 
 		if err != nil && ctx.Err() == nil {
 			log.Printf("Judging job: %v", err)
+		}
+
+		// A bounded run supports handoff smoke checks without leaving a worker
+		// polling or accidentally processing additional jobs afterward.
+		if *once {
+			if err != nil {
+				log.Fatal(err)
+			}
+			return
 		}
 
 		// Avoid repeatedly querying the database when idle or recovering.

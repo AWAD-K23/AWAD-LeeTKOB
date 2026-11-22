@@ -70,3 +70,17 @@ go -C backend run ./cmd/checker --data ../eval/extra --predictions ../eval/runs/
   original `FAIL` report. It does not claim the full evaluation passed.
 - CI runs these offline checks in the existing sandbox job. Remote CI is not
   claimed until the branch/tag actually runs there.
+
+## Saved real-model results
+
+- `runs/real-dev/`: 102 predictions; 0 wrongful deductions, 56.8% recall,
+  30.4% unsure; unchanged evaluator exit 1.
+- `runs/real-smoke/`: one successful real call on an Accepted extra solution.
+- `runs/real-worker/`: database proof of Accepted judging and a real model pass.
+- The dev run made 34 sequential requests; five returned HTTP 503 and were not
+  retried. Budget blocks and failed evidence validation stayed unsure.
+- Every successful response includes its provider ID and token usage. The 503
+  responses did not supply IDs or usage; none were fabricated.
+- `node scripts/summarize-model-run.mjs eval/runs/real-dev` reproduces recorded
+  usage totals and the observed request-rate check without making model calls.
+- See [Member 2 handoff](../docs/PA3/MEMBER2-HANDOFF.md) for measured cost arithmetic.

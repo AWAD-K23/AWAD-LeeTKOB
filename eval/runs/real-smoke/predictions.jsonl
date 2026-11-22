@@ -1,0 +1,2 @@
+{"solution":"recursive-total/s01","constraint":"C1","verdict":"pass","evidence":[]}
+{"solution":"recursive-total/s01","constraint":"C2","verdict":"pass","evidence":[{"line":4,"text":"    return n == 0 ? 0 : n + total(n - 1);"}]}

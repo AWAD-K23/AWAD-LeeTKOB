@@ -1,0 +1,69 @@
+{
+  "submissionId": "e7ad52ed-686a-4d50-abc7-b426fb8d1931",
+  "lab": "Order two integers",
+  "status": "completed",
+  "judgeVerdict": "Accepted",
+  "checks": [
+    {
+      "constraint": "Do not call `std::sort`",
+      "verdict": "pass",
+      "source": "hard_rule",
+      "evidence": []
+    },
+    {
+      "constraint": "Use a comparison to order the numbers",
+      "verdict": "pass",
+      "source": "model",
+      "evidence": [
+        {
+          "line": 8,
+          "text": "    if (a > b) { int temp = a; a = b; b = temp; }"
+        }
+      ]
+    }
+  ],
+  "calls": [
+    {
+      "callId": "92c54ab0-a294-4fbb-9072-24f8374f549e",
+      "chargedMicroUsd": 444,
+      "status": "recorded",
+      "log": {
+        "model": "gemini-3.5-flash-lite",
+        "prompt": {
+          "code": "                                                          \n#include <iostream>\nint main() {\n    const char* identity = \"                           \";\n    (void)identity;\n    int a, b;\n    std::cin >> a >> b;\n    if (a > b) { int temp = a; a = b; b = temp; }\n    std::cout << a << \" \" << b << \"\\n\";\n}\n",
+          "statement": "**Read two integers a and b.**\n\nPrint them in ascending order, separated by a space.\n\n**Input:**\nTwo integers on one line.\n\n**Output:**\nThe smaller integer followed by the larger integer.\n\n**Example:**\nInput:\n`3 1`\n\nOutput:\n`1 3`\n\nFollow the assignment requirements listed below.",
+          "constraints": [
+            {
+              "id": "8d93f12c-f2ad-4ce0-a994-677c18a5d4a8",
+              "text": "Use a comparison to order the numbers"
+            }
+          ]
+        },
+        "outcome": "response_received",
+        "response": {
+          "verdicts": [
+            {
+              "verdict": "pass",
+              "evidence": [
+                {
+                  "line": 8,
+                  "text": "    if (a > b) { int temp = a; a = b; b = temp; }"
+                }
+              ],
+              "constraintId": "8d93f12c-f2ad-4ce0-a994-677c18a5d4a8"
+            }
+          ]
+        },
+        "startedAt": "2026-11-22T15:38:10.1006909Z",
+        "durationMs": 1145,
+        "usageKnown": true,
+        "inputTokens": 470,
+        "modelVersion": "gemini-3.5-flash-lite",
+        "outputTokens": 121,
+        "thinkingTokens": 0,
+        "providerRequestId": "YgwDa5mgDP213LUP0_eT6AE",
+        "estimatedCostMicroUsd": 444
+      }
+    }
+  ]
+}

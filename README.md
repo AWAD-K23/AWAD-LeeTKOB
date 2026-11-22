@@ -72,11 +72,15 @@ For a walkthrough with example requests, see [manual backend testing](docs/MANUA
 
 The worker now supports `gemini-3.5-flash-lite` for semantic constraints after Accepted. Calls remain off by default. Known account identifiers and comments are removed before sending code; hard-rule decisions never enter model requests. See [Member 2 progress](docs/PA3/MEMBER2-PROGRESS.md) for configuration and current limits.
 
-At the [standard text rates](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash-lite) checked November 22, 2026, input costs US$0.30 and output including thinking costs US$2.50 per million tokens. For 80 calls with 2,000 input and 500 output tokens each: `80 ? (2000 ? 0.30 + 500 ? 2.50) / 1000000 = US$0.148`. This is an illustrative estimate; measured dev-set cost and predictions remain pending.
+At the [standard text rates](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash-lite) checked November 22, 2026, input costs US$0.30 and output including thinking costs US$2.50 per million tokens. For 80 calls with 2,000 input and 500 output tokens each: `80 ? (2000 ? 0.30 + 500 ? 2.50) / 1000000 = US$0.148`. This is an illustrative estimate. The measured run below records actual usage on successful calls and distinguishes unknown error usage.
 
 The worker enforces a persistent US$1 per-lab cap by default. Override it locally with `MODEL_LAB_BUDGET_MICRO_USD` (integer millionths of a dollar). Each call reserves its conservative maximum estimated cost before contacting Google. Unknown usage retains the reservation; known usage is charged at the recorded token estimate. Apply migration 00005 before enabling calls. Model API credentials belong only in the trusted worker environment.
 
 The team reports AI Studio limits of 1,000 requests per minute and 10,000 requests per day for its account. These limit request frequency, not total spending; active limits can change.
+
+Measured real run: **0 wrongful deductions**, **56.8% recall (21/37)**, and **30.4% unsure (31/102)**. The original evaluator returned 1. Of 34 sequential requests, 29 succeeded and five returned HTTP 503 without usage; errors were not retried. Evidence validation and budget blocks also produced unsure. Peak usage was 12 requests per rolling minute, below the reported 15 RPM limit.
+
+The 29 successful calls used 22,841 input and 2,536 output tokens, with zero reported thinking tokens. Summed rounded standard-price estimates total **US$0.013204**. For 80 similar calls, assuming one semantic call per submission: `0.013204 / 29 ? 80 = US$0.036425`. This excludes unknown usage from the five 503s. Their retained US$2.392065 reservation is a conservative budget charge, not a measured provider bill. See [saved real-run evidence](eval/runs/real-dev/) and [Member 2 handoff](docs/PA3/MEMBER2-HANDOFF.md).
 
 ## PA2 checks
 
@@ -99,7 +103,7 @@ CI runs the `gates`, `secret-history`, `e2e`, and `sandbox` jobs on pull request
 
 ## Spending cap status
 
-Google AI Studio currently displays the `AWAD-LeeTKOB` project's monthly spend cap as **₫100,000**. The cap is project-level and the Spend page was set to **All API Keys**; it is not an application-side hard limit. Google documents the project cap as experimental and warns that billing processing can lag by about 10 minutes, so a small overage is possible. Keep this limitation in mind before enabling model calls. See the [saved cap screenshot](img/evidence/gemini-monthly-cap.png) and [Google's billing documentation](https://ai.google.dev/gemini-api/docs/billing#project-spend-caps). The worker integration is implemented; final provider-cap verification and real-run evidence remain pending.
+Google AI Studio currently displays the `AWAD-LeeTKOB` project's monthly spend cap as **₫100,000**. The cap is project-level and the Spend page was set to **All API Keys**; it is not an application-side hard limit. Google documents the project cap as experimental and warns that billing processing can lag by about 10 minutes, so a small overage is possible. Keep this limitation in mind before enabling model calls. See the [saved cap screenshot](img/evidence/gemini-monthly-cap.png) and [Google's billing documentation](https://ai.google.dev/gemini-api/docs/billing#project-spend-caps). The worker integration is implemented; real-run evidence is saved; final public provider-cap verification remains pending.
 
 ## PA3 worker, sandbox, and local deployment
 
@@ -107,7 +111,7 @@ Google AI Studio currently displays the `AWAD-LeeTKOB` project's monthly spend c
   [evaluation commands](eval/README.md).
 - Saved model-off results: **0 wrongful deductions**, **40.5% recall**, and
   **46.1% unsure** over 102 pairs. All 55 ban pairs were decided; 47 semantic pairs
-  stayed unsure. The original evaluator returned 1. Real-model evaluation is pending.
+  stayed unsure. The original evaluator returned 1. Real-model results are recorded below.
 
 - Follow [Member 1 handoff](docs/PA3/MEMBER1-HANDOFF.md) for the API contracts, worker start command, Docker deployment, and receiving-member checks.
 - See [current database structure](docs/DATABASE.md) for classes, labs, durable jobs, judge results, and separate constraint verdicts.

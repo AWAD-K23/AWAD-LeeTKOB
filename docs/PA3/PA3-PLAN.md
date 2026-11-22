@@ -38,11 +38,12 @@ to the deployment files or backend components they supplied.
 
 ## Member 2 — model checking and evaluation
 
-**In progress:** The user confirmed Member 1 acceptance checks were already run.
-The semantic boundary, Gemini adapter, worker integration, fake-model guardrails,
-and persistent per-lab cost ledger are implemented. Real calls remain off.
-See [Member 2 progress](MEMBER2-PROGRESS.md) for limits and pending dataset/evaluation
-work. Checklist items requiring real-call evidence remain open.
+**Local delivery complete:** See [Member 2 handoff](MEMBER2-HANDOFF.md) for real
+checker/worker evidence, usage, costs, and interfaces. The real evaluation returned
+0 wrongful deductions, 56.8% recall, and 30.4% unsure; the original evaluator
+returned 1. These scores do not meet PA4 thresholds. Provider 503 errors, budget
+blocks, and rejected evidence are recorded honestly. Member 3 acceptance and final
+public provisioning remain separate tasks.
 
 **Offline evidence:** The checker image ran with `--network none`, memory/process
 limits, and `MODEL_OFF=1`. It produced 102 official predictions, decided all 55
@@ -52,13 +53,13 @@ recorded under `eval/runs/offline/`. Five separate labelled/tagged cases were
 verified Accepted with `g++ -std=c++17 -O2` and checked with the same command.
 
 - [x] Accept Member 1's handoff and run its checks before building on it. User confirmed the checks were already run.
-- [ ] Add a real model call for semantic constraints. Send only the statement, constraints, and code with comments and identity removed. Return a verdict and evidence per constraint; never let the model set deductions.
+- [x] Add a real model call for semantic constraints. Send only the statement, constraints, and code with comments and identity removed. Return a verdict and evidence per constraint; never let the model set deductions.
 - [x] Add schema validation and a time limit. Invalid output and timeouts become `unsure`; test both with a fake model and no network.
-- [x] Log provider request IDs, model, tokens, time, and cost per call without exposing secrets. Implemented and fake-transport tested; real-run logs remain part of evaluation below.
+- [x] Log provider request IDs, model, tokens, time, and cost per call without exposing secrets. Fake-transport tested and saved real logs supplied; HTTP 503 responses without IDs/usage are explicitly recorded as unknown.
 - [x] Add a checker command and Dockerfile. With `MODEL_OFF=1`, decide ban lists, return `unsure` for semantic constraints, and make no network calls. Accept a dataset folder without problem-specific setup.
 - [x] Preserve the published dev set and evaluator unchanged. Add at least five labelled, tagged cases separately, including a trap and an injection.
-- [ ] Run the real model on the dev set and save predictions, the evaluator report, and call log. Report all three metrics honestly; calculate the cost for 80 submissions in `README` and `AI-LOG.md`.
-- [ ] **Handoff:** Demonstrate the checker on a real Accepted submission, the offline model-off image, fake-model guardrail tests, and the saved real-run evidence. Provide the verdict and evidence interface to Member 3.
+- [x] Run the real model on the dev set and save predictions, the evaluator report, and call log. Report all three metrics honestly; calculate the cost for 80 submissions in `README` and `AI-LOG.md`.
+- [x] **Handoff:** Demonstrate the checker on a real Accepted submission, the offline model-off image, fake-model guardrail tests, and the saved real-run evidence. Provide the verdict and evidence interface to Member 3. Local demonstrations are recorded; Member 3 acceptance remains below.
 
 ## Member 3 — review, deployment walkthrough, and submission
 

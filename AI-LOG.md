@@ -1,5 +1,60 @@
 # AI log
 
+## 2026-11-22 — Real checker smoke test
+
+- **Tool:** Codex.
+- **Asked for:** Verify the configured real model with one smoke request before running the dev set, while respecting the reported 15 RPM limit.
+- **Kept:** One sequential request, strict response/evidence validation, and no automatic retries.
+- **Changed:** Saved the prediction, provider audit, and usage summary for an Accepted extra solution.
+- **Rejected:** Starting the full evaluation before verifying that the configured provider returned a usable result.
+- **By hand:** The user entered the API key locally, enabled `MODEL_OFF=0`, and reported the account quota. The assistant did not change provider settings.
+- **Verified:** The semantic constraint returned pass with exact evidence and a provider request ID. The estimated cost was US$0.000220.
+- **Evidence:** `eval/runs/real-smoke/`.
+
+## 2026-11-22 — Real dev-set evaluation
+
+- **Tool:** Codex.
+- **Asked for:** Run the real model on the official dev set within the 15 RPM limit and preserve predictions, call logs, and the unchanged evaluator's report.
+- **Kept:** Sequential calls, strict evidence checks, no automatic retries, and retained reservations for unknown usage.
+- **Changed:** Saved all 102 predictions and the original evaluation output in `eval/runs/real-dev/`.
+- **Rejected:** Retrying 503s to hide failures, replacing predictions with hand-written answers, or modifying labels, evaluator rules, or guardrail tests to improve scores.
+- **By hand:** The user authorized continued real calls and supplied the account limit; no provider quota or spending setting was changed.
+- **Verified:** The evaluator returned 1: 0 wrongful deductions, 56.8% recall (21/37), and 30.4% unsure (31/102). Of 34 requests, 29 succeeded with provider IDs and known usage; five returned HTTP 503 without IDs or usage. Later budget blocks remained unsure. Peak request rate was 12 per rolling minute.
+- **Evidence:** `eval/runs/real-dev/predictions.jsonl`, `calls.jsonl`, `report.txt`, and `summary.json`. The original FAIL report is preserved.
+
+## 2026-11-22 — Model usage and cost accounting
+
+- **Tool:** Codex.
+- **Asked for:** Record measured model usage and calculate the estimated cost of 80 comparable submissions in README and AI-LOG.
+- **Kept:** Known token usage and unknown error usage are reported separately; retained reservations are not presented as provider bills.
+- **Changed:** Added `scripts/summarize-model-run.mjs` and saved reproducible usage summaries.
+- **Rejected:** Treating failed calls with missing usage as free or claiming the estimate is a measured bill for all requests.
+- **By hand:** No provider billing setting was changed; the user supplied the model configuration.
+- **Verified:** The 29 known-usage dev calls used 22,841 input and 2,536 output tokens, with zero reported thinking tokens. At US$0.30/US$2.50 per million respectively, rounded per-call estimates total US$0.013204. For 80 comparable calls, assuming one per submission: `0.013204 / 29 × 80 = US$0.036425`. Unknown usage on five 503 calls is excluded; its US$2.392065 retained reservation is a conservative budget charge. Across all 36 real requests, including both smoke tests, peak usage remained 12 per rolling minute.
+- **Evidence:** `scripts/summarize-model-run.mjs`, `eval/runs/real-dev/usage-summary.json`, and README's model/cost section.
+
+## 2026-11-22 — Real worker integration and identity removal
+
+- **Tool:** Codex.
+- **Asked for:** Demonstrate real semantic checking on an Accepted submission through the worker and verify that known student identity is removed before provider access.
+- **Kept:** Real sandbox execution, existing lease-checked result storage, and separate judge and constraint verdicts.
+- **Changed:** Added bounded `worker --once` operation and queued one labelled local smoke fixture for the enrolled manual-test student. Saved a read-only query and its result.
+- **Rejected:** Leaving a worker polling after the smoke test or treating model findings as published deductions.
+- **By hand:** No separate user edits were recorded for this step; the assistant prepared and processed the local fixture within the authorized verification work.
+- **Verified:** The worker stored Accepted, a hard-rule pass, and a model pass with exact comparison evidence. The provider prompt removed known identity text from both a comment and a literal. Estimated call cost was US$0.000444. No marks were published.
+- **Evidence:** `backend/cmd/worker/main.go` and `eval/runs/real-worker/`.
+
+## 2026-11-22 — Member 2 documentation and local handoff
+
+- **Tool:** Codex.
+- **Asked for:** Document the completed Member 2 work, maintain honest limitations, and check finished tasks in PA3-PLAN.
+- **Kept:** Actual metrics and failure evidence, with PA4 accuracy targets distinct from PA3 delivery requirements.
+- **Changed:** Added `MEMBER2-HANDOFF.md`; updated README, backend/progress documentation, and the remaining Member 2 checklist items.
+- **Rejected:** Claiming PA4-level accuracy, Member 3 acceptance, final public cap verification, or remote CI results from local checks.
+- **By hand:** The user requested regular commits and completed-task updates. No teammate acceptance was supplied.
+- **Verified:** Final Go format/vet, PostgreSQL-backed tests with fake models, official file hashes, and credential checks passed. No configured API key was found in saved evidence. Sandbox attacks passed in the preceding delivery and were not repeated for the pacing/CLI change.
+- **Evidence:** `docs/PA3/MEMBER2-HANDOFF.md`, `docs/PA3/PA3-PLAN.md`, `docs/PA3/MEMBER2-PROGRESS.md`, and README.
+
 ## 2026-11-22 — Model request pacing
 
 - **Tool:** Codex.

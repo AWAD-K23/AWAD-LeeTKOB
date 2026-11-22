@@ -21,16 +21,20 @@
 | Standalone checker | Generic dataset command and Dockerfile; no label access |
 | Offline verification | 102 official predictions, all 55 ban pairs decided, zero wrongful deductions |
 | Additional cases | Five labelled/tagged solutions, including trap and injection; all Accepted |
+| Real evaluation | All 102 predictions saved; original scorer exit 1; metrics below |
+| Real worker proof | Accepted, hard-rule pass, model pass, known identity removed |
+| Provider pacing | Five seconds between starts; measured peak 12 RPM across 36 real calls |
 
 ## Next steps
 
-1. Confirm the final key's project spending cap before enabling real calls.
-2. Run the real model and unchanged evaluator; save predictions, metrics, and logs.
-3. Demonstrate a real-model Accepted submission and finish the Member 2 handoff.
+1. Member 3 accepts the [Member 2 handoff](MEMBER2-HANDOFF.md).
+2. Improve semantic evidence accuracy before PA4 without changing labels or the scorer.
+3. Verify the final public key/project cap and deployment as part of final team checks.
 
 ## Current limits
 
-- No real model calls or spending occurred during implementation.
+- Real calls were authorized by the user after local key setup. Their actual
+  usage and known/unknown cost distinction are in the handoff and saved audits.
 - No account metadata, private tests, or deductions enter provider requests.
   Unknown personal names embedded in code cannot be reliably inferred from the
   current account schema, which stores only email and UUID. Known identifiers
@@ -42,7 +46,8 @@
   Imported into `eval/official/` with byte-preserving Git attributes and SHA-256 checks.
 - The scanner now covers statements, type/template references, and canonical
   declaration types as well as calls. All official ban pairs were decided offline.
-- Real model calls and evaluation evidence remain unchecked in PA3-PLAN.
+- Member 2 implementation and local demonstration tasks are checked in PA3-PLAN;
+  this does not claim PA4 accuracy, teammate acceptance, or public deployment.
 
 ## Official dataset format
 
@@ -83,14 +88,28 @@ metric thresholds.
 ## Local configuration for the next step
 
 Edit the ignored root `.env` file locally. Set `MODEL_NAME` to the exact
-provider model ID and `MODEL_API_KEY` to its key. Keep `MODEL_OFF=1` while
-preparing the adapter and tests. Never paste the key into chat or commit it.
+provider model ID and `MODEL_API_KEY` to its key. Use `MODEL_OFF=1` for offline
+checks and `MODEL_OFF=0` only for intended real calls. Never paste the key into
+chat or commit it. Unit tests always use fakes, regardless of local settings.
 
 Verify in the provider console that the final project/key uses the intended
 spending cap. Existing screenshot evidence alone does not confirm this.
 
 The worker now loads `.env` automatically from the repository root or `backend/`.
 Shell variables take precedence. Restart the worker after changing local settings.
+
+## Real-run results
+
+| Metric | Result |
+|---|---:|
+| Wrongful deductions | 0 |
+| Recall | 56.8% (21/37) |
+| Unsure | 30.4% (31/102) |
+| Requests | 34; 29 successful, five HTTP 503 |
+| Evaluator exit | 1; scores do not meet PA4 thresholds |
+
+See [Member 2 handoff](MEMBER2-HANDOFF.md) for evidence, unknown usage, cost
+arithmetic, the worker smoke result, and remaining accuracy limits.
 
 ## Cost controls
 
