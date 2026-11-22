@@ -1,5 +1,16 @@
 # AI log
 
+## 2026-11-22 — Official evaluation source inspection
+
+- **Tool:** Codex.
+- **Asked for:** Verify the user-supplied evaluation repository and compare its dataset and evaluator interface with the Member 2 implementation.
+- **Kept:** The lecturer's unchanged dataset and evaluator as the required evaluation source; no substitute labels or scorer were created.
+- **Changed:** Documented the upstream URL, inspected revision, file layout, JSONL prediction contract, and evaluator exit codes in the Member 2 progress record.
+- **Rejected:** Claiming complete ban-list coverage from call-reference scanning alone: the official data also includes loop-statement and container-type bans.
+- **By hand:** The user found and supplied the official GitHub URL.
+- **Verified:** Inspected upstream README, evaluator source, all six constraint files, and the local scanner. Downloaded a temporary checkout at `552c811db2d35a23d641bc4fdffc1ac120be1a28`. No dataset files were modified, no evaluation was run, and no real model calls were made.
+- **Evidence:** https://github.com/fithcmus/awad-leetkob-eval and `docs/PA3/MEMBER2-PROGRESS.md`.
+
 ## 2026-11-22 — PA3 Member 2 worker integration and durable limits
 
 - **Tool:** Codex.

@@ -21,8 +21,9 @@
 
 ## Next steps
 
-1. Receive the official dataset folder and unchanged `eval.mjs`.
-2. Add the dataset command, offline Docker image, and separate labelled cases.
+1. Import the official dataset unchanged from the pinned upstream revision below.
+2. Extend syntax scanning for loop statements and container/type bans, then add
+   the dataset command, offline Docker image, and separate labelled cases.
 3. Confirm the final key's project spending cap before enabling real calls.
 4. Run the real model and unchanged evaluator; save predictions, metrics, and logs.
 
@@ -34,9 +35,36 @@
   current account schema, which stores only email and UUID. Known identifiers
   are redacted; arbitrary personal text remains a limitation.
 - Line-spliced or ambiguous C++ source becomes `unsure` without a model call.
-- No official dataset or evaluator was found in the repository file listing.
-  Their original files are needed before building the dataset adapter.
+- Official source found: [fithcmus/awad-leetkob-eval](https://github.com/fithcmus/awad-leetkob-eval).
+  Inspected revision: `552c811db2d35a23d641bc4fdffc1ac120be1a28`.
+  It contains six problems, 47 solutions, and 102 labelled pairs.
+  Files were inspected in a temporary checkout; not yet imported into this repository.
+- The current scanner reports calls and declaration references. The official
+  constraints also ban loop statements and container types; those need broader
+  syntax coverage before claiming complete offline ban-list support.
 - The full Member 2 checklist remains open until integration and evidence exist.
+
+## Official dataset format
+
+| Path | Contents |
+|---|---|
+| `problems/<id>/statement.md` | Problem statement |
+| `problems/<id>/constraints.json` | Constraint IDs, text, and deductions |
+| `problems/<id>/tests/` | Judge input/output files |
+| `solutions/<id>/*.cpp` | Accepted C++ solutions |
+| `labels.jsonl` | Expected labels; never used as checker input |
+| `eval.mjs` | Unchanged Node 22+ evaluator |
+
+Predictions use one JSONL record per solution/constraint pair, with `solution`,
+`constraint`, `verdict`, and `evidence` fields. Evaluate with:
+
+```text
+node <official-folder>/eval.mjs --data <official-folder> --predictions <predictions.jsonl> --json <summary.json>
+```
+
+Exit 0 means thresholds met; exit 1 means valid input but thresholds missed;
+exit 2 means invalid input. PA3 requires honest reporting, not passing the PA4
+metric thresholds.
 
 ## Local configuration for the next step
 
