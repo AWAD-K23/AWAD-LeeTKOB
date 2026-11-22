@@ -53,6 +53,7 @@ type CallLog struct {
 type Gemini struct {
 	key    string
 	client *http.Client
+	wait   func(context.Context) error
 	Record func(CallLog) error
 }
 
@@ -62,7 +63,7 @@ func NewGemini(model, key string, record func(CallLog) error) (*Gemini, error) {
 	}
 
 	return &Gemini{
-		key: key, Record: record,
+		key: key, Record: record, wait: providerRate.wait,
 		client: &http.Client{
 			Timeout: 20 * time.Second,
 			// Never forward authentication to a redirect target.
@@ -119,6 +120,12 @@ func (g *Gemini) Generate(ctx context.Context, request Request) (result []byte, 
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("x-goog-api-key", g.key)
+
+	if err := g.wait(ctx); err != nil {
+		entry.Outcome = "cancelled_before_request"
+		return nil, err
+	}
+	entry.StartedAt = time.Now().UTC()
 
 	res, err := g.client.Do(req)
 	if err != nil {

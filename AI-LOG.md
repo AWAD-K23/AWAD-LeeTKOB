@@ -1,5 +1,16 @@
 # AI log
 
+## 2026-11-22 — Model request pacing
+
+- **Tool:** Codex.
+- **Asked for:** Continue real-model verification after the user enabled `MODEL_OFF=0`, while respecting the account's 15 requests-per-minute limit.
+- **Kept:** Sequential calls and no automatic retries. Provider requests in each process are spaced at least five seconds apart, below 15 RPM.
+- **Changed:** Added a shared cancellable limiter across Gemini instances and tests for spacing and cancellation. Audit start times now refer to the provider request after any rate wait.
+- **Rejected:** Launching parallel real-model tests or assuming the local limiter controls other applications using the same API key.
+- **By hand:** The user enabled model calls and reported the provider quota. No quota or provider setting was changed by the assistant.
+- **Verified:** Semantic package tests passed, including fake-transport provider tests, rate spacing, cancellation, schema validation, and timeout behavior. No real call had been made at this commit.
+- **Evidence:** `backend/internal/semantic/rate.go`, `rate_test.go`, and real-run evidence to follow.
+
 ## 2026-11-22 — Generic checker command and model-off image
 
 - **Tool:** Codex.
