@@ -20,14 +20,21 @@
 - [x] Compile and run code inside the sandbox with all nine protections: no network; CPU, wall time, memory including swap, process, and output limits; non-root user; no host mounts or Docker socket; no secrets.
 - [x] Add a meaningful attack submission for each protection. Read allocated memory back in the memory test; ensure wall timeout kills the container.
 - [x] Set up CI for the project and sandbox tests on the `pa3` tag; document local commands.
-- [x] Set up the deployment environment for the application, queue, worker, sandbox, database, and server-side model configuration. Set a spending cap for public test accounts and document the deployment steps.
+- [x] Set up the local deployment environment for the application, queue, worker, sandbox, database, and server-side model configuration; document deployment steps.
+- [ ] Verify that the documented provider spending cap applies to the final model project/key used for public testing before enabling real calls. Existing saved cap evidence does not prove final public provisioning is complete.
 - [x] Write hard-rule tests, including comments, strings, a student's own `sort`, and an `<algorithm>` include used for `std::swap`.
 - [x] Implement syntax-aware ban-list checks for constraints starting with “Do not use” or “Do not call”. Do not call the model for constraints decided by hard rules.
 - [x] **Handoff:** Show a real submission moving from queued to judged, the worker restart and hard-rule tests, and a working deployment environment. Provide the Accepted submission, constraint data, hard-rule interface, and deployment instructions.
 
-**Evidence:** See [Member 1 handoff](MEMBER1-HANDOFF.md) for code, tests, interfaces, and local deployment commands. PostgreSQL/Docker backend checks and all three browser tests passed. CI is configured for the final `pa3` tag; no remote tag run or public hosting is claimed. The existing documented provider cap is retained.
+**Evidence:** See [Member 1 handoff](MEMBER1-HANDOFF.md) for code, tests, interfaces, and local deployment commands. The original PostgreSQL/Docker checks passed during Member 1 delivery. Later verification passed Go format/vet/PostgreSQL integration checks, eight frontend workflow tests, and the additional Markdown/C++ rendering test in a targeted run. Frontend lint, formatting, type-checking, and production build passed. Docker attack tests were not rerun during the frontend changes. CI is configured for the final `pa3` tag; no remote tag run or public hosting is claimed.
+
+**Frontend follow-up completed:** Dedicated role-aware pages, account selection by email, class details, lab authoring, submission history/source, Markdown statements, C++ highlighting, and page transitions are implemented. See [manual flow test](MANUAL-FLOW-TEST.md). A local database inspection confirmed an Accepted submission also had a separate `hard_rule` violation with exact source evidence. TA review UI and real model checking remain Members 3 and 2 work respectively.
 
 **Handoff ownership:** Member 1 has published the interfaces and verification steps. Actual acceptance by Members 2 and 3 remains in their own first checklist items; no teammate agreement is claimed here.
+
+**Deployment follow-up owner:** Member 3 owns rebuilding and smoke-testing the current
+Docker deployment after the frontend redesign. Member 1 retains ownership of fixes
+to the deployment files or backend components they supplied.
 
 ## Member 2 — model checking and evaluation
 
@@ -43,6 +50,7 @@
 ## Member 3 — review, deployment walkthrough, and submission
 
 - [ ] Accept both handoffs and run their documented checks before integration.
+- [ ] Rebuild and smoke-test `compose.pa3.yaml` after the frontend redesign and `/api` proxy change. Check frontend loading and direct page refreshes through Caddy, `/api/me` authentication, sign-in, class/lab access, and a real submission processed by the separate worker. Record the tested commit and results; return Member 1 implementation defects to Member 1.
 - [ ] Connect verdicts to the TA review queue. Show each submission, constraint, verdict, evidence, and TA-selected deduction. Enforce class ownership on the server.
 - [ ] Keep verdicts out of published marks. If Publish exists, block it while any verdict is unreviewed. Follow and cite the product owners' FAQ for student visibility before publication.
 - [ ] Run the deployed end-to-end flow with the dev-set `sort-merge` lab and compliant, violation, and injection submissions. Verify another class's TA cannot access the lab or queue.

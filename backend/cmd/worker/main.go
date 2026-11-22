@@ -35,7 +35,7 @@ func main() {
 
 	// Use the real sandbox runner for every claimed submission.
 	w := worker.Worker{
-		DB: db, 
+		DB: db,
 		Runner: sandbox.Runner{
 			Image: os.Getenv("SANDBOX_IMAGE"),
 		},
