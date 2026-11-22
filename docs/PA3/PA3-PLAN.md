@@ -44,12 +44,19 @@ and persistent per-lab cost ledger are implemented. Real calls remain off.
 See [Member 2 progress](MEMBER2-PROGRESS.md) for limits and pending dataset/evaluation
 work. Checklist items requiring real-call evidence remain open.
 
-- [ ] Accept Member 1's handoff and run its checks before building on it.
+**Offline evidence:** The checker image ran with `--network none`, memory/process
+limits, and `MODEL_OFF=1`. It produced 102 official predictions, decided all 55
+ban-list pairs, and caused zero wrongful deductions. All 47 semantic pairs stayed
+unsure. The unchanged evaluator returned 1 (40.5% recall, 46.1% unsure), honestly
+recorded under `eval/runs/offline/`. Five separate labelled/tagged cases were
+verified Accepted with `g++ -std=c++17 -O2` and checked with the same command.
+
+- [x] Accept Member 1's handoff and run its checks before building on it. User confirmed the checks were already run.
 - [ ] Add a real model call for semantic constraints. Send only the statement, constraints, and code with comments and identity removed. Return a verdict and evidence per constraint; never let the model set deductions.
-- [ ] Add schema validation and a time limit. Invalid output and timeouts become `unsure`; test both with a fake model and no network.
-- [ ] Log provider request IDs, model, tokens, time, and cost per call without exposing secrets.
-- [ ] Add a checker command and Dockerfile. With `MODEL_OFF=1`, decide ban lists, return `unsure` for semantic constraints, and make no network calls. Accept a dataset folder without problem-specific setup.
-- [ ] Preserve the published dev set and evaluator unchanged. Add at least five labelled, tagged cases separately, including a trap and an injection.
+- [x] Add schema validation and a time limit. Invalid output and timeouts become `unsure`; test both with a fake model and no network.
+- [x] Log provider request IDs, model, tokens, time, and cost per call without exposing secrets. Implemented and fake-transport tested; real-run logs remain part of evaluation below.
+- [x] Add a checker command and Dockerfile. With `MODEL_OFF=1`, decide ban lists, return `unsure` for semantic constraints, and make no network calls. Accept a dataset folder without problem-specific setup.
+- [x] Preserve the published dev set and evaluator unchanged. Add at least five labelled, tagged cases separately, including a trap and an injection.
 - [ ] Run the real model on the dev set and save predictions, the evaluator report, and call log. Report all three metrics honestly; calculate the cost for 80 submissions in `README` and `AI-LOG.md`.
 - [ ] **Handoff:** Demonstrate the checker on a real Accepted submission, the offline model-off image, fake-model guardrail tests, and the saved real-run evidence. Provide the verdict and evidence interface to Member 3.
 

@@ -12,4 +12,5 @@ frontend/test-results/
 backend/bin/
 bin/
 backend/coverage.out
+eval/runs/local*/
 .DS_Store

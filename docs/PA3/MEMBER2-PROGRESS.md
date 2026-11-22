@@ -18,14 +18,15 @@
 | Durable budget | Lab-row lock and `model_calls` ledger prevent concurrent overspending |
 | Usage log | Sanitized prompt, provider response ID, model, tokens, time, estimated cost |
 | Environment loading | API and worker share automatic local `.env` loading |
+| Standalone checker | Generic dataset command and Dockerfile; no label access |
+| Offline verification | 102 official predictions, all 55 ban pairs decided, zero wrongful deductions |
+| Additional cases | Five labelled/tagged solutions, including trap and injection; all Accepted |
 
 ## Next steps
 
-1. Import the official dataset unchanged from the pinned upstream revision below.
-2. Extend syntax scanning for loop statements and container/type bans, then add
-   the dataset command, offline Docker image, and separate labelled cases.
-3. Confirm the final key's project spending cap before enabling real calls.
-4. Run the real model and unchanged evaluator; save predictions, metrics, and logs.
+1. Confirm the final key's project spending cap before enabling real calls.
+2. Run the real model and unchanged evaluator; save predictions, metrics, and logs.
+3. Demonstrate a real-model Accepted submission and finish the Member 2 handoff.
 
 ## Current limits
 
@@ -38,11 +39,10 @@
 - Official source found: [fithcmus/awad-leetkob-eval](https://github.com/fithcmus/awad-leetkob-eval).
   Inspected revision: `552c811db2d35a23d641bc4fdffc1ac120be1a28`.
   It contains six problems, 47 solutions, and 102 labelled pairs.
-  Files were inspected in a temporary checkout; not yet imported into this repository.
-- The current scanner reports calls and declaration references. The official
-  constraints also ban loop statements and container types; those need broader
-  syntax coverage before claiming complete offline ban-list support.
-- The full Member 2 checklist remains open until integration and evidence exist.
+  Imported into `eval/official/` with byte-preserving Git attributes and SHA-256 checks.
+- The scanner now covers statements, type/template references, and canonical
+  declaration types as well as calls. All official ban pairs were decided offline.
+- Real model calls and evaluation evidence remain unchecked in PA3-PLAN.
 
 ## Official dataset format
 
@@ -65,6 +65,20 @@ node <official-folder>/eval.mjs --data <official-folder> --predictions <predicti
 Exit 0 means thresholds met; exit 1 means valid input but thresholds missed;
 exit 2 means invalid input. PA3 requires honest reporting, not passing the PA4
 metric thresholds.
+
+## Saved offline evidence
+
+| Dataset | Pairs | Wrongful | Recall | Unsure |
+|---|---:|---:|---:|---:|
+| Official | 102 | 0 | 40.5% (15/37) | 46.1% (47/102) |
+| Extra | 10 | 0 | 40.0% (2/5) | 50.0% (5/10) |
+
+- Reports and predictions: `eval/runs/offline/` and `eval/runs/extra-offline/`.
+- Both evaluator runs returned 1: valid input, thresholds not met. These are
+  model-off results, not evidence of real model performance.
+- All missed violations in these runs are semantic constraints left unsure.
+- See [evaluation commands](../../eval/README.md) for reproduction. Local reruns
+  use new output folders and never overwrite saved evidence.
 
 ## Local configuration for the next step
 

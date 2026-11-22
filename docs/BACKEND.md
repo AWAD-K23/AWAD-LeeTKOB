@@ -35,6 +35,7 @@ backend/
     worker/          # Start the background judging loop
     migrate/         # Apply database migrations
     create-user/     # Create an initial account
+    checker/         # Write prediction JSONL for any compatible dataset
   internal/
     api/             # HTTP routes, access checks, and database operations
     worker/          # Job ownership, judging, retries, and result saving
@@ -43,6 +44,7 @@ backend/
     hardrules/       # Supported ban-list checks and tests
     semantic/        # Gemini adapter, prompt cleaning, verdict validation
     localenv/        # Shared automatic local environment loading
+    checker/         # Dataset reader and isolated-image syntax scanner
   migrations/        # Database changes, applied in version order
   go.mod             # Go version and dependency list
   go.sum             # Dependency checksums
@@ -56,6 +58,7 @@ backend/
 | `cmd/worker/main.go` | `go -C backend run ./cmd/worker` | Repeatedly process judging jobs |
 | `cmd/migrate/main.go` | `go -C backend run ./cmd/migrate` | Apply missing migrations |
 | `cmd/create-user/main.go` | `go -C backend run ./cmd/create-user` | Create an account using environment settings |
+| `cmd/checker/main.go` | `go -C backend run ./cmd/checker --data ../eval/official --predictions <new-file>` | Standalone dataset predictions; Docker syntax runner by default |
 
 - The API and worker use `localenv.Load` to read `.env` from the current directory or its parent.
 - Existing process environment variables take precedence over that file.

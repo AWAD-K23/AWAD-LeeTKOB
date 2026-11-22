@@ -103,6 +103,12 @@ Google AI Studio currently displays the `AWAD-LeeTKOB` project's monthly spend c
 
 ## PA3 worker, sandbox, and local deployment
 
+- Standalone checker, official dataset, Docker build, and model-off evaluation:
+  [evaluation commands](eval/README.md).
+- Saved model-off results: **0 wrongful deductions**, **40.5% recall**, and
+  **46.1% unsure** over 102 pairs. All 55 ban pairs were decided; 47 semantic pairs
+  stayed unsure. The original evaluator returned 1. Real-model evaluation is pending.
+
 - Follow [Member 1 handoff](docs/PA3/MEMBER1-HANDOFF.md) for the API contracts, worker start command, Docker deployment, and receiving-member checks.
 - See [current database structure](docs/DATABASE.md) for classes, labs, durable jobs, judge results, and separate constraint verdicts.
 - For full backend checks, build `leetkob-sandbox:pa3`, set `TEST_DATABASE_URL` and `SANDBOX_TESTS=1`, and run the same Go format/vet/test commands above. PowerShell users can run `scripts/test-pa3.ps1` from the root.

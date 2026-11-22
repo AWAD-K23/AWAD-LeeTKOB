@@ -1,5 +1,16 @@
 # AI log
 
+## 2026-11-22 — Generic checker command and model-off image
+
+- **Tool:** Codex.
+- **Asked for:** Implement the next Member 2 checker and evaluation tasks sequentially, keep regular commits, and check finished tasks in `docs/PA3/PA3-PLAN.md`.
+- **Kept:** Generic discovery from statement, constraint, and source files; labels are never checker input. The offline image has no network, database, Docker socket, host mounts, or credentials. Student source is analyzed, not executed.
+- **Changed:** Added `cmd/checker`, dataset and scanner packages, an isolated checker Dockerfile, offline scripts, saved predictions/reports, and CI steps in the existing jobs. Added a separate online audit-file path and per-problem evaluation-run cap; the production worker retains its durable database cap. Checked handoff acceptance, guardrails, logging implementation, checker, and dataset tasks; real-call and final handoff tasks remain open.
+- **Rejected:** Counting model-off scores as real-model results, reading labels to produce predictions, hiding the original evaluator's FAIL, or passing CI when bans are missed or cause wrongful deductions.
+- **By hand:** Provider-cap verification remains pending; no real model call was made. The user confirmed Member 1 checks were already run.
+- **Verified:** The offline Docker image generated 102 official predictions with 0 wrongful deductions, 40.5% recall (15/37), and 46.1% unsure (47/102). All 55 ban pairs were decided; every missed violation was semantic and unsure. The unchanged scorer returned 1. The five extra cases produced 10 predictions, 0 wrongful, 40.0% recall, and 50.0% unsure, also exit 1. Final Go format/vet, PostgreSQL-backed tests, all nine sandbox attacks, syntax tests, checker tests, and official hashes passed. The final image and stricter offline verifier passed on both datasets; remote CI was not run. An initial harness attempt lost tmpfs output after container exit; stdout capture fixed it. A tar buffer limit was then corrected without changing data or labels.
+- **Evidence:** `backend/cmd/checker/`, `backend/internal/checker/`, `deploy/Dockerfile.checker`, `eval/runs/`, and `scripts/run-offline-eval.mjs`.
+
 ## 2026-11-22 — Pinned official evaluation data and independent cases
 
 - **Tool:** Codex.
