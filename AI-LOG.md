@@ -1,5 +1,16 @@
 # AI log
 
+## 2026-11-22 — PA3 Member 2 semantic-checker foundation
+
+- **Tool:** Codex.
+- **Asked for:** Implement the Member 2 tasks sequentially, reuse the handoff checks already performed by the user, and pause with local configuration instructions when an API key or other manual provider setup is required. Maintain this log during implementation and commit tested parts separately.
+- **Kept:** A provider-independent checker, disabled by default, that preserves hard-rule findings and requests only pending semantic constraints. Model findings remain separate from TA deductions.
+- **Changed:** Added response and evidence validation, a context timeout, comment removal with source-line preservation, and fake-model tests. Added `docs/PA3/MEMBER2-PROGRESS.md` to distinguish the tested foundation from pending provider, worker, dataset, and evaluation work.
+- **Rejected:** Real model calls in unit tests and marking the entire Member 2 integration complete before provider and evaluation evidence exist.
+- **By hand:** The user confirmed Member 1 checks had already run and requested regular commits. No provider setup or key entry is claimed.
+- **Verified:** Go formatting, full Go vet, and `go -C backend test ./... -count=1` passed. The semantic tests use fakes and no network. PostgreSQL/Docker integration cases require their opt-in settings and were not rerun; the user supplied Member 1 acceptance. The first vet attempt hit a local cache permission denial; running the checks with cache access succeeded.
+- **Evidence:** `backend/internal/semantic/check.go`, `source.go`, `check_test.go`, and `docs/PA3/MEMBER2-PROGRESS.md`.
+
 Tool used: Codex, for planning and initial project setup.
 
 ## 1. Local PostgreSQL port
