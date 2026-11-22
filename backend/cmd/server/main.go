@@ -15,6 +15,11 @@ import (
 )
 
 func main() {
+	// Load local settings before checking the required server configuration.
+	if err := loadLocalEnv(); err != nil {
+		log.Fatal(err)
+	}
+
 	dbURL, origin := os.Getenv("DATABASE_URL"), os.Getenv("APP_ORIGIN")
 	if dbURL == "" || origin == "" {
 		log.Fatal("DATABASE_URL and APP_ORIGIN are required")
@@ -26,6 +31,8 @@ func main() {
 		log.Fatal(err)
 	}
 	defer pool.Close()
+
+	// Ping the database to ensure the connection is valid.
 	if err := pool.Ping(context.Background()); err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +55,16 @@ func main() {
 		port = "8080"
 	}
 
-	server := &http.Server{Addr: ":" + port, Handler: (&api.Server{DB: pool, Sessions: sessions, Origin: origin}).Routes(), ReadHeaderTimeout: 5 * time.Second}
+	// Start the API server and listen for requests.
+	server := &http.Server{
+		Addr: ":" + port,
+		Handler: (&api.Server{
+			DB:       pool,
+			Sessions: sessions,
+			Origin:   origin,
+		}).Routes(),
+		ReadHeaderTimeout: 5 * time.Second}
+
 	log.Printf("Listening on port %s", port)
 	log.Fatal(server.ListenAndServe())
 }

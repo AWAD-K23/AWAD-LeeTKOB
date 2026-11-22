@@ -1,449 +1,303 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
+import {
+  QueryClient,
+  QueryCache,
+  QueryClientProvider,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { Eye, EyeOff, LockKeyhole, Code2 } from "lucide-react";
+import { api, ApiError, type User } from "@/lib/api";
+import {
+  Brand,
+  EmptyState,
+  Feedback,
+  Loading,
+  Shell,
+} from "@/components/layout";
+import { ClassesPage, ClassPage, ClassForm, PeoplePage } from "@/pages/classes";
+import { LabsPage, LabForm } from "@/pages/labs";
+import {
+  LabWorkspace,
+  SubmissionPage,
+  SubmissionsPage,
+} from "@/pages/workspace";
 import "./style.css";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 
-type Lab = { id: string; title: string; statement: string };
-type Status = { id: string; status: string; verdict: string; detail: string };
+const client = new QueryClient({
+  // A protected request reporting an expired session returns to sign-in.
+  queryCache: new QueryCache({
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 401) {
+        client.setQueryData(["session"], null);
+        client.removeQueries({
+          predicate: (query) => query.queryKey[0] !== "session",
+        });
+      }
+    },
+  }),
+  defaultOptions: { queries: { retry: false, staleTime: 15_000 } },
+});
 
-async function api<T>(path: string, body?: object, headers = {}): Promise<T> {
-  const response = await fetch(path, {
-    method: body ? "POST" : "GET",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json", ...headers },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) throw new Error((await response.json()).detail);
-  return response.status === 204 ? (undefined as T) : response.json();
-}
-
-export default function App() {
-  const [role, setRole] = useState("");
-  const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
-  const [labs, setLabs] = useState<Lab[]>([]);
-  const [selected, setSelected] = useState("");
-  const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<Status | null>(null);
+function Login({ complete }: { complete: () => Promise<unknown> }) {
+  const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [tests, setTests] = useState([{ input: "", expectedOutput: "" }]);
-  const [constraints, setConstraints] = useState([
-    { description: "", deduction: 0 },
-  ]);
-
-  async function refresh() {
-    setRole((await api<{ role: string }>("/me")).role);
-    setClasses(await api("/classes"));
-    setLabs(await api("/labs"));
-  }
-  useEffect(() => {
-    let active = true;
-    void Promise.all([
-      api<{ role: string }>("/me"),
-      api<{ id: string; name: string }[]>("/classes"),
-      api<Lab[]>("/labs"),
-    ])
-      .then(([me, availableClasses, availableLabs]) => {
-        if (!active) return;
-        setRole(me.role);
-        setClasses(availableClasses);
-        setLabs(availableLabs);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
-  useEffect(() => {
-    if (!status || ["completed", "failed"].includes(status.status)) return;
-    const timer = setInterval(() => {
-      void api<Status>(`/submissions/${status.id}`)
-        .then(setStatus)
-        .catch((error: Error) => setMessage(error.message));
-    }, 1500);
-    return () => clearInterval(timer);
-  }, [status]);
-
-  async function run(action: () => Promise<void>) {
-    setBusy(true);
-    setMessage("");
-    try {
-      await action();
-    } catch (error) {
-      setMessage((error as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
+  const [error, setError] = useState<Error | null>(null);
 
   return (
-    <main>
-      <header>
-        <h1>LeeTKOB</h1>
-        <span>C++ laboratory</span>
-        {role && (
-          <Button
-            onClick={() =>
-              void run(async () => {
-                await api("/auth/logout", {});
-                setRole("");
-                setStatus(null);
-              })
-            }
-          >
-            Sign out
-          </Button>
-        )}
-      </header>
-      {message && (
-        <p role="alert" className="notice">
-          {message}
-        </p>
-      )}
-      {!role ? (
-        <Card className="mx-auto my-12 max-w-md p-6">
+    <div className="login-layout">
+      <section className="login-story">
+        <Brand />
+        <div className="login-copy">
+          <span className="eyebrow">YOUR C++ LABORATORY</span>
+          <h1>
+            Small steps.
+            <br />
+            Better solutions.
+          </h1>
+          <p>
+            A focused space to write code, test your thinking, and keep
+            learning.
+          </p>
+          <div className="code-preview" aria-hidden="true">
+            <div className="preview-title">
+              <Code2 size={16} />
+              main.cpp <span>C++</span>
+            </div>
+            <pre>
+              <span className="syntax-purple">#include</span>
+              {" <iostream>\n\n"}
+              <span className="syntax-amber">int</span>
+              {" main() {\n"}
+              {"    std::cout << "}
+              <span className="syntax-green">"Hello, possibility."</span>
+              {";\n"}
+              {"    return 0;\n}"}
+            </pre>
+          </div>
+        </div>
+        <p className="muted">Write. Submit. Understand.</p>
+      </section>
+      <section className="login-form-area">
+        <div className="login-card page-enter">
+          <span className="login-lock">
+            <LockKeyhole size={22} />
+          </span>
           <h2>Welcome back</h2>
-          <p>Sign in to manage labs or submit your work.</p>
+          <p className="muted">Sign in to your LeeTKOB workspace.</p>
+          <Feedback error={error} />
           <form
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
               const data = new FormData(event.currentTarget);
-              void run(async () => {
+              setBusy(true);
+              setError(null);
+
+              try {
                 await api("/auth/login", {
                   email: data.get("email"),
                   password: data.get("password"),
                 });
-                await refresh();
-              });
+                await complete();
+              } catch (cause) {
+                setError(cause as Error);
+              } finally {
+                setBusy(false);
+              }
             }}
           >
-            <div className="grid gap-2">
-              <Label htmlFor={"field-1"}>Email</Label>
-              <Input
-                id={"field-1"}
+            <label>
+              Email
+              <input
                 name="email"
                 type="email"
-                required
+                placeholder="you@example.edu"
                 autoComplete="username"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor={"field-2"}>Password</Label>
-              <Input
-                id={"field-2"}
-                name="password"
-                type="password"
                 required
-                autoComplete="current-password"
               />
+            </label>
+            <label htmlFor="password">Password</label>
+            <div className="password-field">
+              <input
+                id="password"
+                name="password"
+                type={visible ? "text" : "password"}
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                className="icon-button"
+                onClick={() => setVisible(!visible)}
+                aria-label={visible ? "Hide password" : "Show password"}
+              >
+                {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
-            <Button disabled={busy}>Sign in</Button>
+            <button className="btn btn-primary" disabled={busy}>
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
           </form>
-        </Card>
-      ) : (
-        <>
-          <p className="mb-4">
-            Signed in as <Badge variant="secondary">{role}</Badge>
+          <p className="login-help">
+            Need an account? Contact your class administrator.
           </p>
-          {role === "admin" && (
-            <Card className="mb-6 p-6">
-              <h2>Create a class</h2>
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const data = new FormData(event.currentTarget);
-                  void run(async () => {
-                    await api("/classes", {
-                      name: data.get("name"),
-                      taId: data.get("taId"),
-                      studentIds: String(data.get("studentIds"))
-                        .split(/[\s,]+/)
-                        .filter(Boolean),
-                    });
-                    await refresh();
-                    setMessage("Class created.");
-                  });
-                }}
-              >
-                <div className="grid gap-2">
-                  <Label htmlFor={"field-3"}>Class name</Label>
-                  <Input id={"field-3"} name="name" required />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor={"field-4"}>TA account ID</Label>
-                  <Input id={"field-4"} name="taId" required />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor={"field-5"}>
-                    Student account IDs (one per line)
-                  </Label>
-                  <Textarea id={"field-5"} name="studentIds" />
-                </div>
-                <Button disabled={busy}>Create class</Button>
-              </form>
-            </Card>
-          )}
-          {role === "ta" && (
-            <Card className="mb-6 p-6">
-              <h2>Create a lab</h2>
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const data = new FormData(event.currentTarget);
-                  void run(async () => {
-                    await api(`/classes/${data.get("classId")}/labs`, {
-                      title: data.get("title"),
-                      statement: data.get("statement"),
-                      tests,
-                      constraints,
-                    });
-                    await refresh();
-                    setMessage(
-                      "Lab created. Your class students can now submit.",
-                    );
-                  });
-                }}
-              >
-                <div className="grid gap-2">
-                  <Label htmlFor={"field-6"}>Class</Label>
-                  <select
-                    id={"field-6"}
-                    name="classId"
-                    required
-                    defaultValue=""
-                  >
-                    <option value="" disabled>
-                      Choose a class
-                    </option>
-                    {classes.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor={"field-7"}>Title</Label>
-                  <Input id={"field-7"} name="title" required />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor={"field-8"}>Statement</Label>
-                  <Textarea id={"field-8"} name="statement" required rows={6} />
-                </div>
-                <h3>Test cases</h3>
-                {tests.map((test, index) => (
-                  <fieldset key={index}>
-                    <legend>Case {index + 1}</legend>
-                    <div className="grid gap-2">
-                      <Label htmlFor={`field-9-${index}`}>Input</Label>
-                      <Textarea
-                        id={`field-9-${index}`}
-                        value={test.input}
-                        onChange={(e) =>
-                          setTests(
-                            tests.map((t, i) =>
-                              i === index ? { ...t, input: e.target.value } : t,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor={`field-10-${index}`}>
-                        Expected output
-                      </Label>
-                      <Textarea
-                        id={`field-10-${index}`}
-                        value={test.expectedOutput}
-                        onChange={(e) =>
-                          setTests(
-                            tests.map((t, i) =>
-                              i === index
-                                ? { ...t, expectedOutput: e.target.value }
-                                : t,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    {tests.length > 1 && (
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          setTests(tests.filter((_, i) => i !== index))
-                        }
-                      >
-                        Remove case
-                      </Button>
-                    )}
-                  </fieldset>
-                ))}
-                <Button
-                  type="button"
-                  onClick={() =>
-                    setTests([...tests, { input: "", expectedOutput: "" }])
-                  }
-                >
-                  Add case
-                </Button>
-                <h3>Constraints</h3>
-                {constraints.map((c, index) => (
-                  <fieldset key={index}>
-                    <legend>Constraint {index + 1}</legend>
-                    <div className="grid gap-2">
-                      <Label htmlFor={`field-11-${index}`}>Rule</Label>
-                      <Textarea
-                        id={`field-11-${index}`}
-                        value={c.description}
-                        required
-                        onChange={(e) =>
-                          setConstraints(
-                            constraints.map((v, i) =>
-                              i === index
-                                ? { ...v, description: e.target.value }
-                                : v,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor={`field-12-${index}`}>Deduction</Label>
-                      <Input
-                        id={`field-12-${index}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={c.deduction}
-                        required
-                        onChange={(e) =>
-                          setConstraints(
-                            constraints.map((v, i) =>
-                              i === index
-                                ? { ...v, deduction: Number(e.target.value) }
-                                : v,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    {constraints.length > 1 && (
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          setConstraints(
-                            constraints.filter((_, i) => i !== index),
-                          )
-                        }
-                      >
-                        Remove constraint
-                      </Button>
-                    )}
-                  </fieldset>
-                ))}
-                <Button
-                  type="button"
-                  onClick={() =>
-                    setConstraints([
-                      ...constraints,
-                      { description: "", deduction: 0 },
-                    ])
-                  }
-                >
-                  Add constraint
-                </Button>
-                <Button
-                  className="bg-emerald-500 text-black hover:bg-emerald-400"
-                  disabled={busy || !classes.length}
-                >
-                  Create lab
-                </Button>
-              </form>
-            </Card>
-          )}
-          {role !== "admin" && (
-            <Card className="mb-6 p-6">
-              <h2>Your labs</h2>
-              {!labs.length && <p>No labs are available yet.</p>}
-              <div className="grid gap-2">
-                <Label htmlFor={"field-13"}>Lab</Label>
-                <select
-                  id={"field-13"}
-                  value={selected}
-                  onChange={(e) => setSelected(e.target.value)}
-                >
-                  <option value="">Choose a lab</option>
-                  {labs.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {selected && (
-                <article>
-                  <h3>{labs.find((l) => l.id === selected)?.title}</h3>
-                  <p className="statement">
-                    {labs.find((l) => l.id === selected)?.statement}
-                  </p>
-                </article>
-              )}
-              {role === "student" && selected && (
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    const data = new FormData(event.currentTarget);
-                    void run(async () => {
-                      const result = await api<{ id: string }>(
-                        `/labs/${selected}/submissions`,
-                        { source: data.get("source") },
-                        { "Idempotency-Key": crypto.randomUUID() },
-                      );
-                      setStatus({
-                        id: result.id,
-                        status: "pending",
-                        verdict: "",
-                        detail: "",
-                      });
-                    });
-                  }}
-                >
-                  <div className="grid gap-2">
-                    <Label htmlFor={"field-14"}>C++ source</Label>
-                    <Textarea
-                      id={"field-14"}
-                      className="code"
-                      name="source"
-                      required
-                      rows={18}
-                      spellCheck={false}
-                    />
-                  </div>
-                  <Button
-                    className="bg-emerald-500 text-black hover:bg-emerald-400"
-                    disabled={busy}
-                  >
-                    Submit
-                  </Button>
-                </form>
-              )}
-              {status && (
-                <aside role="status">
-                  <h3>
-                    {status.verdict ||
-                      (status.status === "pending" ? "Queued" : status.status)}
-                  </h3>
-                  <p>{status.detail}</p>
-                  <small>Submission {status.id}</small>
-                </aside>
-              )}
-            </Card>
-          )}
-        </>
-      )}
-    </main>
+        </div>
+      </section>
+    </div>
   );
 }
+
+function Application() {
+  const cache = useQueryClient();
+  const navigate = useNavigate();
+  const [logoutError, setLogoutError] = useState<Error | null>(null);
+  const session = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      try {
+        return await api<User>("/me");
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) return null;
+        throw error;
+      }
+    },
+    staleTime: 0,
+  });
+  const user = session.data;
+
+  if (session.isPending) return <Loading />;
+  if (session.error)
+    return (
+      <div className="page-container">
+        <Brand />
+        <Feedback error={session.error} retry={() => void session.refetch()} />
+      </div>
+    );
+  if (!user)
+    return (
+      <Login
+        complete={async () => {
+          cache.clear();
+          await cache.fetchQuery({
+            queryKey: ["session"],
+            queryFn: () => api<User>("/me"),
+          });
+          navigate("/", { replace: true, viewTransition: true });
+        }}
+      />
+    );
+
+  const home = user.role === "admin" ? "/classes" : "/labs";
+  const deny = (
+    <div className="page-container">
+      <EmptyState
+        title="This page isn't available for your role"
+        action={
+          <a className="btn" href={home}>
+            Return to workspace
+          </a>
+        }
+      >
+        Your account can access the destinations in the navigation above.
+      </EmptyState>
+    </div>
+  );
+
+  return (
+    <>
+      <Feedback error={logoutError} />
+      <Routes>
+        <Route
+          element={
+            <Shell
+              user={user}
+              logout={() => {
+                void api("/auth/logout", {})
+                  .then(() => {
+                    cache.clear();
+                    cache.setQueryData(["session"], null);
+                    navigate("/login");
+                  })
+                  .catch(setLogoutError);
+              }}
+            />
+          }
+        >
+          <Route index element={<Navigate to={home} replace />} />
+          <Route path="login" element={<Navigate to={home} replace />} />
+          <Route path="classes" element={<ClassesPage user={user} />} />
+          <Route
+            path="classes/new"
+            element={user.role === "admin" ? <ClassForm /> : deny}
+          />
+          <Route path="classes/:id" element={<ClassPage user={user} />} />
+          <Route
+            path="people"
+            element={user.role === "admin" ? <PeoplePage /> : deny}
+          />
+          <Route
+            path="labs"
+            element={user.role !== "admin" ? <LabsPage user={user} /> : deny}
+          />
+          <Route
+            path="classes/:id/labs/new"
+            element={user.role === "ta" ? <LabForm /> : deny}
+          />
+          <Route
+            path="labs/new"
+            element={user.role === "ta" ? <LabForm /> : deny}
+          />
+          <Route
+            path="labs/:id"
+            element={
+              user.role !== "admin" ? <LabWorkspace user={user} /> : deny
+            }
+          />
+          <Route
+            path="submissions"
+            element={user.role === "student" ? <SubmissionsPage /> : deny}
+          />
+          <Route
+            path="submissions/:id"
+            element={user.role !== "admin" ? <SubmissionPage /> : deny}
+          />
+          <Route
+            path="*"
+            element={
+              <div className="page-container">
+                <EmptyState
+                  title="Page not found"
+                  action={
+                    <a className="btn" href={home}>
+                      Return to workspace
+                    </a>
+                  }
+                >
+                  This address does not match a page in your workspace.
+                </EmptyState>
+              </div>
+            }
+          />
+        </Route>
+      </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={client}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
+}
+
+const router = createBrowserRouter([{ path: "*", element: <Application /> }]);

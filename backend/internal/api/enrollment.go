@@ -38,11 +38,13 @@ func (s *Server) enroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// The lab ID is in the URL path, and the student ID is in the JSON body.
 	lab := chi.URLParam(r, "labId")
 	var in struct {
 		StudentID string `json:"studentId"`
 	}
 
+	// Limit the body to 4096 bytes and reject unknown fields or extra JSON.
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096))
 	dec.DisallowUnknownFields()
 	if _, err := uuid.Parse(lab); err != nil {
@@ -55,6 +57,7 @@ func (s *Server) enroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// The student ID must be a valid UUID. The server does not trust the UI to validate this.
 	if _, err := uuid.Parse(in.StudentID); err != nil {
 		fail(w, 400, "invalid-request", "Invalid request", "Provide a valid studentId.")
 		return
@@ -68,12 +71,16 @@ func (s *Server) enroll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// No row was inserted if the enrollment already exists, or if the lab
+	// or student could not be found. Check which case occurred below.
 	if tag.RowsAffected() == 0 {
 		var exists bool
 		if err := s.DB.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM enrollments WHERE lab_id=$1 AND student_id=$2)", lab, in.StudentID).Scan(&exists); err != nil {
 			internal(w)
 			return
 		}
+		// An existing enrollment is a successful repeat request. Otherwise,
+		// report that the lab or student was not found.
 		if !exists {
 			fail(w, 404, "not-found", "Not found", "The lab or student was not found.")
 			return

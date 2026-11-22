@@ -141,7 +141,9 @@ func (s *Server) labs(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	rows, err := s.DB.Query(r.Context(), `SELECT l.id::text,l.title,l.statement FROM labs l WHERE
+	rows, err := s.DB.Query(r.Context(), `SELECT l.id::text,l.title,l.statement,
+ COALESCE(l.class_id::text,''),ARRAY(SELECT description FROM lab_constraints
+ WHERE lab_id=l.id ORDER BY id) FROM labs l WHERE
  ($2='ta' AND EXISTS(SELECT 1 FROM class_tas t WHERE t.class_id=l.class_id AND t.ta_id=$1))
  OR ($2='student' AND EXISTS(SELECT 1 FROM enrollments e WHERE e.lab_id=l.id AND e.student_id=$1)) ORDER BY l.title`, id, role)
 	if err != nil {
@@ -149,14 +151,18 @@ func (s *Server) labs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer rows.Close()
-	out := []map[string]string{}
+	out := []map[string]any{}
 	for rows.Next() {
-		var id, title, statement string
-		if rows.Scan(&id, &title, &statement) != nil {
+		var id, title, statement, classID string
+		var requirements []string
+		if rows.Scan(&id, &title, &statement, &classID, &requirements) != nil {
 			internal(w)
 			return
 		}
-		out = append(out, map[string]string{"id": id, "title": title, "statement": statement})
+		out = append(out, map[string]any{
+			"id": id, "title": title, "statement": statement, "classId": classID,
+			"requirements": requirements,
+		})
 	}
 	if rows.Err() != nil {
 		internal(w)
@@ -175,11 +181,12 @@ func (s *Server) submissionStatus(w http.ResponseWriter, r *http.Request) {
 		fail(w, 404, "not-found", "Submission not found", "The submission was not found.")
 		return
 	}
-	var status, verdict, detail string
+	var status, verdict, detail, labID string
+	var source []byte
 	// Students see judge results only; constraint verdicts are reserved for TA review.
-	err = s.DB.QueryRow(r.Context(), `SELECT j.status,COALESCE(x.verdict,''),COALESCE(x.detail,'') FROM submissions s
+	err = s.DB.QueryRow(r.Context(), `SELECT j.status,COALESCE(x.verdict,''),COALESCE(x.detail,''),s.source,l.id::text FROM submissions s
  JOIN labs l ON l.id=s.lab_id JOIN jobs j ON j.submission_id=s.id LEFT JOIN judge_results x ON x.submission_id=s.id
- WHERE s.id=$1 AND (($3='student' AND s.student_id=$2) OR ($3='ta' AND EXISTS(SELECT 1 FROM class_tas t WHERE t.class_id=l.class_id AND t.ta_id=$2)))`, submissionID, id, role).Scan(&status, &verdict, &detail)
+ WHERE s.id=$1 AND (($3='student' AND s.student_id=$2) OR ($3='ta' AND EXISTS(SELECT 1 FROM class_tas t WHERE t.class_id=l.class_id AND t.ta_id=$2)))`, submissionID, id, role).Scan(&status, &verdict, &detail, &source, &labID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		fail(w, 404, "not-found", "Submission not found", "The submission was not found.")
 		return
@@ -188,5 +195,8 @@ func (s *Server) submissionStatus(w http.ResponseWriter, r *http.Request) {
 		internal(w)
 		return
 	}
-	jsonResponse(w, map[string]string{"id": submissionID.String(), "status": status, "verdict": verdict, "detail": detail})
+	jsonResponse(w, map[string]string{
+		"id": submissionID.String(), "status": status, "verdict": verdict,
+		"detail": detail, "source": string(source), "labId": labID,
+	})
 }

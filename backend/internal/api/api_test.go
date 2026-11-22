@@ -235,6 +235,35 @@ func TestSubmissionContract(t *testing.T) {
 		if err := json.Unmarshal(out.Body.Bytes(), &class); err != nil {
 			t.Fatal(err)
 		}
+
+		// Browsing must preserve account privacy and class membership boundaries.
+		expectProblem(t, request("GET", "/people", "", cookie, "", ""),
+			403, "forbidden", "Forbidden")
+		out = request("GET", "/people?q=ta%40example.test", "", adminCookie, "", "")
+		if out.Code != 200 || !strings.Contains(out.Body.String(), "ta@example.test") ||
+			strings.Contains(out.Body.String(), "password") {
+			t.Fatalf("unsafe or missing account search: %d %s", out.Code, out.Body.String())
+		}
+
+		expectProblem(t, request("GET", "/classes/"+class.ID, "", otherCookie, "", ""),
+			404, "not-found", "Class not found")
+		out = request("GET", "/classes/"+class.ID, "", cookie, "", "")
+		if out.Code != 200 || strings.Contains(out.Body.String(), "@example.test") {
+			t.Fatalf("student received roster data: %d %s", out.Code, out.Body.String())
+		}
+
+		out = request("GET", "/classes/"+class.ID, "", taCookie, "", "")
+		if out.Code != 200 || !strings.Contains(out.Body.String(), "student@example.test") {
+			t.Fatalf("TA cannot see assigned class: %d %s", out.Code, out.Body.String())
+		}
+
+		expectProblem(t, request("GET", "/submissions", "", taCookie, "", ""),
+			403, "forbidden", "Forbidden")
+		out = request("GET", "/submissions", "", otherCookie, "", "")
+		if out.Code != 200 || strings.TrimSpace(out.Body.String()) != "[]" {
+			t.Fatalf("student history leaked submissions: %d %s", out.Code, out.Body.String())
+		}
+
 		labBody := `{"title":"Sort numbers","statement":"Sort ascending","tests":[{"input":"2 1","expectedOutput":"1 2"}],"constraints":[{"description":"Use merge sort","deduction":2}]}`
 		out = request("POST", "/classes/"+class.ID+"/labs", labBody, taCookie, "", origin)
 		if out.Code != 201 {

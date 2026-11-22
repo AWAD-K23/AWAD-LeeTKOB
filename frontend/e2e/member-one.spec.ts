@@ -1,19 +1,46 @@
 import { expect, test } from "@playwright/test";
 
 test("TA creates a lab with tests and chosen deductions", async ({ page }) => {
-  await page.route("**/me", (route) => route.fulfill({ json: { role: "ta" } }));
-  await page.route("**/classes", (route) =>
+  await page.route("**/api/me", (route) =>
+    route.fulfill({ json: { id: "ta-a", role: "ta" } }),
+  );
+  await page.route("**/api/classes", (route) =>
     route.fulfill({ json: [{ id: "class-a", name: "Sorting A" }] }),
   );
-  await page.route("**/labs", (route) => route.fulfill({ json: [] }));
+  let created = false;
+  await page.route("**/api/labs", (route) =>
+    route.fulfill({
+      json: created
+        ? [
+            {
+              id: "lab-a",
+              classId: "class-a",
+              title: "Merge sort",
+              statement: "Sort ascending using merge sort.",
+            },
+          ]
+        : [],
+    }),
+  );
   let saved: Record<string, unknown> | undefined;
-  await page.route("**/classes/class-a/labs", async (route) => {
+  await page.route("**/api/classes/class-a/labs", async (route) => {
     saved = route.request().postDataJSON();
+    created = true;
     await route.fulfill({ status: 201, json: { id: "lab-a" } });
   });
   await page.goto("/");
+  await page.getByRole("link", { name: "Create lab" }).click();
   await page.getByLabel("Class", { exact: true }).selectOption("class-a");
   await page.getByLabel("Title", { exact: true }).fill("Merge sort");
+  // Declining navigation preserves an unfinished authoring form.
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("link", { name: "Classes", exact: true })
+    .click();
+  await expect(page.getByLabel("Title", { exact: true })).toHaveValue(
+    "Merge sort",
+  );
   await page
     .getByLabel("Statement", { exact: true })
     .fill("Sort ascending using merge sort.");
@@ -35,21 +62,21 @@ test("TA creates a lab with tests and chosen deductions", async ({ page }) => {
 test("student submits code and sees the polled judge result", async ({
   page,
 }) => {
-  await page.route("**/me", (route) =>
-    route.fulfill({ json: { role: "student" } }),
+  await page.route("**/api/me", (route) =>
+    route.fulfill({ json: { id: "student-a", role: "student" } }),
   );
-  await page.route("**/classes", (route) => route.fulfill({ json: [] }));
-  await page.route("**/labs", (route) =>
+  await page.route("**/api/classes", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/labs", (route) =>
     route.fulfill({
       json: [{ id: "lab-a", title: "Sorting", statement: "Sort two numbers." }],
     }),
   );
-  await page.route("**/labs/lab-a/submissions", async (route) => {
+  await page.route("**/api/labs/lab-a/submissions", async (route) => {
     expect(route.request().headers()["idempotency-key"]).toBeTruthy();
     expect(route.request().postDataJSON()).toEqual({ source: "int main(){}" });
     await route.fulfill({ status: 201, json: { id: "submission-a" } });
   });
-  await page.route("**/submissions/submission-a", (route) =>
+  await page.route("**/api/submissions/submission-a", (route) =>
     route.fulfill({
       json: {
         id: "submission-a",
@@ -63,7 +90,7 @@ test("student submits code and sees the polled judge result", async ({
   await expect(page.getByRole("heading", { name: "Create a lab" })).toHaveCount(
     0,
   );
-  await page.getByLabel("Lab", { exact: true }).selectOption("lab-a");
+  await page.getByRole("link", { name: "Sorting", exact: true }).click();
   await page.getByLabel("C++ source").fill("int main(){}");
   await page.getByRole("button", { name: "Submit", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Accepted");

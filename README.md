@@ -20,6 +20,13 @@ Requirements: Node.js and npm, Go 1.26 or newer, Docker with Compose, and Git. O
 
 ## Backend
 
+The redesigned frontend uses dedicated class, lab, people, and submission pages.
+Browser API requests use `/api/*`; Vite and Caddy strip that prefix when forwarding
+to Go. Direct clients on port 8080 keep using the existing unprefixed endpoints.
+Restart the Go server after pulling backend changes. No new migration is needed
+for the frontend browsing endpoints. See [browsing contracts](docs/contract/frontend-browsing.md)
+and the [frontend design plan](docs/FRONTEND-DESIGN-PLAN.md).
+
 ```text
 backend/
 ├── cmd/
@@ -41,7 +48,7 @@ backend/
 
 Files in `internal/api` share the `api` package. The SQL used by each handler stays alongside that handler for now.
 
-The Go programs read shell environment variables; they do not load `.env` automatically. In PowerShell, load the local file from the repository root:
+The server automatically loads `.env` from the current directory or its parent. Existing shell environment variables take precedence. The migration and account creation commands still require shell environment variables. In PowerShell, load the local file from the repository root:
 
 ```powershell
 Get-Content .env | Where-Object { $_ -match '^[A-Za-z_][A-Za-z0-9_]*=' } | ForEach-Object {

@@ -11,7 +11,7 @@
 - Keep tests before or in the same commit as the code. Make separate commits for sandbox, queue, hard rules, model call, and limits. Do not rewrite history to simulate this order.
 - Record real assistant use and actual changed or rejected suggestions in `AI-LOG.md` throughout the work.
 
-## Member 1 (you) — submission, queue, sandbox, hard rules, and deployment setup
+## Member 1 — submission, queue, sandbox, hard rules, and deployment setup
 
 - [x] Inspect the current implementation and publish fixed job, result, and constraint interfaces for Members 2 and 3. Receiving members confirm acceptance in their handoff tasks below.
 - [x] Ensure a TA can create a lab with its statement, tests, constraints, and deductions in their class.
