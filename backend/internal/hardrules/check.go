@@ -11,20 +11,27 @@ import (
 	"leetkob/backend/internal/sandbox"
 )
 
+// Constraint contains a rule ID and its text, never a deduction.
 type Constraint struct {
 	ID   string `json:"id"`
 	Text string `json:"text"`
 }
+
+// Evidence points to an exact line in the submitted source.
 type Evidence struct {
 	Line int    `json:"line"`
 	Text string `json:"text"`
 }
+
+// Verdict records a checker finding for later TA review.
 type Verdict struct {
 	ConstraintID string     `json:"constraintId"`
 	Verdict      string     `json:"verdict"`
 	Evidence     []Evidence `json:"evidence"`
 	Source       string     `json:"source"`
 }
+
+// Scanner allows real sandbox analysis or a fake runner in tests.
 type Scanner interface {
 	Run(context.Context, []byte, string, string) (sandbox.Result, error)
 }

@@ -12,6 +12,7 @@ import (
 // people exposes account selectors only to administrators, never password hashes.
 func (s *Server) people(w http.ResponseWriter, r *http.Request) {
 	_, role, ok := s.identity(w, r)
+
 	if !ok {
 		return
 	}
@@ -25,15 +26,18 @@ func (s *Server) people(w http.ResponseWriter, r *http.Request) {
 		SELECT id::text, email, role FROM users
 		WHERE email ILIKE '%' || $1 || '%'
 		ORDER BY email LIMIT 200`, r.URL.Query().Get("q"))
+
 	if err != nil {
 		internal(w)
 		return
 	}
+
 	defer rows.Close()
 
 	out := []map[string]string{}
 	for rows.Next() {
 		var id, email, role string
+
 		if rows.Scan(&id, &email, &role) != nil {
 			internal(w)
 			return
@@ -53,11 +57,13 @@ func (s *Server) people(w http.ResponseWriter, r *http.Request) {
 // classDetail checks membership before returning class members or lab links.
 func (s *Server) classDetail(w http.ResponseWriter, r *http.Request) {
 	id, role, ok := s.identity(w, r)
+
 	if !ok {
 		return
 	}
 
 	classID, err := uuid.Parse(chi.URLParam(r, "classId"))
+
 	if err != nil {
 		fail(w, 404, "not-found", "Class not found", "The class was not found.")
 		return
@@ -69,6 +75,7 @@ func (s *Server) classDetail(w http.ResponseWriter, r *http.Request) {
 		 $3='admin' OR EXISTS(SELECT 1 FROM class_tas WHERE class_id=c.id AND ta_id=$2)
 		 OR EXISTS(SELECT 1 FROM class_students WHERE class_id=c.id AND student_id=$2))`,
 		classID, id, role).Scan(&name)
+
 	if errors.Is(err, pgx.ErrNoRows) {
 		fail(w, 404, "not-found", "Class not found", "The class was not found.")
 		return
@@ -81,20 +88,24 @@ func (s *Server) classDetail(w http.ResponseWriter, r *http.Request) {
 
 	// Students do not receive their classmates' account details.
 	members := []map[string]string{}
+
 	if role != "student" {
 		rows, err := s.DB.Query(r.Context(), `
 			SELECT u.id::text,u.email,u.role FROM users u WHERE
 			EXISTS(SELECT 1 FROM class_tas WHERE class_id=$1 AND ta_id=u.id)
 			OR EXISTS(SELECT 1 FROM class_students WHERE class_id=$1 AND student_id=u.id)
 			ORDER BY u.role,u.email`, classID)
+
 		if err != nil {
 			internal(w)
 			return
 		}
+
 		defer rows.Close()
 
 		for rows.Next() {
 			var memberID, email, memberRole string
+
 			if rows.Scan(&memberID, &email, &memberRole) != nil {
 				internal(w)
 				return
@@ -117,6 +128,7 @@ func (s *Server) classDetail(w http.ResponseWriter, r *http.Request) {
 // submissionHistory returns the signed-in student's own submissions only.
 func (s *Server) submissionHistory(w http.ResponseWriter, r *http.Request) {
 	id, role, ok := s.identity(w, r)
+
 	if !ok {
 		return
 	}
@@ -132,15 +144,18 @@ func (s *Server) submissionHistory(w http.ResponseWriter, r *http.Request) {
 		JOIN labs l ON l.id=s.lab_id JOIN jobs j ON j.submission_id=s.id
 		LEFT JOIN judge_results x ON x.submission_id=s.id
 		WHERE s.student_id=$1 ORDER BY s.created_at DESC LIMIT 200`, id)
+
 	if err != nil {
 		internal(w)
 		return
 	}
+
 	defer rows.Close()
 
 	out := []map[string]string{}
 	for rows.Next() {
 		var submissionID, labID, title, createdAt, status, verdict string
+
 		if rows.Scan(&submissionID, &labID, &title, &createdAt, &status, &verdict) != nil {
 			internal(w)
 			return

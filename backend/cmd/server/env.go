@@ -14,6 +14,7 @@ import (
 func loadLocalEnv() error {
 	for _, path := range []string{".env", filepath.Join("..", ".env")} {
 		file, err := os.Open(path)
+
 		if os.IsNotExist(err) {
 			continue
 		}

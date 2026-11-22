@@ -26,6 +26,7 @@ func TestSyntaxTraps(t *testing.T) {
 	if os.Getenv("SANDBOX_TESTS") != "1" {
 		t.Skip("requires built sandbox image")
 	}
+
 	for _, test := range []struct{ name, source, verdict string }{
 		{"real call", "#include <algorithm>\nint main(){int a[2]; std::sort(a,a+2);}", "violation"},
 		{"comment", "// std::sort(a,a+n);\nint main(){}", "pass"},
@@ -37,12 +38,15 @@ func TestSyntaxTraps(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := Check(context.Background(), sandbox.Runner{}, []byte(test.source), []Constraint{{ID: "C1", Text: "Do not call `std::sort`"}, {ID: "C2", Text: "Use merge sort"}})
+
 			if err != nil {
 				t.Fatal(err)
 			}
+
 			if len(got) != 2 || got[0].Verdict != test.verdict || got[1].Source != "semantic_pending" {
 				t.Fatalf("%+v", got)
 			}
+
 			if test.verdict == "violation" && (len(got[0].Evidence) != 1 || got[0].Evidence[0].Text == "") {
 				t.Fatal("missing exact evidence")
 			}
