@@ -53,3 +53,31 @@ func TestSyntaxTraps(t *testing.T) {
 		})
 	}
 }
+
+func TestStatementAndTypeBans(t *testing.T) {
+	if os.Getenv("SANDBOX_TESTS") != "1" {
+		t.Skip("requires built sandbox image")
+	}
+
+	for _, test := range []struct{ name, source, ban, verdict string }{
+		{"for loop", "int main(){for(int i=0;i<2;i++) {}}", "for", "violation"},
+		{"range loop", "int main(){int a[2]={};for(int x:a) {}}", "for", "violation"},
+		{"while loop", "int main(){int x=2;while(x--) {}}", "while", "violation"},
+		{"do loop", "int main(){int x=2;do {} while(x--);}", "do", "violation"},
+		{"goto", "int main(){goto done;done:;}", "goto", "violation"},
+		{"loop text trap", "// for while goto\nint main(){auto s=\"for while goto\";}", "for", "pass"},
+		{"vector", "#include <vector>\nint main(){std::vector<int> a;}", "std::vector", "violation"},
+		{"container alias", "#include <vector>\nusing Numbers=std::vector<int>;\nint main(){Numbers a;}", "std::vector", "violation"},
+		{"own container", "namespace mine{template<class T>struct vector{};}\nint main(){mine::vector<int> a;}", "std::vector", "pass"},
+		{"unused include", "#include <vector>\nint main(){int a[2]={};}", "std::vector", "pass"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := Check(context.Background(), sandbox.Runner{}, []byte(test.source),
+				[]Constraint{{ID: "rule", Text: "Do not use `" + test.ban + "`"}},
+			)
+			if err != nil || len(got) != 1 || got[0].Verdict != test.verdict {
+				t.Fatalf("checks=%+v err=%v", got, err)
+			}
+		})
+	}
+}

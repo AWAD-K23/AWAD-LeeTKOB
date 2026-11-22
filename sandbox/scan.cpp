@@ -3,6 +3,9 @@
 #include <iostream>
 #include <string>
 
+// Both the worker sandbox and standalone checker supply their own source path.
+static std::string mainPath;
+
 static std::string text(CXString value) {
     std::string out = clang_getCString(value) ? clang_getCString(value) : "";
     clang_disposeString(value);
@@ -26,11 +29,43 @@ static CXChildVisitResult visit(CXCursor cursor, CXCursor, CXClientData) {
     unsigned line = 0;
     clang_getExpansionLocation(location, &file, &line, nullptr, nullptr);
     auto kind = clang_getCursorKind(cursor);
-    if ((kind == CXCursor_CallExpr || kind == CXCursor_DeclRefExpr) && file && text(clang_getFileName(file)) == "/work/main.cpp") {
+    bool submitted = file && text(clang_getFileName(file)) == mainPath;
+
+    // Statement cursors distinguish real repetition from comments and strings.
+    if (submitted) {
+        const char* statement = nullptr;
+        switch (kind) {
+            case CXCursor_ForStmt:
+            case CXCursor_CXXForRangeStmt: statement = "for"; break;
+            case CXCursor_WhileStmt: statement = "while"; break;
+            case CXCursor_DoStmt: statement = "do"; break;
+            case CXCursor_GotoStmt: statement = "goto"; break;
+            default: break;
+        }
+        if (statement) std::cout << statement << '\t' << line << '\n';
+    }
+
+    if (submitted && (kind == CXCursor_CallExpr || kind == CXCursor_DeclRefExpr ||
+                      kind == CXCursor_TypeRef || kind == CXCursor_TemplateRef)) {
         CXCursor target = clang_getCursorReferenced(cursor);
         if (!clang_Cursor_isNull(target)) {
             // A tab-separated name and line avoid serializing arbitrary student strings.
             std::cout << qualified(target) << '\t' << line << '\n';
+        }
+    }
+
+    // Canonical types expose containers hidden behind typedefs, using aliases,
+    // or auto. Only declarations in submitted code count, never header bodies.
+    if (submitted && (kind == CXCursor_VarDecl || kind == CXCursor_FieldDecl ||
+                      kind == CXCursor_ParmDecl)) {
+        CXType type = clang_getCanonicalType(clang_getCursorType(cursor));
+        while (type.kind == CXType_Pointer || type.kind == CXType_LValueReference ||
+               type.kind == CXType_RValueReference) {
+            type = clang_getCanonicalType(clang_getPointeeType(type));
+        }
+        CXCursor declaration = clang_getTypeDeclaration(type);
+        if (!clang_Cursor_isNull(declaration)) {
+            std::cout << qualified(declaration) << '\t' << line << '\n';
         }
     }
     return CXChildVisit_Recurse;
@@ -38,6 +73,7 @@ static CXChildVisitResult visit(CXCursor cursor, CXCursor, CXClientData) {
 
 int main(int argc, char** argv) {
     if (argc != 2) return 2;
+    mainPath = argv[1];
     CXIndex index = clang_createIndex(0, 0);
     const char* args[] = {"-std=c++17", "-xc++"};
     CXTranslationUnit unit = clang_parseTranslationUnit(index, argv[1], args, 2, nullptr, 0, CXTranslationUnit_None);

@@ -1,5 +1,16 @@
 # AI log
 
+## 2026-11-22 — Generic statement and type ban coverage
+
+- **Tool:** Codex.
+- **Asked for:** Continue Member 2 against the official dev set, address scanner coverage gaps, and check completed PA3 plan tasks only after verification.
+- **Kept:** Syntax-based checks with no model calls for ban lists and exact source evidence.
+- **Changed:** Added statement cursors for loops and goto, type/template references, and canonical declaration types for aliases and inferred containers. The scanner accepts its actual source path for standalone use.
+- **Rejected:** Searching source text for keywords or treating included headers as student use of a banned facility. No problem IDs or solution text were added to production rules.
+- **By hand:** The user supplied the official repository URL and requested continued work and checklist updates.
+- **Verified:** Rebuilt the sandbox image; all seven original syntax cases and ten new statement/type cases passed using real libclang in restricted Docker containers. No labels or evaluator files were modified.
+- **Evidence:** `sandbox/scan.cpp` and `backend/internal/hardrules/check_test.go`.
+
 ## 2026-11-22 — Official evaluation source inspection
 
 - **Tool:** Codex.
