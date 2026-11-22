@@ -1,5 +1,17 @@
 # AI log
 
+## 2026-11-22 — PA3 Member 2 Gemini adapter
+
+- **Tool:** Codex.
+- **Asked for:** Continue the Member 2 implementation after local model settings were supplied, maintain formal task records, and commit each tested part separately.
+- **Kept:** The configured `gemini-3.5-flash-lite` model and `MODEL_OFF=1`. A fixed Google HTTPS endpoint, header authentication, one bounded request, provider-side JSON schema, and mandatory local validation.
+- **Changed:** Added the Gemini REST adapter and fake-transport tests. Audit records include the sanitized prompt, response ID, model version, token counts, duration, and standard-price estimated cost including thinking tokens. Provider error bodies and authentication headers are excluded.
+- **Rejected:** Real provider calls in tests, automatic retries without another cost reservation, and unaudited model names with unknown rates.
+- **By hand:** The user entered local model settings; the key was not displayed. Final provider spending-cap verification is not inferred from the presence of a key.
+- **Verified:** Semantic package tests and vet passed. Provider tests use a fake HTTP transport, including successful usage accounting, rejected output, oversized responses, cancellation, and audit failure. No real model call has been made.
+- **Sources:** Google [generateContent reference](https://ai.google.dev/api/generate-content) and [standard pricing](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash-lite), checked November 22, 2026. Text input is $0.30 and output including thinking is $2.50 per million tokens.
+- **Evidence:** `backend/internal/semantic/gemini.go` and `gemini_test.go`.
+
 ## 2026-11-22 — PA3 Member 2 semantic-checker foundation
 
 - **Tool:** Codex.
