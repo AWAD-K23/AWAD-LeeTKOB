@@ -1,120 +1,244 @@
 # LeeTKOB
 
-LeeTKOB supports C++ lab judging and constraint review before a TA publishes marks. See [the project brief](docs/LeeTKOB%20%E2%80%94%20class%20project%20brief.md) and [PA2 plan](docs/PA2-PLAN.md).
+LeeTKOB is a C++ programming-lab platform for students and teaching assistants.
+Students submit code, a background worker judges it against private tests, and
+assignment constraints are checked separately using syntax analysis and an
+optional AI model.
 
-## Stack
+**Accepted means the output tests passed.** A submission can still violate an
+assignment rule. Constraint findings are intended for TA review before any marks
+are published; the model never chooses deductions.
 
-- Frontend: React, TypeScript, Vite, and npm.
-- Backend: Go, Chi, and SCS sessions stored in PostgreSQL.
-- Database: PostgreSQL, started locally with Docker Compose.
+## What the app does
 
-## Local setup
+| Role | Current features |
+| --- | --- |
+| Admin | Create classes and assign existing TA/student accounts by email |
+| Teaching assistant | Create labs with Markdown statements, private tests, requirements, and deductions |
+| Student | Browse enrolled labs, edit highlighted C++, submit work, and view judging status, history, and saved source |
 
-Requirements: Node.js and npm, Go 1.26 or newer, Docker with Compose, and Git. On Windows PowerShell, use `npm.cmd` if script execution prevents `npm` from running.
+- The frontend includes light/dark themes, responsive pages, drafts, and transitions.
+- The backend enforces roles, class membership, and submission ownership.
+- PostgreSQL stores sessions, submissions, the durable job queue, and results.
+- Hard rules check supported bans without AI. Gemini checks remaining semantic rules.
+- Student responses exclude protected constraint findings and deductions.
 
-1. Clone `https://github.com/longtoZ/AWAD-LeeTKOB.git`.
-2. Copy `.env.example` to `.env` and set `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `DATABASE_URL`, and `API_PORT` (normally `8080`). Use host port `5433` in `DATABASE_URL`. Set `APP_ORIGIN=http://localhost:5173` and `COOKIE_SECURE=false` for local HTTP. Use HTTPS and `COOKIE_SECURE=true` in deployment. Never commit `.env`.
-3. Run `docker compose up -d` from the repository root to start PostgreSQL.
-4. In `frontend`, run `npm ci`, then `npm run dev`. Vite prints the local URL.
-5. Run `npm run build` in `frontend` to build the frontend.
+**Current limits:** TA review UI, mark publication, and appeals are still pending.
+Public deployment verification and final submission work are tracked separately.
+See [the PA3 plan](docs/PA3/PA3-PLAN.md) for delivery status.
 
-## Backend
+## How it works
 
-The redesigned frontend uses dedicated class, lab, people, and submission pages.
-Browser API requests use `/api/*`; Vite and Caddy strip that prefix when forwarding
-to Go. Direct clients on port 8080 keep using the existing unprefixed endpoints.
-Restart the Go server after pulling backend changes. No new migration is needed
-for the frontend browsing endpoints. See [browsing contracts](docs/contract/frontend-browsing.md)
-and the [frontend design plan](docs/FRONTEND-DESIGN-PLAN.md).
+```mermaid
+flowchart TD
+    Browser[React frontend] --> API[Go API]
+    API -->|Save submission and pending job| DB[(PostgreSQL)]
+    DB -->|Claim job| Worker[Go worker]
+    Worker --> Sandbox[Restricted C++ sandbox]
+    Sandbox --> Tests{Output tests pass?}
+    Tests -->|No| Judge[Execution failure or Wrong Answer]
+    Tests -->|Yes| Rules[Hard-rule checks]
+    Rules --> Model[Optional semantic model checks]
+    Model --> Results[Accepted plus separate constraint findings]
+    Judge --> DB
+    Results --> DB
+    DB -->|Status and judge result| API
+    Results -.-> Review[TA review and publication: pending]
+```
+
+The server and worker are separate programs connected through database rows.
+Student code runs in restricted Docker containers with no network, host mounts,
+Docker socket, or application secrets. The trusted worker controls Docker.
+
+## Stack and repository
+
+| Part | Technology | Location |
+| --- | --- | --- |
+| Frontend | React, TypeScript, Vite, Tailwind CSS, React Router, TanStack Query | `frontend/` |
+| API and worker | Go, Chi, SCS sessions, pgx | `backend/` |
+| Database | PostgreSQL 17 and Goose migrations | `backend/migrations/`, `compose.yaml` |
+| Sandbox and scanner | Docker, Clang/libclang, C++17 | `sandbox/` |
+| Semantic checking | Gemini API, validated JSON findings | `backend/internal/semantic/` |
+| Evaluation | Generic checker, official dataset, unchanged Node evaluator | `eval/` |
+| Deployment setup | Dockerfiles, Compose, Caddy, host-worker service template | `deploy/`, `compose.pa3.yaml` |
+
+## Run locally
+
+Requirements: Git, Node.js 22.13.1 or newer, npm, Go 1.26 or newer, and Docker
+with Compose. Start Docker Desktop when using Windows.
+
+### 1. Configure the environment
+
+Copy `.env.example` to an ignored `.env` file at the repository root, then fill
+in the settings below. Keep `.env.example` as variable names without values.
+
+| Setting | Local development value |
+| --- | --- |
+| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Choose local database credentials |
+| `DATABASE_URL` | `postgres://USER:PASSWORD@localhost:5433/DATABASE?sslmode=disable`, using the same credentials |
+| `API_PORT` | `8080`, matching the Vite proxy |
+| `APP_ORIGIN` | `http://localhost:5173` |
+| `COOKIE_SECURE` | `false` for local HTTP |
+| `SANDBOX_IMAGE` | `leetkob-sandbox:pa3`, or leave empty for that default |
+| `MODEL_OFF` | `1` for no model calls; `0` explicitly enables them |
+
+The API, worker, and checker load `.env` automatically from the current directory
+or its parent. Existing process environment variables take precedence. Restart
+running programs after changing settings.
+
+### 2. Start PostgreSQL and prepare judging
+
+Run from the repository root, checking each command succeeds:
 
 ```text
-backend/
-├── cmd/
-│   ├── server/          # API entry point
-│   ├── migrate/         # Database migration command
-│   └── create-user/     # Initial account command
-├── internal/api/
-│   ├── server.go        # Router and shared server dependencies
-│   ├── auth.go          # Login and logout handlers
-│   ├── enrollment.go    # Enrollment handler
-│   ├── submission.go   # Submission and idempotency handling
-│   ├── problem.go      # Problem details responses
-│   ├── password.go     # Password hashing
-│   └── api_test.go     # Unit and HTTP contract checks
-├── migrations/          # Versioned PostgreSQL schema changes
-├── go.mod
-└── go.sum
+docker compose up -d
+docker build -t leetkob-sandbox:pa3 sandbox
 ```
 
-Files in `internal/api` share the `api` package. The SQL used by each handler stays alongside that handler for now.
+Apply the schema using the migration container, which receives database settings
+from Compose:
 
-The server automatically loads `.env` from the current directory or its parent. Existing shell environment variables take precedence. The migration and account creation commands still require shell environment variables. In PowerShell, load the local file from the repository root:
-
-```powershell
-Get-Content .env | Where-Object { $_ -match '^[A-Za-z_][A-Za-z0-9_]*=' } | ForEach-Object {
-  $name, $value = $_ -split '=', 2
-  [Environment]::SetEnvironmentVariable($name, $value, 'Process')
-}
-cd backend
-go run ./cmd/migrate
-go run ./cmd/server
+```text
+docker compose -f compose.pa3.yaml run --build --rm migrate
 ```
 
-From `backend`, run `go test ./...` for unit checks. Set `TEST_DATABASE_URL` to a PostgreSQL test database to include integration checks; these create and remove an isolated temporary schema. CI must set this variable so database contract tests are not skipped.
+Alternatively, supply `DATABASE_URL` in your shell and run:
 
-For initial development accounts, set `USER_EMAIL`, `USER_PASSWORD` (at least 12 bytes), and `USER_ROLE` (`admin`, `ta`, or `student`) in the shell, then run `go run ./cmd/create-user`. Remove the password environment variable afterwards. Labs currently need to be created in PostgreSQL; an authenticated admin can enroll a student using `POST /labs/{labId}/enrollments` with JSON `{ "studentId": "<uuid>" }`.
+```text
+go -C backend run ./cmd/migrate
+```
 
-`POST /auth/login` accepts `email` and `password`; `POST /auth/logout` ends the session. These endpoints and enrollment require the configured `Origin` header. Submission details are in [the contract](docs/contract/submissions.md). PA3 adds class/lab forms, a separate judging worker, and a tested C++ sandbox. Account creation still uses the administrator CLI.
+PostgreSQL uses host port **5433** and the named `postgres_data` volume. Normal
+restarts preserve data. `docker compose down -v` deletes persistent volumes.
 
-For a walkthrough with example requests, see [manual backend testing](docs/MANUAL-TESTING.md).
+### 3. Create accounts
 
-## Model and cost
+There is no automatic account seed or registration endpoint. To create each
+admin, TA, or student account, supply these variables in the command's shell:
 
-The worker now supports `gemini-3.5-flash-lite` for semantic constraints after Accepted. Calls remain off by default. Known account identifiers and comments are removed before sending code; hard-rule decisions never enter model requests. See [Member 2 progress](docs/PA3/MEMBER2-PROGRESS.md) for configuration and current limits.
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | Local database connection |
+| `USER_EMAIL` | Unique email used for login |
+| `USER_PASSWORD` | Password of at least 12 bytes |
+| `USER_ROLE` | `admin`, `ta`, or `student` |
 
-At the [standard text rates](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash-lite) checked November 22, 2026, input costs US$0.30 and output including thinking costs US$2.50 per million tokens. For 80 calls with 2,000 input and 500 output tokens each: `80 ? (2000 ? 0.30 + 500 ? 2.50) / 1000000 = US$0.148`. This is an illustrative estimate. The measured run below records actual usage on successful calls and distinguishes unknown error usage.
+```text
+go -C backend run ./cmd/create-user
+```
 
-The worker enforces a persistent US$1 per-lab cap by default. Override it locally with `MODEL_LAB_BUDGET_MICRO_USD` (integer millionths of a dollar). Each call reserves its conservative maximum estimated cost before contacting Google. Unknown usage retains the reservation; known usage is charged at the recorded token estimate. Apply migration 00005 before enabling calls. Model API credentials belong only in the trusted worker environment.
+The migration and account commands require shell settings; they do not load
+`.env` automatically. See the [manual walkthrough](docs/PA3/MANUAL-FLOW-TEST.md)
+for shell examples, existing local test accounts, and sample lab data. Those
+accounts exist only in databases where they were created.
 
-The team reports AI Studio limits of 1,000 requests per minute and 10,000 requests per day for its account. These limit request frequency, not total spending; active limits can change.
+### 4. Start the three programs
 
-Measured real run: **0 wrongful deductions**, **56.8% recall (21/37)**, and **30.4% unsure (31/102)**. The original evaluator returned 1. Of 34 sequential requests, 29 succeeded and five returned HTTP 503 without usage; errors were not retried. Evidence validation and budget blocks also produced unsure. Peak usage was 12 requests per rolling minute, below the reported 15 RPM limit.
+Install frontend dependencies once:
 
-The 29 successful calls used 22,841 input and 2,536 output tokens, with zero reported thinking tokens. Summed rounded standard-price estimates total **US$0.013204**. For 80 similar calls, assuming one semantic call per submission: `0.013204 / 29 ? 80 = US$0.036425`. This excludes unknown usage from the five 503s. Their retained US$2.392065 reservation is a conservative budget charge, not a measured provider bill. See [saved real-run evidence](eval/runs/real-dev/) and [Member 2 handoff](docs/PA3/MEMBER2-HANDOFF.md).
+```text
+npm ci --prefix frontend
+```
 
-## PA2 checks
+Run each command in a separate terminal from the repository root:
 
-Use Node.js 22.13.1 and Go 1.26 or newer. From the repository root, run the same checks used by the `gates` workflow:
+| Program | Command |
+| --- | --- |
+| API | `go -C backend run ./cmd/server` |
+| Worker | `go -C backend run ./cmd/worker` |
+| Frontend | `npm run dev --prefix frontend` |
 
-| Check | Command |
-|---|---|
-| Frontend lint, format, type-check, and build | `npm ci --prefix frontend && npm run check --prefix frontend` |
-| Go format check | `node scripts/check-go-format.mjs` |
-| Go vet | `go -C backend vet ./...` |
-| Backend unit and PostgreSQL contract tests | `go -C backend test ./... -count=1 -v` |
-| Dependency audit | `npm audit --prefix frontend` |
-| Browser smoke test | `npm run e2e --prefix frontend` |
+Open **http://localhost:5173**. On Windows, use `npm.cmd` if PowerShell blocks
+the npm script launcher.
 
-The database-backed Go tests require `TEST_DATABASE_URL`; CI starts PostgreSQL and sets it so the integration suite cannot silently skip. Before the first browser smoke test, install Chromium: use `npx --prefix frontend playwright install chromium` on Windows/macOS; Linux CI uses `npx --prefix frontend playwright install --with-deps chromium` to install system packages too. The test command itself is the same locally and in CI. The browser smoke test checks that the app shell renders; it does not replace API contract tests.
+Sign in as admin to create a class, then as its TA to create a lab, and finally
+as an enrolled student to submit code. The worker must be running to process
+queued submissions. It can also process at most one job with `--once`.
 
-CI runs the `gates`, `secret-history`, `e2e`, and `sandbox` jobs on pull requests, pushes to `main`, and the `pa2`/`pa3` tags. The sandbox job enables `SANDBOX_TESTS=1`, builds the runner image, and runs the full backend suite against PostgreSQL and Docker. Configure these jobs as required checks in GitHub branch protection. A passing workflow run alone does not configure branch protection.
+Browser API requests use `/api/*`; Vite and Caddy strip that prefix before
+forwarding to Go. Direct clients on port 8080 use unprefixed paths such as `/me`.
 
-`npm audit` checks the frontend dependency tree. The evaluated lint-toolchain versions in `package.json` use a targeted `minimatch` override to avoid the advisory in the compatible upstream dependency range; review the override when upgrading that toolchain.
+## Model checking and evaluation
 
-## Spending cap status
+The supported model is `gemini-3.5-flash-lite`. With `MODEL_OFF=1`, hard rules
+still run and semantic constraints remain unsure without provider calls.
 
-Google AI Studio currently displays the `AWAD-LeeTKOB` project's monthly spend cap as **₫100,000**. The cap is project-level and the Spend page was set to **All API Keys**; it is not an application-side hard limit. Google documents the project cap as experimental and warns that billing processing can lag by about 10 minutes, so a small overage is possible. Keep this limitation in mind before enabling model calls. See the [saved cap screenshot](img/evidence/gemini-monthly-cap.png) and [Google's billing documentation](https://ai.google.dev/gemini-api/docs/billing#project-spend-caps). The worker integration is implemented; real-run evidence is saved; final public provider-cap verification remains pending.
+For real checking, set `MODEL_NAME` and `MODEL_API_KEY` in the ignored `.env`,
+verify the intended provider spending cap, then explicitly set `MODEL_OFF=0`.
+The key belongs only in the trusted worker or standalone checker environment.
 
-## PA3 worker, sandbox, and local deployment
+| Control | Behavior |
+| --- | --- |
+| Input | Statement, semantic rules, and code with comments and known identities removed |
+| Response | Validated verdict/evidence per constraint; never a deduction |
+| Failure | Invalid answers, timeouts, and blocked calls become unsure |
+| Requests | Calls are paced within each process; no automatic provider retries |
+| Production budget | Shared by the lab and retained across worker restarts |
 
-- Standalone checker, official dataset, Docker build, and model-off evaluation:
-  [evaluation commands](eval/README.md).
-- Saved model-off results: **0 wrongful deductions**, **40.5% recall**, and
-  **46.1% unsure** over 102 pairs. All 55 ban pairs were decided; 47 semantic pairs
-  stayed unsure. The original evaluator returned 1. Real-model results are recorded below.
+The worker reserves budget before contacting the provider. Known usage replaces
+the reservation with a token-based estimate; unknown usage keeps the reservation.
+The optional `MODEL_LAB_BUDGET_MICRO_USD` setting controls the local cap. Multiple
+processes sharing a key need coordinated pacing.
 
-- Follow [Member 1 handoff](docs/PA3/MEMBER1-HANDOFF.md) for the API contracts, worker start command, Docker deployment, and receiving-member checks.
-- See [current database structure](docs/DATABASE.md) for classes, labs, durable jobs, judge results, and separate constraint verdicts.
-- For full backend checks, build `leetkob-sandbox:pa3`, set `TEST_DATABASE_URL` and `SANDBOX_TESTS=1`, and run the same Go format/vet/test commands above. PowerShell users can run `scripts/test-pa3.ps1` from the root.
-- `MODEL_OFF=1` is the default worker setting. Hard rules run and semantic rules remain unsure without network calls. Set `MODEL_OFF=0` only after checking the final provider cap; restart the worker after changing settings.
-- The local deployment uses `compose.pa3.yaml`; PostgreSQL remains on host port 5433. The handoff explains the environment settings for local HTTP and public HTTPS.
+The standalone checker reads statements, constraints, and C++ solutions from a
+dataset folder and writes a prediction file. The separate evaluator compares
+those predictions with expected labels. The checker never reads labels to choose
+its answers. Official data and the evaluator are preserved unchanged; our own
+cases are stored separately.
+
+Predictions, provider logs, and evaluator reports are saved for review. See
+[evaluation documentation](eval/README.md) and
+[Member 2 handoff](docs/PA3/MEMBER2-HANDOFF.md) for detailed results and limitations.
+
+Build and run the standalone model-off checker with no provider access:
+
+```text
+docker build -f deploy/Dockerfile.checker -t leetkob-checker:pa3 .
+node scripts/verify-eval.mjs
+node scripts/run-offline-eval.mjs
+```
+
+The script disables container networking and applies resource limits. It saves
+predictions and the original evaluator report in a new local run folder. See
+[evaluation commands](eval/README.md) for other datasets, real calls, and reruns.
+
+## Checks
+
+Run from the repository root:
+
+```text
+node scripts/check-go-format.mjs
+go -C backend vet ./...
+go -C backend test ./... -count=1
+npm ci --prefix frontend
+npm run check --prefix frontend
+```
+
+- Set `TEST_DATABASE_URL` in the test process to include PostgreSQL integration
+  checks. They create and remove only isolated temporary schemas.
+- Set `SANDBOX_TESTS=1` and build the sandbox image to include real Docker attacks
+  and syntax checks. `scripts/test-pa3.ps1` runs the full backend checks on Windows.
+- Unit tests use fake models and never call a real provider.
+- Install Chromium once with `npx --prefix frontend playwright install chromium`,
+  then run `npm run e2e --prefix frontend` for browser workflows.
+- `npm audit --prefix frontend` checks frontend dependencies.
+- CI runs `gates`, `secret-history`, `e2e`, and `sandbox` on pull requests, `main`
+  pushes, and the `pa2`/`pa3` tags. Offline checker checks run in the sandbox job.
+
+## Documentation
+
+| Guide | Contents |
+| --- | --- |
+| [Backend structure](docs/BACKEND.md) | Go files, commands, routes, and model controls |
+| [Database structure](docs/DATABASE.md) | Tables, relationships, queue state, and cost reservations |
+| [Backend connections](docs/PA3/backend-mechanism/BACKEND-CONNECTIONS.md) | Server, worker, sandbox, and hard rules |
+| [Model checker flow](docs/PA3/backend-mechanism/MODEL-CHECKER-FLOW.md) | Visual walkthrough with real data and code snippets |
+| [Manual test](docs/PA3/MANUAL-FLOW-TEST.md) | Accounts, example labs, submission cases, and database checks |
+| [Evaluation](eval/README.md) | Dataset layout, checker image, commands, and reports |
+| [Deployment setup](docs/PA3/MEMBER1-HANDOFF.md) | Compose/Caddy setup and separate host worker |
+| [PA3 plan](docs/PA3/PA3-PLAN.md) | Completed work, remaining tasks, and ownership |
+| [AI log](AI-LOG.md) | Assistant use, changes, rejected suggestions, and verification |
+
+The local deployment stack is configured in `compose.pa3.yaml`; the worker runs
+separately on the Docker host. Deployment files and local evidence do not claim
+that public hosting, the TA review workflow, or final tag CI are complete.

@@ -56,25 +56,32 @@ backend/
 | --- | --- | --- |
 | `cmd/server/main.go` | `go -C backend run ./cmd/server` | Start the API, normally on port 8080 |
 | `cmd/worker/main.go` | `go -C backend run ./cmd/worker` | Repeatedly process judging jobs |
+| `cmd/worker/main.go --once` | `go -C backend run ./cmd/worker --once` | Process at most one available job and exit |
 | `cmd/migrate/main.go` | `go -C backend run ./cmd/migrate` | Apply missing migrations |
 | `cmd/create-user/main.go` | `go -C backend run ./cmd/create-user` | Create an account using environment settings |
 | `cmd/checker/main.go` | `go -C backend run ./cmd/checker --data ../eval/official --predictions <new-file>` | Standalone dataset predictions; Docker syntax runner by default |
 
-- The API and worker use `localenv.Load` to read `.env` from the current directory or its parent.
+- The API, worker, and checker use `localenv.Load` to read `.env` from the current directory or its parent.
 - Existing process environment variables take precedence over that file.
 - The migration and account commands still require settings loaded into their
   process environment.
 - Migration SQL paths are relative to the backend working directory. The `-C backend`
   commands above select that directory.
+- Checker input/output paths are also relative to `backend/` when using `go -C backend`.
+- With real calls enabled, the checker also requires `--call-log <new-file>`.
+  Existing prediction and audit files are refused to preserve earlier evidence.
 
 | Setting | Used for |
 | --- | --- |
-| `DATABASE_URL` | Database access for all four commands |
+| `DATABASE_URL` | Database access for API, worker, migrations, and account creation; the standalone checker needs no database |
 | `APP_ORIGIN` | Allowed frontend origin for state-changing API requests |
 | `API_PORT` | API listening port; defaults to 8080 |
 | `COOKIE_SECURE` | Use `false` for local HTTP; secure cookies otherwise |
 | `SANDBOX_IMAGE` | Worker sandbox image; defaults to `leetkob-sandbox:pa3` |
 | `USER_EMAIL`, `USER_PASSWORD`, `USER_ROLE` | Account creation; password must be at least 12 bytes |
+| `MODEL_OFF` | Worker/checker calls are off when unset or `1`; `0` explicitly enables them |
+| `MODEL_NAME`, `MODEL_API_KEY` | Supported Gemini model and private provider key; only the worker or enabled checker needs these |
+| `MODEL_LAB_BUDGET_MICRO_USD` | Optional budget in microdollars; shared per lab in the worker, or per problem/run in the checker |
 
 ## API files
 
@@ -136,10 +143,36 @@ backend/
 - Output comparison ignores differences in whitespace between tokens.
 - Only submissions passing all execution tests proceed to constraint checking.
 - Supported bans start with `Do not use` or `Do not call`, with names in backticks.
+- The Clang scanner covers calls, references, loop/goto statements, and types,
+  including container aliases. Header contents alone do not count as student use.
 - Other requirements stay `unsure` with source `semantic_pending` when calls are off.
 - With `MODEL_OFF=0`, Accepted code reaches Gemini with validated findings and
   a persistent per-lab cost cap. Failed attempts become `unsure` with source `model`.
 - Accepted and a separate rule violation can both be saved for one submission.
+
+## Model checking and evaluation
+
+| Control | Current behavior |
+| --- | --- |
+| Prompt | Statement, pending semantic constraints, and code; comments and known account identifiers removed |
+| Hard-rule findings | Preserved; never sent to Gemini for another decision |
+| Deadline | Bounds checking time, including budget/rate waiting |
+| Validation | Required IDs/verdicts, strict JSON fields, and matching evidence lines |
+| Invalid response or provider error | Unsure; no automatic provider retry |
+| Rate | Spaces request starts within one process |
+| Budget | Reserve maximum estimated cost before network access; unknown usage keeps its reservation |
+| Audit | Provider ID when returned, model, prompt/response, tokens, duration, and estimated cost |
+
+- Production reservations and logs live in `model_calls`. Concurrent workers lock
+  the lab row before checking the remaining budget.
+- The standalone checker writes prediction/audit files. Its per-problem cap is
+  separate for each evaluation run; it does not use the application database.
+- Multiple processes sharing a key need coordinated rate limits.
+- Evaluation compares generated predictions with expected labels using the
+  unchanged official scorer. Labels are not input to the checker itself.
+- Saved prediction files, call logs, and reports make each run reviewable.
+- See [evaluation commands](../eval/README.md) and
+  [Member 2 handoff](PA3/MEMBER2-HANDOFF.md) for detailed results and limitations.
 
 ## Database and deployment files
 
@@ -149,6 +182,7 @@ backend/
 | `compose.yaml` | Local PostgreSQL with a named persistent volume and host port 5433 |
 | `compose.pa3.yaml` | Database, migration, API, and web deployment services |
 | `deploy/` | API/web Dockerfiles, Caddy routing, and Linux worker service template |
+| `deploy/Dockerfile.checker` | Standalone dataset checker with libclang; offline runs need no Docker socket |
 | `sandbox/` | Restricted runner image and C++ scanner source |
 
 - The trusted worker runs on the Docker host and controls Docker.
@@ -163,11 +197,15 @@ backend/
 | Go checks | `go -C backend vet ./...` |
 | Tests | `go -C backend test ./... -count=1` |
 | Backend with database and Docker checks | `./scripts/test-pa3.ps1` in PowerShell |
+| Official dataset integrity | `node scripts/verify-eval.mjs` |
+| Offline dataset checks after building the checker image | `node scripts/run-offline-eval.mjs` |
 
 - Database tests need `TEST_DATABASE_URL`; Docker tests need `SANDBOX_TESTS=1`
   and the built sandbox image. Without those settings, relevant tests skip.
-- [Worker flow](PA3/WORKER-FLOW.md), [hard-rule flow](PA3/HARD-RULE-FLOW.md),
-  and [sandbox attacks](PA3/SANDBOX-ATTACKS.md) explain the code in detail.
+- [Worker flow](PA3/backend-mechanism/WORKER-FLOW.md),
+  [hard-rule flow](PA3/backend-mechanism/HARD-RULE-FLOW.md),
+  [model flow](PA3/backend-mechanism/MODEL-CHECKER-FLOW.md), and
+  [sandbox attacks](PA3/backend-mechanism/SANDBOX-ATTACKS.md) explain the code in detail.
 - [Manual test](PA3/MANUAL-FLOW-TEST.md) provides accounts and UI steps.
 - [Member 1 handoff](PA3/MEMBER1-HANDOFF.md) tracks delivery and remaining work.
 - Real-model evidence is in [Member 2 handoff](PA3/MEMBER2-HANDOFF.md).

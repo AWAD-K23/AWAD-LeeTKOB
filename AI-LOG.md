@@ -1,5 +1,16 @@
 # AI log
 
+## 2026-11-22 — Project overview and reference documentation refresh
+
+- **Tool:** Codex.
+- **Asked for:** Check BACKEND.md and DATABASE.md against the current implementation, update outdated details, and rewrite README.md to describe the project as a whole.
+- **Kept:** Simple tables and short explanations; separate judge results, constraint findings, and future TA review; general control flow with detailed results retained in evaluation and handoff documents.
+- **Changed:** Reorganized README around roles, architecture, setup, judging, evaluation, checks, and documentation. Updated backend environment/CLI/model controls and moved mechanism links. Expanded database budget/audit states. Following the user's correction, removed model scores, measured usage/costs, and quota figures from these overview documents; kept the logic and links to detailed evidence.
+- **Rejected:** Keeping SQL-only lab creation instructions, an incomplete backend tree, outdated quota claims, or presenting retained cost reservations as provider bills.
+- **By hand:** The user requested the documentation refresh, then clarified that the guides should describe general logic rather than evaluation figures and requested a commit amend. Their separately staged `.env.example` change is outside this documentation task.
+- **Verified:** Reviewed command entry points, frontend scripts/proxy, deployment Dockerfile, migration 00005, and saved model evidence. All 29 revised local links resolved; overview evaluation figures were removed; Compose option and Git whitespace checks passed. Documentation-only changes; no model calls or database writes were needed.
+- **Evidence:** `README.md`, `docs/BACKEND.md`, and `docs/DATABASE.md`.
+
 ## 2026-11-22 — Member 2 flow explanation
 
 - **Tool:** Codex.
