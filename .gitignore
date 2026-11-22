@@ -10,5 +10,6 @@ frontend/playwright-report/
 frontend/test-results/
 *.log
 backend/bin/
+bin/
 backend/coverage.out
 .DS_Store

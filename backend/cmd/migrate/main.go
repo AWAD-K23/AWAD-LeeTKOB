@@ -1,3 +1,4 @@
+// Applies database migrations in order.
 package main
 
 import (
@@ -14,6 +15,7 @@ func main() {
 	if databaseURL == "" {
 		log.Fatal("DATABASE_URL is required")
 	}
+
 	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {
 		log.Fatal(err)
@@ -22,6 +24,8 @@ func main() {
 	if err := goose.SetDialect("postgres"); err != nil {
 		log.Fatal(err)
 	}
+
+	// Apply only migrations that have not already run.
 	if err := goose.Up(db, "migrations"); err != nil {
 		log.Fatal(err)
 	}

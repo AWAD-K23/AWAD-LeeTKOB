@@ -1,5 +1,7 @@
+-- Keep the original submitted source as bytes.
 -- +goose Up
 ALTER TABLE submissions ALTER COLUMN source TYPE bytea USING convert_to(source, 'UTF8');
 
+-- Restore the earlier text column when rolling back.
 -- +goose Down
 ALTER TABLE submissions ALTER COLUMN source TYPE text USING convert_from(source, 'UTF8');

@@ -12,10 +12,14 @@ import (
 
 // HashPassword creates an Argon2id PHC string for account provisioning.
 func HashPassword(password string) (string, error) {
+
+	// Generate a new random salt for each password. Even if two users choose
+	// the same password, their stored hashes should differ.
 	salt := make([]byte, 16)
 	if _, err := rand.Read(salt); err != nil {
 		return "", err
 	}
+
 	hash := argon2.IDKey([]byte(password), salt, 3, 65536, 4, 32)
 	return fmt.Sprintf("$argon2id$v=19$m=65536,t=3,p=4$%s$%s", base64.RawStdEncoding.EncodeToString(salt), base64.RawStdEncoding.EncodeToString(hash)), nil
 }
@@ -25,11 +29,16 @@ func verifyPassword(encoded, password string) bool {
 	if len(parts) != 6 || parts[1] != "argon2id" || parts[2] != "v=19" || parts[3] != "m=65536,t=3,p=4" {
 		return false
 	}
+
 	salt, e1 := base64.RawStdEncoding.DecodeString(parts[4])
 	expected, e2 := base64.RawStdEncoding.DecodeString(parts[5])
 	if e1 != nil || e2 != nil || len(salt) != 16 || len(expected) != 32 {
 		return false
 	}
+
 	actual := argon2.IDKey([]byte(password), salt, 3, 65536, 4, 32)
+
+	// Compare the hashes in constant time, so response timing does not reveal
+	// how much of the stored hash matched.
 	return subtle.ConstantTimeCompare(actual, expected) == 1
 }

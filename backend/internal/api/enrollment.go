@@ -17,6 +17,7 @@ func (s *Server) enroll(w http.ResponseWriter, r *http.Request) {
 		fail(w, 401, "unauthenticated", "Authentication required", "A valid session is required.")
 		return
 	}
+
 	var role string
 	if err := s.DB.QueryRow(ctx, "SELECT role FROM users WHERE id=$1", user).Scan(&role); errors.Is(err, pgx.ErrNoRows) {
 		fail(w, 401, "unauthenticated", "Authentication required", "A valid session is required.")
@@ -25,43 +26,61 @@ func (s *Server) enroll(w http.ResponseWriter, r *http.Request) {
 		internal(w)
 		return
 	}
+
+	// Enrollment is restricted to administrators.
 	if role != "admin" {
 		fail(w, 403, "forbidden", "Forbidden", "Only administrators may enroll students.")
 		return
 	}
+
 	if !s.validOrigin(r) {
 		fail(w, 403, "invalid-origin", "Invalid origin", "The request origin is not allowed.")
 		return
 	}
+
+	// The lab ID is in the URL path, and the student ID is in the JSON body.
 	lab := chi.URLParam(r, "labId")
 	var in struct {
 		StudentID string `json:"studentId"`
 	}
+
+	// Limit the body to 4096 bytes and reject unknown fields or extra JSON.
 	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096))
 	dec.DisallowUnknownFields()
 	if _, err := uuid.Parse(lab); err != nil {
 		fail(w, 404, "not-found", "Lab not found", "The lab was not found.")
 		return
 	}
+
 	if dec.Decode(&in) != nil || dec.Decode(&struct{}{}) != io.EOF {
 		fail(w, 400, "invalid-request", "Invalid request", "Provide a studentId.")
 		return
 	}
+
+	// The student ID must be a valid UUID. The server does not trust the UI to validate this.
 	if _, err := uuid.Parse(in.StudentID); err != nil {
 		fail(w, 400, "invalid-request", "Invalid request", "Provide a valid studentId.")
 		return
 	}
+
+	// Insert only when the lab exists and the account has the student role.
+	// ON CONFLICT avoids creating a duplicate if enrollment is repeated.
 	tag, err := s.DB.Exec(ctx, "INSERT INTO enrollments (lab_id,student_id) SELECT l.id,u.id FROM labs l CROSS JOIN users u WHERE l.id=$1 AND u.id=$2 AND u.role='student' ON CONFLICT DO NOTHING", lab, in.StudentID)
 	if err != nil {
 		internal(w)
 		return
 	}
+
+	// No row was inserted if the enrollment already exists, or if the lab
+	// or student could not be found. Check which case occurred below.
 	if tag.RowsAffected() == 0 {
 		var exists bool
 		if err := s.DB.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM enrollments WHERE lab_id=$1 AND student_id=$2)", lab, in.StudentID).Scan(&exists); err != nil {
 			internal(w)
 			return
 		}
+		// An existing enrollment is a successful repeat request. Otherwise,
+		// report that the lab or student was not found.
 		if !exists {
 			fail(w, 404, "not-found", "Not found", "The lab or student was not found.")
 			return

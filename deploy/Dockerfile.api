@@ -1,0 +1,17 @@
+FROM golang:1.26-bookworm AS build
+WORKDIR /src
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+COPY backend/ ./
+RUN CGO_ENABLED=0 go build -o /out/server ./cmd/server \
+    && CGO_ENABLED=0 go build -o /out/migrate ./cmd/migrate
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/ /app/
+COPY backend/migrations/ /app/migrations/
+USER 65534:65534
+WORKDIR /app
+EXPOSE 8080
+CMD ["/app/server"]

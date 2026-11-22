@@ -86,3 +86,103 @@ Rejected: treating the rubric's ±10 self-assessment tolerance as permission to 
 Tool: Codex, following read-only review of the PA#2 evidence changes.
 Changed: separated the Playwright test command from browser installation in README and clarified that Windows/macOS and Linux CI need different browser setup flags, while both run the same `npm run e2e --prefix frontend` check.
 Kept: the existing local test result and the CI workflow command; no application or test files changed.
+
+## 2026-11-21 — PA3 lab creation backend
+
+- **Tool:** Codex.
+- **Asked for:** Implement the Member 1 lab creation backend so a TA can create a lab in their assigned class, including the statement, test cases, constraints, and TA-selected deductions.
+- **Kept:** A versioned migration for classes, TA membership, lab statements, test cases, and constraints; a class-scoped lab creation endpoint; server-side TA membership checks; and one transaction for the lab and its related rows.
+- **Changed:** Extended the existing lab structure while preserving local data and the existing submission contract. Added PostgreSQL tests for student refusal, another class's refusal, invalid input, and saved tests and constraints.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** `go -C backend test ./... -count=1` passed with `TEST_DATABASE_URL` pointing to local PostgreSQL on port 5433. The suite ran in an isolated temporary schema, including the new lab creation test.
+- **Evidence:** `backend/migrations/00003_labs_and_classes.sql`, `backend/internal/api/lab.go`, `backend/internal/api/server.go`, and `backend/internal/api/api_test.go`.
+
+## 2026-11-21 — PA3 class setup and submission status
+
+- **Tool:** Codex.
+- **Asked for:** Implement the Member 1 class and submission backend, including class assignment, student enrollment, and protected judging-status access.
+- **Kept:** Admin-only class creation, server-side class membership, automatic enrollment in newly created labs, class/lab lists, session identity lookup, and student-owned submission status. The status endpoint exposes judging results without constraint deductions.
+- **Changed:** Added class-student membership, persistent judging result storage, job lease fields, and a separate constraint-verdict table for the worker handoff.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** The complete Go test suite passed against local PostgreSQL with an isolated temporary schema, including class setup, automatic enrollment, status ownership, class-list privacy, and the existing submission contract.
+- **Evidence:** `backend/internal/api/workspace.go`, `backend/internal/api/api_test.go`, and `backend/migrations/00004_judging.sql`.
+
+## 2026-11-21 — PA3 shadcn/ui and Tailwind screens
+
+- **Tool:** Codex and the official shadcn CLI.
+- **Asked for:** Build the Member 1 frontend screens using shadcn/ui and Tailwind CSS while retaining the Go backend integration.
+- **Kept:** Generated shadcn components, Tailwind's Vite integration, a dark theme, role-based class and lab forms, editable test cases and constraints, student C++ submission, and protected status polling.
+- **Changed:** Replaced the placeholder page and temporary JSON forms with the connected application screens. Added the Vite API proxy paths needed by class lists and submission polling.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Frontend lint, formatting, TypeScript checks, production build, and the Playwright login-screen check passed. Lint reported two non-blocking Fast Refresh warnings in generated shadcn component exports.
+- **Evidence:** `frontend/src/App.tsx`, `frontend/src/components/ui/`, `frontend/src/style.css`, `frontend/components.json`, and `frontend/e2e/app-shell.spec.ts`.
+
+## 2026-11-21 — PA3 isolated C++ sandbox
+
+- **Tool:** Codex.
+- **Asked for:** Implement and verify a sandbox that compiles and executes C++ submissions while enforcing all nine PA3 isolation and resource requirements.
+- **Kept:** A non-root, read-only Docker container with no network, host mounts, Docker socket, or application secrets; explicit CPU, memory/swap, process, wall-time, and output limits; streamed source input; and forced whole-container cleanup.
+- **Changed:** Added a dedicated runner image and nine real C++ attack submissions. Compilation and syntax analysis also run inside the restricted container.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** All nine Docker attack tests passed. A further wall-time check confirmed the timed-out container is removed; the memory test writes and reads its allocation, and output capture is bounded to 64 KiB.
+- **Evidence:** `sandbox/Dockerfile`, `backend/internal/sandbox/runner.go`, and `backend/internal/sandbox/testdata/`.
+
+## 2026-11-21 — PA3 syntax-aware hard rules
+
+- **Tool:** Codex.
+- **Asked for:** Implement syntax-aware ban-list decisions before semantic model checking, with tests for compliant traps and evidence lines.
+- **Kept:** A libclang-based scanner running in the sandbox, generic backtick ban-list parsing, resolved call targets, and exact source-line evidence. Semantic constraints return `unsure` with `semantic_pending`; this package has no model dependency.
+- **Changed:** Added a reusable Go checker interface for the worker and Member 2. The checker analyzes all ban-list constraints together and separates their decisions from semantic work.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Real Docker syntax tests passed for actual calls, comments, strings, a student's namespace, an include used only for `std::swap`, using declarations, and macros. Ban-list format tests also passed.
+- **Evidence:** `backend/internal/hardrules/check.go`, `backend/internal/hardrules/check_test.go`, and `sandbox/scan.cpp`.
+
+## 2026-11-21 — PA3 persistent queue worker
+
+- **Tool:** Codex.
+- **Asked for:** Add a separate judging worker that recovers queued submissions after restart and stores exactly one result set.
+- **Kept:** PostgreSQL row-lock claims, renewable leases, fencing tokens, bounded infrastructure retries, sandbox judging, and hard-rule checks only after Accepted. Semantic work remains explicitly pending for Member 2.
+- **Changed:** Added `cmd/worker` and a worker package. Results and constraint verdicts are stored in a transaction guarded by the current lease token and database unique keys.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** PostgreSQL/Docker integration tests passed for queued work with no worker, a new worker processing real C++ to Accepted, one stored result set, no second claim of a live lease, recovery of an expired lease, and refusal of stale or duplicate completion.
+- **Evidence:** `backend/cmd/worker/main.go`, `backend/internal/worker/worker.go`, and `backend/internal/worker/worker_test.go`.
+
+## 2026-11-21 — PA3 form accessibility and browser flows
+
+- **Tool:** Codex.
+- **Asked for:** Verify the Member 1 shadcn forms and student result flow in the browser.
+- **Kept:** Explicit, unique label/control IDs, including repeated test-case and constraint fields, and separate labels so select options do not become label text.
+- **Changed:** Added browser tests that verify the TA's submitted tests and deductions, the student's retry key, and the polled Accepted result.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Frontend lint, formatting, types, production build, and all three Playwright tests passed. Generated-component Fast Refresh warnings remain non-blocking.
+- **Evidence:** `frontend/src/App.tsx` and `frontend/e2e/member-one.spec.ts`.
+
+## 2026-11-21 — PA3 CI and full pipeline checks
+
+- **Tool:** Codex.
+- **Asked for:** Run the Member 1 checks together and configure sandbox and worker checks for the `pa3` tag.
+- **Kept:** The existing required jobs, with a separate Docker/PostgreSQL sandbox job and no ignored failures. PRs, main, and `pa3` run the checks.
+- **Changed:** Extended the API test to submit real code through HTTP and process it through the worker when Docker tests are enabled. Kept failed hard-rule analysis as `unsure` without routing bans to a model.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Local Go format/vet and the full PostgreSQL/Docker suite passed, including all nine attacks, syntax traps, worker recovery, and API-to-worker judging. The follow-up failure-handling test also passed. Remote tag CI is configured; no remote run is claimed here.
+- **Evidence:** `.github/workflows/gates.yml`, `backend/internal/api/api_test.go`, and `backend/internal/worker/worker_test.go`.
+
+## 2026-11-21 — PA3 deployment environment and handoff
+
+- **Tool:** Codex.
+- **Asked for:** Prepare and verify the Member 1 deployment environment and document the worker, sandbox, and next-member interfaces.
+- **Kept:** Separate web/API/migration images, PostgreSQL on host port 5433, Caddy routing, a host-worker service template, ignored secret configuration, and model calls off by default. Retained the provider project cap already documented in README.
+- **Changed:** Added deployment Compose and Docker files, the full-check PowerShell script, server-only model configuration names, and the Member 1 handoff guide. Documented the custom sandbox choice and how the next members consume verdicts.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Deployment images built and the local stack started successfully. The frontend returned HTTP 200 and the protected identity endpoint returned HTTP 401 without a session. The standalone worker built. The documented backend script passed Go format/vet, PostgreSQL checks, all nine Docker attacks, syntax traps, and worker tests.
+- **Evidence:** `compose.pa3.yaml`, `deploy/`, `scripts/test-pa3.ps1`, and `docs/PA3/MEMBER1-HANDOFF.md`. This verifies local setup; no public-host provisioning or remote tag CI run is claimed.
+
+## 2026-11-21 — PA3 database reference and completed Member 1 checklist
+
+- **Tool:** Codex.
+- **Asked for:** Update the current database reference and check the completed Member 1 plan items against the implemented work and passing checks.
+- **Kept:** A schema reference covering all four migrations, separate judge results and constraint verdicts, and a step-by-step submission/lease flow.
+- **Changed:** Updated `DATABASE.md` and checked the eleven Member 1 implementation/handoff items with linked evidence. Clarified that publishing the fixed interfaces belongs to Member 1, while receiving-member acceptance remains in Members 2 and 3's own tasks.
+- **Rejected:** None recorded for this completed part.
+- **Verified:** Reviewed the documented tables and fields against migrations `00001`–`00004`, and linked the completed checklist to passing backend, Docker, browser, and local deployment checks. Public hosting and the remote `pa3` CI run are explicitly not claimed.
+- **Evidence:** `docs/DATABASE.md`, `docs/PA3/PA3-PLAN.md`, and `docs/PA3/MEMBER1-HANDOFF.md`.

@@ -1,3 +1,4 @@
+// Creates an account using environment variables.
 package main
 
 import (
@@ -16,10 +17,13 @@ func main() {
 	if databaseURL == "" || email == "" || len(password) < 12 || (role != "student" && role != "ta" && role != "admin") {
 		log.Fatal("Set DATABASE_URL, USER_EMAIL, USER_PASSWORD (at least 12 bytes), and USER_ROLE (student, ta, or admin)")
 	}
+
+	// Store a password hash, never the supplied password itself.
 	hash, err := api.HashPassword(password)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	pool, err := pgxpool.New(context.Background(), databaseURL)
 	if err != nil {
 		log.Fatal(err)

@@ -17,6 +17,8 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"leetkob/backend/internal/sandbox"
+	"leetkob/backend/internal/worker"
 )
 
 func TestPassword(t *testing.T) {
@@ -124,6 +126,20 @@ func TestSubmissionContract(t *testing.T) {
 	if _, err = db.Exec(ctx, strings.Split(string(second), "-- +goose Down")[0]); err != nil {
 		t.Fatal(err)
 	}
+	third, err := os.ReadFile(filepath.Join("..", "..", "migrations", "00003_labs_and_classes.sql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(ctx, strings.Split(string(third), "-- +goose Down")[0]); err != nil {
+		t.Fatal(err)
+	}
+	fourth, err := os.ReadFile(filepath.Join("..", "..", "migrations", "00004_judging.sql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(ctx, strings.Split(string(fourth), "-- +goose Down")[0]); err != nil {
+		t.Fatal(err)
+	}
 	student, other, ta, admin, lab := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
 	password, err := HashPassword("test-password")
 	if err != nil {
@@ -204,6 +220,132 @@ func TestSubmissionContract(t *testing.T) {
 	otherCookie := login("other@example.test")
 	taCookie := login("ta@example.test")
 	adminCookie := login("admin@example.test")
+
+	t.Run("class setup and status ownership", func(t *testing.T) {
+		origin := "http://localhost:5173"
+		body := fmt.Sprintf(`{"name":"Sorting 2026","taId":%q,"studentIds":[%q]}`, ta, student)
+		expectProblem(t, request("POST", "/classes", body, taCookie, "", origin), 403, "forbidden", "Forbidden")
+		out := request("POST", "/classes", body, adminCookie, "", origin)
+		if out.Code != 201 {
+			t.Fatal(out.Code, out.Body.String())
+		}
+		var class struct {
+			ID string `json:"id"`
+		}
+		if err := json.Unmarshal(out.Body.Bytes(), &class); err != nil {
+			t.Fatal(err)
+		}
+
+		// Browsing must preserve account privacy and class membership boundaries.
+		expectProblem(t, request("GET", "/people", "", cookie, "", ""),
+			403, "forbidden", "Forbidden")
+		out = request("GET", "/people?q=ta%40example.test", "", adminCookie, "", "")
+		if out.Code != 200 || !strings.Contains(out.Body.String(), "ta@example.test") ||
+			strings.Contains(out.Body.String(), "password") {
+			t.Fatalf("unsafe or missing account search: %d %s", out.Code, out.Body.String())
+		}
+
+		expectProblem(t, request("GET", "/classes/"+class.ID, "", otherCookie, "", ""),
+			404, "not-found", "Class not found")
+		out = request("GET", "/classes/"+class.ID, "", cookie, "", "")
+		if out.Code != 200 || strings.Contains(out.Body.String(), "@example.test") {
+			t.Fatalf("student received roster data: %d %s", out.Code, out.Body.String())
+		}
+
+		out = request("GET", "/classes/"+class.ID, "", taCookie, "", "")
+		if out.Code != 200 || !strings.Contains(out.Body.String(), "student@example.test") {
+			t.Fatalf("TA cannot see assigned class: %d %s", out.Code, out.Body.String())
+		}
+
+		expectProblem(t, request("GET", "/submissions", "", taCookie, "", ""),
+			403, "forbidden", "Forbidden")
+		out = request("GET", "/submissions", "", otherCookie, "", "")
+		if out.Code != 200 || strings.TrimSpace(out.Body.String()) != "[]" {
+			t.Fatalf("student history leaked submissions: %d %s", out.Code, out.Body.String())
+		}
+
+		labBody := `{"title":"Sort numbers","statement":"Sort ascending","tests":[{"input":"2 1","expectedOutput":"1 2"}],"constraints":[{"description":"Use merge sort","deduction":2}]}`
+		out = request("POST", "/classes/"+class.ID+"/labs", labBody, taCookie, "", origin)
+		if out.Code != 201 {
+			t.Fatal(out.Code, out.Body.String())
+		}
+		var created struct {
+			ID string `json:"id"`
+		}
+		if err := json.Unmarshal(out.Body.Bytes(), &created); err != nil {
+			t.Fatal(err)
+		}
+		out = request("POST", "/labs/"+created.ID+"/submissions", `{"source":"#include <iostream>\nint main(){std::cout << 1 << ' ' << 2;}"}`, cookie, "class-flow", origin)
+		if out.Code != 201 {
+			t.Fatal(out.Code, out.Body.String())
+		}
+		var submitted struct {
+			ID string `json:"id"`
+		}
+		if err := json.Unmarshal(out.Body.Bytes(), &submitted); err != nil {
+			t.Fatal(err)
+		}
+		statusPath := "/submissions/" + submitted.ID
+		if out = request("GET", statusPath, "", cookie, "", origin); out.Code != 200 {
+			t.Fatal(out.Code, out.Body.String())
+		}
+		expectProblem(t, request("GET", statusPath, "", otherCookie, "", origin), 404, "not-found", "Submission not found")
+		if os.Getenv("SANDBOX_TESTS") == "1" {
+			w := worker.Worker{DB: db, Runner: sandbox.Runner{}}
+			if found, err := w.ProcessOne(ctx); err != nil || !found {
+				t.Fatal(found, err)
+			}
+		} else if _, err := db.Exec(ctx, "INSERT INTO judge_results(submission_id,verdict,detail) VALUES($1,'Accepted','All tests passed.')", submitted.ID); err != nil {
+			t.Fatal(err)
+		}
+		out = request("GET", statusPath, "", cookie, "", origin)
+		if out.Code != 200 || !strings.Contains(out.Body.String(), "Accepted") || strings.Contains(out.Body.String(), "deduction") {
+			t.Fatal(out.Code, out.Body.String())
+		}
+		out = request("GET", "/labs", "", cookie, "", origin)
+		if out.Code != 200 || !strings.Contains(out.Body.String(), created.ID) {
+			t.Fatal(out.Code, out.Body.String())
+		}
+		out = request("GET", "/classes", "", otherCookie, "", origin)
+		if out.Code != 200 || strings.Contains(out.Body.String(), class.ID) {
+			t.Fatal(out.Code, out.Body.String())
+		}
+	})
+
+	t.Run("lab creation access and persistence", func(t *testing.T) {
+		classID, otherClass := uuid.NewString(), uuid.NewString()
+		if _, err := db.Exec(ctx, "INSERT INTO classes (id,name) VALUES ($1,'A'),($2,'B')", classID, otherClass); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.Exec(ctx, "INSERT INTO class_tas (class_id,ta_id) VALUES ($1,$2)", classID, ta); err != nil {
+			t.Fatal(err)
+		}
+		body := `{"title":"Sorting","statement":"Use merge sort","tests":[{"input":"3 1","expectedOutput":"1 3"}],"constraints":[{"description":"Use merge sort","deduction":3}]}`
+		path := "/classes/" + classID + "/labs"
+		if got := request("POST", path, body, cookie, "", "http://localhost:5173"); got.Code != 403 {
+			t.Fatal(got.Code, got.Body.String())
+		}
+		if got := request("POST", "/classes/"+otherClass+"/labs", body, taCookie, "", "http://localhost:5173"); got.Code != 404 {
+			t.Fatal(got.Code, got.Body.String())
+		}
+		if got := request("POST", path, `{}`, taCookie, "", "http://localhost:5173"); got.Code != 400 {
+			t.Fatal(got.Code, got.Body.String())
+		}
+		got := request("POST", path, body, taCookie, "", "http://localhost:5173")
+		if got.Code != 201 {
+			t.Fatal(got.Code, got.Body.String())
+		}
+		var result struct {
+			ID string `json:"id"`
+		}
+		if err := json.Unmarshal(got.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		var tests, constraints int
+		if err := db.QueryRow(ctx, "SELECT (SELECT count(*) FROM lab_tests WHERE lab_id=$1), (SELECT count(*) FROM lab_constraints WHERE lab_id=$1)", result.ID).Scan(&tests, &constraints); err != nil || tests != 1 || constraints != 1 {
+			t.Fatalf("tests=%d constraints=%d error=%v", tests, constraints, err)
+		}
+	})
 	path := "/labs/" + lab + "/submissions"
 	origin := "http://localhost:5173"
 	t.Run("unauthenticated", func(t *testing.T) {
