@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"leetkob/backend/internal/hardrules"
 	"leetkob/backend/internal/sandbox"
+	"leetkob/backend/internal/semantic"
 )
 
 var ErrLeaseLost = errors.New("job lease no longer belongs to this worker")
@@ -25,6 +26,8 @@ type Job struct{ ID, SubmissionID, Token string }
 type Worker struct {
 	DB     *pgxpool.Pool
 	Runner hardrules.Scanner
+	// Nil keeps the original hard-rule-only behavior for offline callers.
+	SemanticFor func(lab, submission string) semantic.Checker
 }
 
 // Claim takes one waiting job, or recovers a job whose worker stopped.
@@ -245,6 +248,25 @@ func (w Worker) judge(ctx context.Context, job Job) error {
 
 			checks = append(checks, hardrules.Verdict{ConstraintID: c.ID, Verdict: "unsure", Evidence: []hardrules.Evidence{}, Source: source})
 		}
+	}
+
+	if w.SemanticFor != nil {
+		var statement, studentID, email string
+		err := w.DB.QueryRow(ctx, `SELECT l.statement,u.id::text,u.email
+ FROM labs l JOIN submissions s ON s.lab_id=l.id
+ JOIN users u ON u.id=s.student_id WHERE s.id=$1`, job.SubmissionID).
+			Scan(&statement, &studentID, &email)
+		if err != nil {
+			return err
+		}
+
+		checker := w.SemanticFor(lab, job.SubmissionID)
+		checker.Redactions = []string{studentID, email}
+		// Account email is the only name-like account field in this schema.
+		if local, _, ok := strings.Cut(email, "@"); ok && len(local) >= 3 {
+			checker.Redactions = append(checker.Redactions, local)
+		}
+		checks = checker.Check(ctx, statement, source, constraints, checks)
 	}
 
 	return w.Complete(ctx, job, "Accepted", "All test cases passed.", checks)

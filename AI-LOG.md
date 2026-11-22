@@ -1,5 +1,17 @@
 # AI log
 
+## 2026-11-22 — PA3 Member 2 worker integration and durable limits
+
+- **Tool:** Codex.
+- **Asked for:** Continue Member 2 tasks sequentially after local key configuration, integrate semantic checking with the durable worker, and maintain tested commits and formal implementation records.
+- **Kept:** Model calls off by default; a US$1 local cap per lab; conservative reservations before network access; existing job lease fencing and result transactions. Verdicts never select deductions.
+- **Changed:** Added migration 00005 and a lab-locked model-call ledger. Known usage replaces reserved cost; unknown usage and crashes retain the reservation. Added worker integration, known-identity redaction, shared automatic environment loading, stricter JSON validation, and concurrency/accounting tests. Removed model credentials from the API container configuration.
+- **Rejected:** In-memory-only spending counters, resetting budgets on worker restart, giving the sandbox credentials, and treating a saved key as proof of final provider-cap verification.
+- **By hand:** The user supplied local provider settings. No provider console setting was changed, and no real model call was made. The assistant started the existing local PostgreSQL service and applied additive migration 00005; Goose reported schema version 5.
+- **Verified:** Final Go format, vet, and PostgreSQL-backed tests passed, including fake-model worker integration, concurrent budget admission, retained unknown usage, audit replay refusal, duplicate JSON-key rejection, and comment-cleaning cases. Database tests used temporary schemas. Docker attack tests were not rerun. No real provider calls were made.
+- **Cost estimate:** For `gemini-3.5-flash-lite`, 80 calls with 2,000 input and 500 output tokens including thinking cost `80 × (2000 × 0.30 + 500 × 2.50) / 1000000 = US$0.148`. This is an illustrative standard-price estimate, not measured evaluation usage. The real dev-set run remains pending.
+- **Evidence:** `backend/internal/worker/model.go`, worker and semantic tests, migration `00005_model_calls.sql`, and `docs/PA3/MEMBER2-PROGRESS.md`.
+
 ## 2026-11-22 — PA3 Member 2 Gemini adapter
 
 - **Tool:** Codex.

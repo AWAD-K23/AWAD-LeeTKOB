@@ -38,6 +38,12 @@ to the deployment files or backend components they supplied.
 
 ## Member 2 — model checking and evaluation
 
+**In progress:** The user confirmed Member 1 acceptance checks were already run.
+The semantic boundary, Gemini adapter, worker integration, fake-model guardrails,
+and persistent per-lab cost ledger are implemented. Real calls remain off.
+See [Member 2 progress](MEMBER2-PROGRESS.md) for limits and pending dataset/evaluation
+work. Checklist items requiring real-call evidence remain open.
+
 - [ ] Accept Member 1's handoff and run its checks before building on it.
 - [ ] Add a real model call for semantic constraints. Send only the statement, constraints, and code with comments and identity removed. Return a verdict and evidence per constraint; never let the model set deductions.
 - [ ] Add schema validation and a time limit. Invalid output and timeouts become `unsure`; test both with a fake model and no network.

@@ -165,7 +165,8 @@ func (g *Gemini) Generate(ctx context.Context, request Request) (result []byte, 
 	}
 	entry.ModelVersion = response.ModelVersion
 	if usage := response.Usage; usage != nil && usage.Input > 0 &&
-		usage.Output >= 0 && usage.Thinking >= 0 && usage.Input <= 1048576 &&
+		usage.Output >= 0 && usage.Output <= 65536 &&
+		usage.Thinking >= 0 && usage.Thinking <= 65536 && usage.Input <= 1048576 &&
 		usage.Output+usage.Thinking <= 65536 {
 		entry.InputTokens = usage.Input
 		entry.OutputTokens = usage.Output

@@ -4,7 +4,7 @@
 - **HTTP:** Chi router with SCS server-side sessions.
 - **Database:** PostgreSQL 17, accessed through `pgx`.
 - **Judging:** Separate worker and restricted Docker containers.
-- **Current scope:** Class setup, labs, submissions, judging, and hard-rule findings.
+- **Current scope:** Class setup, labs, submissions, judging, and optional model findings.
 
 ## Main parts
 
@@ -16,6 +16,8 @@ flowchart TD
     Worker -->|Compile and run tests| Runner[Sandbox runner]
     Worker -->|Check assignment constraints| Rules[Hard-rule checker]
     Rules -->|Request code analysis| Runner
+    Worker -->|Pending semantic rules, when enabled| Model[Gemini checker]
+    Model -->|Budget reservations and call logs| DB
     Runner -->|Create and remove restricted containers| Docker[Docker sandbox]
 ```
 
@@ -39,6 +41,8 @@ backend/
     sandbox/         # Docker runner and attack tests
       testdata/      # Nine C++ attack programs
     hardrules/       # Supported ban-list checks and tests
+    semantic/        # Gemini adapter, prompt cleaning, verdict validation
+    localenv/        # Shared automatic local environment loading
   migrations/        # Database changes, applied in version order
   go.mod             # Go version and dependency list
   go.sum             # Dependency checksums
@@ -53,10 +57,10 @@ backend/
 | `cmd/migrate/main.go` | `go -C backend run ./cmd/migrate` | Apply missing migrations |
 | `cmd/create-user/main.go` | `go -C backend run ./cmd/create-user` | Create an account using environment settings |
 
-- The server's `env.go` loads `.env` from the current directory or its parent.
+- The API and worker use `localenv.Load` to read `.env` from the current directory or its parent.
 - Existing process environment variables take precedence over that file.
-- The worker, migration command, and account command require settings loaded into
-  their own process environment; they do not use the server's loader.
+- The migration and account commands still require settings loaded into their
+  process environment.
 - Migration SQL paths are relative to the backend working directory. The `-C backend`
   commands above select that directory.
 
@@ -117,6 +121,9 @@ backend/
 | `internal/worker/worker.go` | Claim jobs, run tests, compare output, check rules, save results |
 | `internal/sandbox/runner.go` | Create a fresh restricted container for each run or analysis |
 | `internal/hardrules/check.go` | Parse supported bans and match scanner findings to source lines |
+| `internal/semantic/` | Remove comments, redact known identities, call Gemini, validate findings and evidence |
+| `internal/worker/model.go` | Reserve persistent per-lab budget and save protected model call logs |
+| `internal/localenv/` | Load local `.env` automatically for API and worker |
 | `sandbox/scan.cpp` outside `backend/` | Clang-based C++ scanner used inside the sandbox |
 
 - Idle/error queue checks wait one second. Successful jobs are followed immediately
@@ -126,14 +133,16 @@ backend/
 - Output comparison ignores differences in whitespace between tokens.
 - Only submissions passing all execution tests proceed to constraint checking.
 - Supported bans start with `Do not use` or `Do not call`, with names in backticks.
-- Other requirements stay `unsure` with source `semantic_pending`; no model is called.
+- Other requirements stay `unsure` with source `semantic_pending` when calls are off.
+- With `MODEL_OFF=0`, Accepted code reaches Gemini with validated findings and
+  a persistent per-lab cost cap. Failed attempts become `unsure` with source `model`.
 - Accepted and a separate rule violation can both be saved for one submission.
 
 ## Database and deployment files
 
 | Location | Purpose |
 | --- | --- |
-| `backend/migrations/00001`–`00004` | Accounts, submissions, classes, tests, queue ownership, and results |
+| `backend/migrations/00001`–`00005` | Accounts, submissions, classes, tests, queue ownership, results, and model budget ledger |
 | `compose.yaml` | Local PostgreSQL with a named persistent volume and host port 5433 |
 | `compose.pa3.yaml` | Database, migration, API, and web deployment services |
 | `deploy/` | API/web Dockerfiles, Caddy routing, and Linux worker service template |
@@ -158,4 +167,5 @@ backend/
   and [sandbox attacks](PA3/SANDBOX-ATTACKS.md) explain the code in detail.
 - [Manual test](PA3/MANUAL-FLOW-TEST.md) provides accounts and UI steps.
 - [Member 1 handoff](PA3/MEMBER1-HANDOFF.md) tracks delivery and remaining work.
-- Real model integration, TA review, publication, and appeals remain future work.
+- Real model evaluation evidence, TA review, publication, and appeals remain pending.
+- See [Member 2 progress](PA3/MEMBER2-PROGRESS.md) for model configuration and limits.

@@ -30,9 +30,6 @@ services:
       APP_ORIGIN: ${APP_ORIGIN:?required}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       API_PORT: "8080"
-      MODEL_OFF: ${MODEL_OFF:-1}
-      MODEL_NAME: ${MODEL_NAME:-}
-      MODEL_API_KEY: ${MODEL_API_KEY:-}
     depends_on:
       migrate: {condition: service_completed_successfully}
   web:

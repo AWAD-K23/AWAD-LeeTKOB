@@ -70,9 +70,11 @@ For a walkthrough with example requests, see [manual backend testing](docs/MANUA
 
 ## Model and cost
 
-Gemini 3.8 Flash is the planned evaluation candidate. Google AI Studio shows a **₫100,000 monthly project spend cap** for `AWAD-LeeTKOB`; evidence is saved in [`img/evidence/gemini-monthly-cap.png`](img/evidence/gemini-monthly-cap.png), with the project identity and paid-tier setup in [project details](img/evidence/gemini-project-details.png) and [billing setup](img/evidence/gemini-paid-tier.png). No model integration is implemented yet.
+The worker now supports `gemini-3.5-flash-lite` for semantic constraints after Accepted. Calls remain off by default. Known account identifiers and comments are removed before sending code; hard-rule decisions never enter model requests. See [Member 2 progress](docs/PA3/MEMBER2-PROGRESS.md) for configuration and current limits.
 
-At Gemini 3.8 Flash introductory standard rates of US$0.75 per million input tokens and US$3.75 per million output tokens, 80 calls with 2,000 input and 500 output tokens each would cost approximately **US$0.27 per lab**. Output pricing includes thinking tokens. This is an estimate, not a measured cost or spending limit; retries, usage, other charges, and pricing changes can change it. The introductory rates apply through 31 December 2026; check [current pricing and data terms](https://ai.google.dev/gemini-api/docs/pricing) before use.
+At the [standard text rates](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash-lite) checked November 22, 2026, input costs US$0.30 and output including thinking costs US$2.50 per million tokens. For 80 calls with 2,000 input and 500 output tokens each: `80 ? (2000 ? 0.30 + 500 ? 2.50) / 1000000 = US$0.148`. This is an illustrative estimate; measured dev-set cost and predictions remain pending.
+
+The worker enforces a persistent US$1 per-lab cap by default. Override it locally with `MODEL_LAB_BUDGET_MICRO_USD` (integer millionths of a dollar). Each call reserves its conservative maximum estimated cost before contacting Google. Unknown usage retains the reservation; known usage is charged at the recorded token estimate. Apply migration 00005 before enabling calls. Model API credentials belong only in the trusted worker environment.
 
 The team reports AI Studio limits of 1,000 requests per minute and 10,000 requests per day for its account. These limit request frequency, not total spending; active limits can change.
 
@@ -97,12 +99,12 @@ CI runs the `gates`, `secret-history`, `e2e`, and `sandbox` jobs on pull request
 
 ## Spending cap status
 
-Google AI Studio currently displays the `AWAD-LeeTKOB` project's monthly spend cap as **₫100,000**. The cap is project-level and the Spend page was set to **All API Keys**; it is not an application-side hard limit. Google documents the project cap as experimental and warns that billing processing can lag by about 10 minutes, so a small overage is possible. Keep this limitation in mind before enabling model calls. See the [saved cap screenshot](img/evidence/gemini-monthly-cap.png) and [Google's billing documentation](https://ai.google.dev/gemini-api/docs/billing#project-spend-caps). The model integration is not implemented.
+Google AI Studio currently displays the `AWAD-LeeTKOB` project's monthly spend cap as **₫100,000**. The cap is project-level and the Spend page was set to **All API Keys**; it is not an application-side hard limit. Google documents the project cap as experimental and warns that billing processing can lag by about 10 minutes, so a small overage is possible. Keep this limitation in mind before enabling model calls. See the [saved cap screenshot](img/evidence/gemini-monthly-cap.png) and [Google's billing documentation](https://ai.google.dev/gemini-api/docs/billing#project-spend-caps). The worker integration is implemented; final provider-cap verification and real-run evidence remain pending.
 
 ## PA3 worker, sandbox, and local deployment
 
 - Follow [Member 1 handoff](docs/PA3/MEMBER1-HANDOFF.md) for the API contracts, worker start command, Docker deployment, and receiving-member checks.
 - See [current database structure](docs/DATABASE.md) for classes, labs, durable jobs, judge results, and separate constraint verdicts.
 - For full backend checks, build `leetkob-sandbox:pa3`, set `TEST_DATABASE_URL` and `SANDBOX_TESTS=1`, and run the same Go format/vet/test commands above. PowerShell users can run `scripts/test-pa3.ps1` from the root.
-- `MODEL_OFF=1` is the default deployment setting. The Member 1 build performs hard rules and records pending semantic work; it makes no real model calls.
+- `MODEL_OFF=1` is the default worker setting. Hard rules run and semantic rules remain unsure without network calls. Set `MODEL_OFF=0` only after checking the final provider cap; restart the worker after changing settings.
 - The local deployment uses `compose.pa3.yaml`; PostgreSQL remains on host port 5433. The handoff explains the environment settings for local HTTP and public HTTPS.

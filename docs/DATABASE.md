@@ -1,7 +1,7 @@
 ﻿# Current database structure
 
 - **Database:** PostgreSQL 17, accessed from Go through `pgx`.
-- **Schema source:** `backend/migrations/00001` through `00004`.
+- **Schema source:** `backend/migrations/00001` through `00005`.
 - **Local port:** `5433`. Migrations preserve the existing local data.
 - **Storage:** Named Docker volume `postgres_data` in Compose; survives normal container restarts. `docker compose down -v` deletes it.
 - **Backend guide:** See [BACKEND.md](BACKEND.md) for commands, files, and routes.
@@ -24,6 +24,8 @@ erDiagram
     submissions ||--o| jobs : queues
     submissions ||--o| judge_results : receives
     submissions ||--o{ constraint_verdicts : receives
+    submissions ||--o{ model_calls : checks
+    labs ||--o{ model_calls : budgets
     lab_constraints ||--o{ constraint_verdicts : checks
     users ||--o{ idempotency_keys : retries
     labs ||--o{ idempotency_keys : scopes
@@ -51,6 +53,7 @@ erDiagram
 | `jobs` | `id`, `submission_id`, `status`, `created_at`, `lease_token`, `leased_until`, `attempts` | UUID PK; submission FK is unique. Tracks durable judging work and recovery after a worker crash. Index on status and creation time supports job claims. |
 | `judge_results` | `submission_id`, `verdict`, `detail`, `judged_at` | Submission FK is also the PK: at most one result per submission. Stores Accepted, Wrong Answer, resource errors, or Judge Error. |
 | `constraint_verdicts` | `submission_id`, `constraint_id`, `verdict`, `evidence`, `source` | Combined PK: at most one verdict per submission/constraint. Verdict is `pass`, `violation`, or `unsure`. Evidence is JSONB. No deduction or published mark is stored here. |
+| `model_calls` | `id`, `lab_id`, `submission_id`, `charged_micro_usd`, `status`, `call_log`, `created_at` | Persistent model budget reservations and protected JSONB audit records. `reserved` retains the maximum estimated cost; `recorded` uses known usage or retains the reservation if usage is unknown. Added by migration 00005. |
 | `idempotency_keys` | `student_id`, `lab_id`, `key`, `fingerprint`, `response`, `created_at` | Combined PK on student/lab/key. Stores a SHA-256 request fingerprint and original response so retries do not create duplicate submissions. |
 | `goose_db_version` | `id`, `version_id`, `is_applied`, `tstamp` | Migration tool's version history, created by Goose when migrations run; not an application table defined in migrations 00001–00004. |
 
@@ -67,8 +70,8 @@ erDiagram
 | | `completed` | Judge result has been stored. This can include a non-Accepted verdict. |
 | | `failed` | Reserved by the schema; current bounded infrastructure retries finish with a stored Judge Error result. |
 | `constraint_verdicts.source` | `hard_rule` | Syntax-aware ban-list decision; a failed analysis remains unsure. |
-| | `semantic_pending` | Semantic work waiting for Member 2's model integration. |
-| | `model` | Reserved for Member 2's validated model result. |
+| | `semantic_pending` | Semantic work left unsure while model calls are off. |
+| | `model` | Validated model finding, or unsure after a failed, invalid, timed-out, or budget-blocked attempt. |
 
 - The worker renews its lease every 10 seconds.
 - When idle or after a processing error, the worker waits one second before looking
@@ -84,7 +87,7 @@ erDiagram
 3. An submits C++ code with a retry key. The API saves the submission, pending job, and retry response in one transaction.
 4. The worker claims the job, increasing `attempts` and setting a lease token and expiry.
 5. The sandbox compiles and runs the code. If every test output matches, the worker proceeds to constraint checking and saves an **Accepted** judge result.
-6. Hard rules check ban lists. Semantic constraints receive `unsure` with `semantic_pending` until Member 2 adds the model.
+6. Hard rules check ban lists. Semantic constraints stay `unsure` with `semantic_pending` when model calls are off; enabled calls use the lab budget ledger and validated Gemini responses.
 7. The worker stores the result and constraint verdicts, then marks the job completed in one transaction.
 8. An's status endpoint returns job status, judge result, saved source, and lab ID. Constraint verdicts and TA deductions stay separate for the TA review work.
 
@@ -116,7 +119,7 @@ erDiagram
 
 ## What remains for Members 2 and 3
 
-- The model is not integrated yet; the `model` source value is reserved.
+- The worker supports model checking; real-run evaluation evidence remains pending.
 - There are no TA-review decisions, published marks, or appeals tables yet.
 - The API enforces roles and ownership; user foreign keys alone do not enforce a role.
 - See [Member 1 handoff](PA3/MEMBER1-HANDOFF.md) for API interfaces, verification commands, and deployment steps.

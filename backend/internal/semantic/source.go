@@ -57,21 +57,30 @@ func stripComments(source string) (string, error) {
 			}
 			i = body + end + len(closing)
 
-		case source[i] == '"' || source[i] == '\'':
-			// A C++ digit separator is not the start of a character literal.
-			if source[i] == '\'' && i > 0 && i+1 < len(source) &&
-				source[i-1] >= '0' && source[i-1] <= '9' &&
-				((source[i+1] >= '0' && source[i+1] <= '9') ||
-					(source[i+1] >= 'a' && source[i+1] <= 'f') ||
-					(source[i+1] >= 'A' && source[i+1] <= 'F')) {
-				i++
-				continue
+		case source[i] >= '0' && source[i] <= '9':
+			// Consume preprocessing numbers together. Apostrophes in hexadecimal
+			// and decimal constants are separators, not character-literal quotes.
+			i++
+			for i < len(source) {
+				ch := source[i]
+				if numberPart(ch) || ch == '.' ||
+					(ch == '\'' && i+1 < len(source) && numberPart(source[i+1])) {
+					i++
+				} else if (ch == '+' || ch == '-') && strings.ContainsRune("eEpP", rune(source[i-1])) {
+					i++
+				} else {
+					break
+				}
 			}
 
+		case source[i] == '"' || source[i] == '\'':
 			quote := source[i]
 			i++
 			closed := false
 			for i < len(source) {
+				if source[i] == '\n' || source[i] == '\r' {
+					return "", errors.New("newline in ordinary literal")
+				}
 				if source[i] == '\\' {
 					i += 2
 				} else if source[i] == quote {
@@ -92,4 +101,9 @@ func stripComments(source string) (string, error) {
 	}
 
 	return string(clean), nil
+}
+
+func numberPart(ch byte) bool {
+	return ch >= '0' && ch <= '9' || ch >= 'a' && ch <= 'z' ||
+		ch >= 'A' && ch <= 'Z' || ch == '_'
 }

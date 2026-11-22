@@ -12,22 +12,27 @@
 | Timeout | Default 20 seconds; provider must honor context cancellation |
 | Source comments | Blanked while keeping line positions; literals preserved |
 | TA evidence | Validated against cleaned code, then mapped to original source lines |
+| Gemini adapter | Configured model `gemini-3.5-flash-lite`; fake-transport tests |
+| Worker integration | Accepted code reaches semantic checking before fenced completion |
+| Identity handling | Comments removed; known account UUID, email, and email local part redacted |
+| Durable budget | Lab-row lock and `model_calls` ledger prevent concurrent overspending |
+| Usage log | Sanitized prompt, provider response ID, model, tokens, time, estimated cost |
+| Environment loading | API and worker share automatic local `.env` loading |
 
 ## Next steps
 
-1. Configure the real provider, model name, and API key locally.
-2. Add the provider adapter, prompt, request/usage logging, and cost limits.
-3. Connect the checker to the worker before its existing result transaction.
-4. Add the dataset command, offline Docker image, and separate labelled cases.
-5. Run the unchanged official evaluator and save real-run evidence.
+1. Receive the official dataset folder and unchanged `eval.mjs`.
+2. Add the dataset command, offline Docker image, and separate labelled cases.
+3. Confirm the final key's project spending cap before enabling real calls.
+4. Run the real model and unchanged evaluator; save predictions, metrics, and logs.
 
 ## Current limits
 
-- This package is not connected to the worker yet; application behavior is unchanged.
-- No real model calls or spending occurred during this step.
-- Requests have no account fields, private tests, or deductions. Full identity
-  handling for the real provider remains part of the next step; arbitrary
-  identifying text inside code literals is not removed by the comment cleaner.
+- No real model calls or spending occurred during implementation.
+- No account metadata, private tests, or deductions enter provider requests.
+  Unknown personal names embedded in code cannot be reliably inferred from the
+  current account schema, which stores only email and UUID. Known identifiers
+  are redacted; arbitrary personal text remains a limitation.
 - Line-spliced or ambiguous C++ source becomes `unsure` without a model call.
 - No official dataset or evaluator was found in the repository file listing.
   Their original files are needed before building the dataset adapter.
@@ -42,5 +47,26 @@ preparing the adapter and tests. Never paste the key into chat or commit it.
 Verify in the provider console that the final project/key uses the intended
 spending cap. Existing screenshot evidence alone does not confirm this.
 
-The worker currently needs environment settings in its own process; automatic
-loading for this configuration will be addressed during worker integration.
+The worker now loads `.env` automatically from the repository root or `backend/`.
+Shell variables take precedence. Restart the worker after changing local settings.
+
+## Cost controls
+
+| Setting or state | Meaning |
+|---|---|
+| `MODEL_OFF=1` | No model call or budget reservation |
+| `MODEL_OFF=0` | Explicitly enables the configured model |
+| `MODEL_LAB_BUDGET_MICRO_USD` | Optional integer cap; default `1000000` means US$1 per lab |
+| Before each call | Reserve 478,413 microdollars using full documented model limits |
+| Known usage | Replace reservation with rounded-up standard-price estimated cost |
+| Timeout, crash, unknown usage | Keep the full reservation |
+| Insufficient remaining budget | Return `unsure`; do not contact the provider |
+
+- Apply migration `00005_model_calls.sql` before enabling model calls.
+- Reservations and charges are cumulative across submissions and worker restarts.
+- The reservation is conservative: a call can be blocked even when its likely
+  actual cost would fit. The model and its reviewed prices are fixed in code.
+- Provider pricing changes require updating the rates and reservation together.
+- Call logs are protected database data; no student endpoint exposes them.
+- The API container no longer receives model credentials; only the host worker
+  needs them. The sandbox never receives worker environment variables.

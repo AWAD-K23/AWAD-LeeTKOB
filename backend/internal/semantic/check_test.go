@@ -73,6 +73,8 @@ func TestInvalidResponsesBecomeUnsure(t *testing.T) {
 		"no evidence":      `{"verdicts":[{"constraintId":"a","verdict":"violation","evidence":[]}]}`,
 		"missing field":    `{"verdicts":[{"constraintId":"a","verdict":"unsure"}]}`,
 		"null evidence":    `{"verdicts":[{"constraintId":"a","verdict":"unsure","evidence":null}]}`,
+		"duplicate key":    `{"verdicts":[{"constraintId":"a","verdict":"pass","verdict":"unsure","evidence":[]}]}`,
+		"wrong key case":   `{"verdicts":[{"constraintId":"a","Verdict":"unsure","evidence":[]}]}`,
 		"invented line":    `{"verdicts":[{"constraintId":"a","verdict":"violation","evidence":[{"line":99,"text":"code"}]}]}`,
 		"invented text":    `{"verdicts":[{"constraintId":"a","verdict":"violation","evidence":[{"line":1,"text":"invented"}]}]}`,
 		"extra document":   `{"verdicts":[{"constraintId":"a","verdict":"unsure","evidence":[]}]} {}`,
@@ -118,6 +120,7 @@ func TestCommentRemoval(t *testing.T) {
 		`const char* x = "https://example.test/*literal*/"; // hidden identity`,
 		`auto x = R"tag(/*literal*/ // literal)tag"; /* hidden identity */`,
 		"int x = 1'000; // hidden identity",
+		"int x = 0xAB'CD; // hidden identity ' with extra quote",
 		`char x = '\''; /* hidden identity */`,
 	}
 
@@ -136,5 +139,27 @@ func TestCommentRemoval(t *testing.T) {
 		if _, err := stripComments(source); err == nil {
 			t.Fatalf("ambiguous source accepted: %q", source)
 		}
+	}
+}
+
+func TestKnownIdentityRedaction(t *testing.T) {
+	model := fakeModel(func(_ context.Context, request Request) ([]byte, error) {
+		data := request.Statement + request.Source + request.Constraints[0].Text
+		if strings.Contains(data, "alice") || strings.Contains(data, "student-123") {
+			t.Fatal("known identity leaked into prompt")
+		}
+		return []byte(`{"verdicts":[{"constraintId":"a","verdict":"unsure","evidence":[]}]}`), nil
+	})
+	checker := Checker{
+		Enabled: true, Model: model,
+		Redactions: []string{"alice@example.test", "alice", "student-123"},
+	}
+	out := checker.Check(
+		context.Background(), "alice's assignment", []byte(`auto id = "student-123";`),
+		[]hardrules.Constraint{{ID: "a", Text: "alice: use recursion"}},
+		[]hardrules.Verdict{{ConstraintID: "a", Source: "semantic_pending"}},
+	)
+	if out[0].Source != "model" || out[0].Verdict != "unsure" {
+		t.Fatal(out)
 	}
 }

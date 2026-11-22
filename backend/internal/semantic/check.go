@@ -32,6 +32,8 @@ type Checker struct {
 	Model   Model
 	Enabled bool
 	Timeout time.Duration
+	// Known account identifiers are removed from all prompt text locally.
+	Redactions []string
 }
 
 // Check replaces only pending semantic findings. Hard-rule findings survive
@@ -87,6 +89,11 @@ func (c Checker) Check(
 	if err != nil {
 		return out
 	}
+	cleaned = redact(cleaned, c.Redactions)
+	statement = redact(statement, c.Redactions)
+	for i := range pending {
+		pending[i].Text = redact(pending[i].Text, c.Redactions)
+	}
 
 	raw, err := c.Model.Generate(callCtx, Request{
 		Statement: statement, Constraints: pending, Source: cleaned,
@@ -107,6 +114,16 @@ func (c Checker) Check(
 	return out
 }
 
+// Preserve newlines and byte positions for subsequent evidence validation.
+func redact(text string, identities []string) string {
+	for _, identity := range identities {
+		if identity != "" && !strings.ContainsAny(identity, "\r\n") {
+			text = strings.ReplaceAll(text, identity, strings.Repeat(" ", len(identity)))
+		}
+	}
+	return text
+}
+
 // The provider cannot add deductions or invent extra fields, IDs, or evidence.
 // Reject the entire response if any constraint is missing or malformed.
 func validate(
@@ -117,6 +134,11 @@ func validate(
 ) ([]hardrules.Verdict, error) {
 	invalid := errors.New("invalid model response")
 	if len(raw) > 256*1024 {
+		return nil, invalid
+	}
+	// encoding/json otherwise accepts duplicate keys and case-insensitive
+	// struct field names, neither of which belongs to our response contract.
+	if err := strictKeys(json.NewDecoder(bytes.NewReader(raw)), 0); err != nil {
 		return nil, invalid
 	}
 
@@ -181,4 +203,47 @@ func validate(
 	}
 
 	return out, nil
+}
+
+func strictKeys(decoder *json.Decoder, depth int) error {
+	invalid := errors.New("invalid JSON keys")
+	if depth > 16 {
+		return invalid
+	}
+
+	token, err := decoder.Token()
+	if err != nil {
+		return err
+	}
+	delimiter, composite := token.(json.Delim)
+	if !composite {
+		return nil
+	}
+
+	seen := map[string]bool{}
+	for decoder.More() {
+		if delimiter == '{' {
+			keyToken, err := decoder.Token()
+			if err != nil {
+				return err
+			}
+			key, ok := keyToken.(string)
+			if !ok || seen[key] {
+				return invalid
+			}
+			seen[key] = true
+			switch key {
+			case "verdicts", "constraintId", "verdict", "evidence", "line", "text":
+			default:
+				return invalid
+			}
+		}
+
+		if err := strictKeys(decoder, depth+1); err != nil {
+			return err
+		}
+	}
+
+	_, err = decoder.Token()
+	return err
 }
