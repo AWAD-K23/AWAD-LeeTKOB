@@ -1,5 +1,16 @@
 # AI log
 
+## 2026-11-22 — Pinned official evaluation data and independent cases
+
+- **Tool:** Codex.
+- **Asked for:** Continue Member 2 using the lecturer's published dataset, preserve its files unchanged, add independent labelled cases, and update completed PA3 checklist items.
+- **Kept:** All 128 upstream files at revision `552c811db2d35a23d641bc4fdffc1ac120be1a28`, including the original labels and evaluator.
+- **Changed:** Imported `eval/official`, recorded SHA-256 hashes and Git byte-preservation attributes, and added five separately labelled/tagged recursive-total solutions with test inputs. Cases include compliant recursion, a loop violation, a formula, a text trap, and prompt injection.
+- **Rejected:** Modifying official labels, using labels as checker input, or assuming extra cases are Accepted without executing them.
+- **By hand:** The user found the official source and requested completed tasks be checked in PA3-PLAN.
+- **Verified:** All 128 imported files matched the temporary upstream checkout byte for byte. All five additional solutions compiled with `g++ -std=c++17 -O2` and passed their three input/output cases in a restricted network-free container with no host mounts or credentials.
+- **Evidence:** `eval/official-sha256.json`, `scripts/verify-eval.mjs`, and `eval/extra/`.
+
 ## 2026-11-22 — Generic statement and type ban coverage
 
 - **Tool:** Codex.
