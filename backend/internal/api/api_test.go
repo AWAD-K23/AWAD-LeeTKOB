@@ -140,6 +140,13 @@ func TestSubmissionContract(t *testing.T) {
 	if _, err = db.Exec(ctx, strings.Split(string(fourth), "-- +goose Down")[0]); err != nil {
 		t.Fatal(err)
 	}
+	reasons, err := os.ReadFile(filepath.Join("..", "..", "migrations", "00007_verdict_reasons.sql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(ctx, strings.Split(string(reasons), "-- +goose Down")[0]); err != nil {
+		t.Fatal(err)
+	}
 	student, other, ta, admin, lab := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
 	password, err := HashPassword("test-password")
 	if err != nil {
@@ -613,7 +620,7 @@ func TestSubmissionContract(t *testing.T) {
 		expectProblem(t, request("POST", path, `{"source":"x"}`, expired, "expired-session", origin), 401, "unauthenticated", "Authentication required")
 	})
 	t.Run("TA review is class scoped and cannot leak into student marks", func(t *testing.T) {
-		for _, name := range []string{"00006_reviews.sql", "00007_verdict_reasons.sql"} {
+		for _, name := range []string{"00006_reviews.sql"} {
 			migration, err := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 			if err != nil {
 				t.Fatal(err)
