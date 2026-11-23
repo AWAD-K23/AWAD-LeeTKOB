@@ -34,8 +34,9 @@ func TestCheckerBoundary(t *testing.T) {
 
 	// Offline mode must not call even an available model.
 	offline := (Checker{Model: model}).Check(context.Background(), "Compare", source, constraints, checks)
-	if calls != 0 || offline[1].Source != "semantic_pending" {
-		t.Fatal("offline mode called model or changed pending state")
+	if calls != 0 || offline[1].Source != "semantic_pending" ||
+		offline[1].Reason != "Semantic model checking is disabled." {
+		t.Fatalf("offline mode called model or lost its reason: %+v", offline[1])
 	}
 
 	// Build exact evidence from the cleaned source rather than relying on spaces.
@@ -91,8 +92,9 @@ func TestInvalidResponsesBecomeUnsure(t *testing.T) {
 				[]hardrules.Constraint{{ID: "a", Text: "Use recursion"}},
 				[]hardrules.Verdict{{ConstraintID: "a", Source: "semantic_pending"}},
 			)
-			if out[0].Verdict != "unsure" || len(out[0].Evidence) != 0 {
-				t.Fatalf("invalid output accepted: %+v", out)
+			if out[0].Verdict != "unsure" || len(out[0].Evidence) != 0 ||
+				out[0].Reason != "Model response failed schema validation." {
+				t.Fatalf("invalid output accepted or unexplained: %+v", out[0])
 			}
 		})
 	}
@@ -109,8 +111,31 @@ func TestTimeoutBecomesUnsure(t *testing.T) {
 		[]hardrules.Constraint{{ID: "a", Text: "Use recursion"}},
 		[]hardrules.Verdict{{ConstraintID: "a", Source: "semantic_pending"}},
 	)
-	if out[0].Verdict != "unsure" || out[0].Source != "model" {
-		t.Fatalf("timeout was not uncertain: %+v", out)
+	if out[0].Verdict != "unsure" || out[0].Source != "model" ||
+		out[0].Reason != "Model request timed out." {
+		t.Fatalf("timeout was not uncertain or explained: %+v", out)
+	}
+}
+
+func TestUncertaintyReasons(t *testing.T) {
+	constraints := []hardrules.Constraint{{ID: "a", Text: "Use recursion"}}
+	checks := []hardrules.Verdict{{ConstraintID: "a", Source: "semantic_pending"}}
+	source := []byte("int main() {}")
+	for _, tc := range []struct {
+		name, response, reason string
+		err error
+	}{
+		{name: "model unsure", response: `{"verdicts":[{"constraintId":"a","verdict":"unsure","evidence":[]}]}`, reason: "Model returned unsure."},
+		{name: "evidence mismatch", response: `{"verdicts":[{"constraintId":"a","verdict":"violation","evidence":[{"line":1,"text":"invented"}]}]}`, reason: "Model evidence did not match submitted code."},
+		{name: "budget exhausted", err: ErrBudgetExceeded, reason: "Lab model budget exhausted."},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			model := fakeModel(func(context.Context, Request) ([]byte, error) { return []byte(tc.response), tc.err })
+			out := (Checker{Enabled: true, Model: model}).Check(context.Background(), "Statement", source, constraints, checks)
+			if out[0].Verdict != "unsure" || out[0].Reason != tc.reason {
+				t.Fatalf("unexpected uncertain finding: %+v", out[0])
+			}
+		})
 	}
 }
 

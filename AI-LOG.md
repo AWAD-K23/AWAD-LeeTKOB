@@ -373,3 +373,12 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Verified:** Parsed workflow YAML and checked full checkout, scan arguments and failure propagation. Downloaded the official Windows CLI to a temporary folder and verified its release SHA-256. It scanned all 66 local commits with no leaks. A separate temporary Git repository passed when clean and failed with exit 1 after a synthetic token was committed and then removed from HEAD, confirming historical detection. No real credentials were used in the fixture.
 - **Limits:** The Linux install step and remote GitHub run have not been executed here; local validation used the same CLI release on Windows. No commit, push or remote CI success is claimed.
 - **Sources:** [Action licensing](https://github.com/gitleaks/gitleaks-action#environment-variables), [CLI documentation/license](https://github.com/gitleaks/gitleaks/tree/v8.30.1), [release checksums](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1).
+
+## 2026-11-24 — PA3 FAQ-09 unsure reasons
+
+- **Tool:** Codex.
+- **Asked for:** Add the FAQ-09 cause for each `unsure` finding to the TA review details, add tests, and record the work. Keep FAQ-10 random pass sampling as a separate PA4 follow-up.
+- **Changed:** Added locally determined reasons for model uncertainty, invalid response schema, mismatched evidence, provider failure, timeout/cancellation, exhausted lab budget, disabled or missing model configuration, and source preparation failure. Persisted the reason with each constraint finding, returned it only through the TA review queue, and displayed it for unsure findings. Added a schema migration and regression coverage for reason generation, persistence, API visibility, and student non-disclosure. FAQ-10 pass sampling remains a separate PA4 follow-up.
+- **Rejected:** Allowing model-generated explanation text; reasons are derived from checker outcomes.
+- **Verified:** Added focused semantic and API/worker regression tests. Execution and PR CI verification are pending for this commit.
+- **Evidence:** `backend/internal/semantic/check.go`, `backend/internal/semantic/check_test.go`, `backend/internal/worker/model.go`, `backend/internal/worker/worker.go`, `backend/internal/worker/worker_test.go`, `backend/internal/api/review.go`, `backend/internal/api/api_test.go`, `frontend/src/pages/review.tsx`, and `backend/migrations/00007_verdict_reasons.sql`.

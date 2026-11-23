@@ -613,12 +613,14 @@ func TestSubmissionContract(t *testing.T) {
 		expectProblem(t, request("POST", path, `{"source":"x"}`, expired, "expired-session", origin), 401, "unauthenticated", "Authentication required")
 	})
 	t.Run("TA review is class scoped and cannot leak into student marks", func(t *testing.T) {
-		migration, err := os.ReadFile(filepath.Join("..", "..", "migrations", "00006_reviews.sql"))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, err := db.Exec(ctx, strings.Split(string(migration), "-- +goose Down")[0]); err != nil {
-			t.Fatal(err)
+		for _, name := range []string{"00006_reviews.sql", "00007_verdict_reasons.sql"} {
+			migration, err := os.ReadFile(filepath.Join("..", "..", "migrations", name))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := db.Exec(ctx, strings.Split(string(migration), "-- +goose Down")[0]); err != nil {
+				t.Fatal(err)
+			}
 		}
 
 		classID, otherClass, labID := uuid.NewString(), uuid.NewString(), uuid.NewString()
@@ -648,8 +650,8 @@ func TestSubmissionContract(t *testing.T) {
 			if _, err := db.Exec(ctx, "INSERT INTO judge_results(submission_id,verdict,detail) VALUES($1,'Accepted','Tests passed')", submissionID); err != nil {
 				t.Fatal(err)
 			}
-			if _, err := db.Exec(ctx, `INSERT INTO constraint_verdicts(submission_id,constraint_id,verdict,evidence,source)
-VALUES($1,$2,'violation','[{"line":1,"text":"int main() { return 0; }"}]','model')`, submissionID, constraintID); err != nil {
+			if _, err := db.Exec(ctx, `INSERT INTO constraint_verdicts(submission_id,constraint_id,verdict,evidence,source,reason)
+VALUES($1,$2,'unsure','[{"line":1,"text":"int main() { return 0; }"}]','model','Model returned unsure.')`, submissionID, constraintID); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -663,7 +665,8 @@ VALUES($1,$2,'violation','[{"line":1,"text":"int main() { return 0; }"}]','model
 		expectProblem(t, request("GET", path, "", cookie, "", ""), 403, "forbidden", "Forbidden")
 		out := request("GET", path, "", taCookie, "", "")
 		if out.Code != 200 || !strings.Contains(out.Body.String(), submissionID) || strings.Contains(out.Body.String(), oldID) ||
-			!strings.Contains(out.Body.String(), `"deduction":3`) || !strings.Contains(out.Body.String(), `"evidence"`) {
+			!strings.Contains(out.Body.String(), `"deduction":3`) || !strings.Contains(out.Body.String(), `"evidence"`) ||
+			!strings.Contains(out.Body.String(), `"reason":"Model returned unsure."`) {
 			t.Fatalf("unsafe or incomplete TA queue: %d %s", out.Code, out.Body.String())
 		}
 		decisionPath := "/labs/" + labID + "/submissions/" + submissionID + "/constraints/" + constraintID + "/review"
@@ -688,7 +691,7 @@ VALUES($1,$2,'violation','[{"line":1,"text":"int main() { return 0; }"}]','model
 		}
 		for _, studentPath := range []string{"/submissions/" + submissionID, "/submissions"} {
 			out = request("GET", studentPath, "", cookie, "", "")
-			if out.Code != 200 || strings.Contains(out.Body.String(), "constraint") || strings.Contains(out.Body.String(), "deduction") || strings.Contains(out.Body.String(), "evidence") || strings.Contains(out.Body.String(), "violation") {
+			if out.Code != 200 || strings.Contains(out.Body.String(), "constraint") || strings.Contains(out.Body.String(), "deduction") || strings.Contains(out.Body.String(), "evidence") || strings.Contains(out.Body.String(), "violation") || strings.Contains(out.Body.String(), "reason") {
 				t.Fatalf("unpublished review leaked to student: %d %s", out.Code, out.Body.String())
 			}
 		}

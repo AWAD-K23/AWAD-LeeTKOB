@@ -82,7 +82,7 @@ func reserveCall(
 	}
 
 	if budget < semantic.ReserveMicroUSD || charged > budget-semantic.ReserveMicroUSD {
-		return errors.New("lab model budget exhausted")
+		return semantic.ErrBudgetExceeded
 	}
 
 	_, err = tx.Exec(ctx, `INSERT INTO model_calls

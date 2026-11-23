@@ -21,6 +21,7 @@ type Finding = {
   constraint: string;
   deduction: number;
   verdict: "pass" | "violation" | "unsure";
+  reason: string;
   evidence: Evidence[];
   source: string;
   decision: "" | "pass" | "violation";
@@ -68,6 +69,11 @@ function FindingDecision({
         TA decision: <strong>{finding.decision || "Pending review"}</strong>.
         TA-selected deduction: <strong>{finding.appliedDeduction}</strong>
       </p>
+      {finding.verdict === "unsure" && (
+        <p role="status">
+          Why unsure: {finding.reason || "Reason not recorded."}
+        </p>
+      )}
       {finding.evidence.length > 0 && (
         <ul>
           {finding.evidence.map((item, index) => (

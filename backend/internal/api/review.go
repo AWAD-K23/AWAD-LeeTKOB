@@ -57,7 +57,7 @@ func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
 	rows, err := s.DB.Query(r.Context(), `
 		SELECT s.id::text,s.student_id::text,s.created_at::text,
 		j.verdict,convert_from(s.source,'UTF8'),c.id::text,c.description,
-		c.deduction::float8,v.verdict,v.evidence,v.source,
+		c.deduction::float8,v.verdict,v.reason,v.evidence,v.source,
 		COALESCE(cr.decision,''),COALESCE(cr.evidence,'[]'::jsonb),
 		COALESCE(cr.applied_deduction::float8,0)
 		FROM submissions s
@@ -77,10 +77,10 @@ func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	out := []map[string]any{}
 	for rows.Next() {
-		var submissionID, studentID, createdAt, judge, code, constraintID, description, verdict, source, decision string
+		var submissionID, studentID, createdAt, judge, code, constraintID, description, verdict, reason, source, decision string
 		var deduction, appliedDeduction float64
 		var evidence, reviewedEvidence []byte
-		if err := rows.Scan(&submissionID, &studentID, &createdAt, &judge, &code, &constraintID, &description, &deduction, &verdict, &evidence, &source, &decision, &reviewedEvidence, &appliedDeduction); err != nil {
+		if err := rows.Scan(&submissionID, &studentID, &createdAt, &judge, &code, &constraintID, &description, &deduction, &verdict, &reason, &evidence, &source, &decision, &reviewedEvidence, &appliedDeduction); err != nil {
 			internal(w)
 			return
 		}
@@ -88,7 +88,7 @@ func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
 			"submissionId": submissionID, "studentId": studentID, "createdAt": createdAt,
 			"judgeVerdict": judge, "sourceCode": code, "constraintId": constraintID,
 			"constraint": description, "deduction": deduction, "verdict": verdict,
-			"evidence": json.RawMessage(evidence), "source": source, "decision": decision,
+			"reason": reason, "evidence": json.RawMessage(evidence), "source": source, "decision": decision,
 			"reviewEvidence":   json.RawMessage(reviewedEvidence),
 			"appliedDeduction": appliedDeduction,
 		})
