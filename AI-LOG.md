@@ -353,3 +353,13 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** None recorded for this completed part.
 - **Verified:** Reviewed the documented tables and fields against migrations `00001`–`00004`, and linked the completed checklist to passing backend, Docker, browser, and local deployment checks. Public hosting and the remote `pa3` CI run are explicitly not claimed.
 - **Evidence:** `docs/DATABASE.md`, `docs/PA3/PA3-PLAN.md`, and `docs/PA3/MEMBER1-HANDOFF.md`.
+
+## 2026-11-23 — Repair secret-history license failure
+
+- **Tool:** Codex.
+- **Asked for:** Resolve the reported Gitleaks Action failure requiring `GITLEAKS_LICENSE`.
+- **Changed:** Replaced the licensed Action wrapper with standalone MIT-licensed Gitleaks CLI v8.30.1. CI verifies the pinned Linux archive checksum, retains full-history checkout and the `secret-history` job name, redacts findings, and fails on leaks or scanner errors. Removed the unused PR-read permission and documented the command in README.
+- **Rejected:** Disabling the scanner, suppressing failures, adding a baseline to hide findings, or requiring license provisioning for the standalone scanner. No scan rules or existing tests were weakened.
+- **Verified:** Parsed workflow YAML and checked full checkout, scan arguments and failure propagation. Downloaded the official Windows CLI to a temporary folder and verified its release SHA-256. It scanned all 66 local commits with no leaks. A separate temporary Git repository passed when clean and failed with exit 1 after a synthetic token was committed and then removed from HEAD, confirming historical detection. No real credentials were used in the fixture.
+- **Limits:** The Linux install step and remote GitHub run have not been executed here; local validation used the same CLI release on Windows. No commit, push or remote CI success is claimed.
+- **Sources:** [Action licensing](https://github.com/gitleaks/gitleaks-action#environment-variables), [CLI documentation/license](https://github.com/gitleaks/gitleaks/tree/v8.30.1), [release checksums](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1).

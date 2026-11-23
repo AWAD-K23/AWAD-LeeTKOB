@@ -224,6 +224,10 @@ npm run check --prefix frontend
 - `npm audit --prefix frontend` checks frontend dependencies.
 - CI runs `gates`, `secret-history`, `e2e`, and `sandbox` on pull requests, `main`
   pushes, and the `pa2`/`pa3` tags. Offline checker checks run in the sandbox job.
+- `secret-history` uses the standalone MIT-licensed Gitleaks CLI v8.30.1,
+  downloaded with a pinned SHA-256 checksum. It scans the full fetched Git
+  history with `gitleaks git --log-opts="--all" --redact --exit-code=1 .` and
+  fails on findings or scanner errors. It needs no `GITLEAKS_LICENSE` secret.
 
 ## Documentation
 
