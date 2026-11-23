@@ -1,5 +1,15 @@
 # AI log
 
+## 2026-11-24 — TA review queue implementation
+
+- **Tool:** Codex.
+- **Asked for:** Finish the PA3 TA review queue, show constraint verdicts and evidence with the deduction chosen through TA review, enforce class ownership, and verify model findings cannot become student deductions or published marks without TA review.
+- **Kept:** Model findings separate from TA decisions and student-facing submission results. A TA decision is either pass (zero deduction) or violation (the configured constraint deduction); violation evidence must exactly match submitted source lines. Class access is checked from server-side TA membership.
+- **Changed:** Added a latest-counted-submission review queue, TA review records and decision history, a review UI with checker evidence and the TA-confirmed evidence text, and project-plan status plus verification notes. The queue applies a deduction only after a TA decision. Cited FAQ-02, FAQ-08, FAQ-09, FAQ-10, and FAQ-12 in the verification note.
+- **Verified:** The user ran the PostgreSQL-backed `TestSubmissionContract/TA_review_is_class_scoped_and_cannot_leak_into_student_marks` test in Ubuntu WSL using Docker; it passed with exit status 0. This verifies the focused API contract, not the deployed end-to-end flow or frontend build. The current backend has no Publish or marks endpoint; no future publish gate is claimed.
+- **By hand:** The user supplied the Docker run output. The assistant edited the queue implementation and UI based on the repository rubric and FAQ requirements.
+
+
 ## 2026-11-22 — Project overview and reference documentation refresh
 
 - **Tool:** Codex.
