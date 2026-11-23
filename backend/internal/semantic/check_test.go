@@ -92,8 +92,7 @@ func TestInvalidResponsesBecomeUnsure(t *testing.T) {
 				[]hardrules.Constraint{{ID: "a", Text: "Use recursion"}},
 				[]hardrules.Verdict{{ConstraintID: "a", Source: "semantic_pending"}},
 			)
-			if out[0].Verdict != "unsure" || len(out[0].Evidence) != 0 ||
-				out[0].Reason != "Model response failed schema validation." {
+			if out[0].Verdict != "unsure" || len(out[0].Evidence) != 0 || out[0].Reason == "" {
 				t.Fatalf("invalid output accepted or unexplained: %+v", out[0])
 			}
 		})
@@ -126,6 +125,7 @@ func TestUncertaintyReasons(t *testing.T) {
 		err                    error
 	}{
 		{name: "model unsure", response: `{"verdicts":[{"constraintId":"a","verdict":"unsure","evidence":[]}]}`, reason: "Model returned unsure."},
+		{name: "invalid schema", response: "not json", reason: "Model response failed schema validation."},
 		{name: "evidence mismatch", response: `{"verdicts":[{"constraintId":"a","verdict":"violation","evidence":[{"line":1,"text":"invented"}]}]}`, reason: "Model evidence did not match submitted code."},
 		{name: "budget exhausted", err: ErrBudgetExceeded, reason: "Lab model budget exhausted."},
 	} {

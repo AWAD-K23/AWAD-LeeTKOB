@@ -77,6 +77,8 @@ func (c Checker) Check(
 
 	for _, constraint := range pending {
 		finding := &out[positions[constraint.ID]]
+		finding.Verdict = "unsure"
+		finding.Evidence = []hardrules.Evidence{}
 		finding.Reason = "Semantic model check has not run."
 		if !c.Enabled {
 			finding.Reason = "Semantic model checking is disabled."
