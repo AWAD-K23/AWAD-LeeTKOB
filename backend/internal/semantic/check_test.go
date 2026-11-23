@@ -123,7 +123,7 @@ func TestUncertaintyReasons(t *testing.T) {
 	source := []byte("int main() {}")
 	for _, tc := range []struct {
 		name, response, reason string
-		err error
+		err                    error
 	}{
 		{name: "model unsure", response: `{"verdicts":[{"constraintId":"a","verdict":"unsure","evidence":[]}]}`, reason: "Model returned unsure."},
 		{name: "evidence mismatch", response: `{"verdicts":[{"constraintId":"a","verdict":"violation","evidence":[{"line":1,"text":"invented"}]}]}`, reason: "Model evidence did not match submitted code."},
