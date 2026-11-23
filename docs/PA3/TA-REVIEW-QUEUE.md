@@ -24,6 +24,8 @@ Test exit status: 0
 
 The test covers class ownership, latest submission selection, rejection of fabricated evidence, no review row before TA action, a TA-attributed violation decision and deduction, and no review-data leak through student submission endpoints. It is a focused API integration test; it does not cover a deployed end-to-end flow, frontend build, or a Publish action.
 
+For this FAQ-09 addition, [GitHub Actions run #43](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45243460493) passed gates, sandbox, end-to-end, and secret-history. The new semantic tests distinguish model uncertainty, schema failure, evidence mismatch, budget exhaustion, and timeout. The API contract now checks the TA-only reason and student non-disclosure; the worker test checks reason persistence. The earlier Ubuntu WSL result above predates this addition.
+
 ## Product-owner FAQ references
 
 - [FAQ-02](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md): which submission counts.
