@@ -14,7 +14,7 @@ are published; the model never chooses deductions.
 | Role | Current features |
 | --- | --- |
 | Admin | Create classes and assign existing TA/student accounts by email |
-| Teaching assistant | Create labs with Markdown statements, private tests, requirements, and deductions |
+| Teaching assistant | Create labs and review constraint findings with evidence; choose deductions |
 | Student | Browse enrolled labs, edit highlighted C++, submit work, and view judging status, history, and saved source |
 
 - The frontend includes light/dark themes, responsive pages, drafts, and transitions.
@@ -23,9 +23,9 @@ are published; the model never chooses deductions.
 - Hard rules check supported bans without AI. Gemini checks remaining semantic rules.
 - Student responses exclude protected constraint findings and deductions.
 
-**Current limits:** TA review UI, mark publication, and appeals are still pending.
+**Current limits:** TA review is available; mark publication and appeals are pending.
 Public deployment verification and final submission work are tracked separately.
-See [the PA3 plan](docs/PA3/PA3-PLAN.md) for delivery status.
+See [the PA3 plan](docs/PA3/PA3-PLAN.md) and [local Compose smoke](docs/PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md) for delivery status and limits.
 
 ## How it works
 
@@ -43,7 +43,7 @@ flowchart TD
     Judge --> DB
     Results --> DB
     DB -->|Status and judge result| API
-    Results -.-> Review[TA review and publication: pending]
+    Results -.-> Review[TA review queue; publication pending]
 ```
 
 The server and worker are separate programs connected through database rows.
@@ -245,4 +245,4 @@ npm run check --prefix frontend
 
 The local deployment stack is configured in `compose.pa3.yaml`; the worker runs
 separately on the Docker host. Deployment files and local evidence do not claim
-that public hosting, the TA review workflow, or final tag CI are complete.
+that public hosting, the deployed dev-set walkthrough, live model checking, or final tag CI are complete.
