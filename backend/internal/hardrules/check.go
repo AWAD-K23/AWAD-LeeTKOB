@@ -27,6 +27,7 @@ type Evidence struct {
 type Verdict struct {
 	ConstraintID string     `json:"constraintId"`
 	Verdict      string     `json:"verdict"`
+	Reason       string     `json:"reason"`
 	Evidence     []Evidence `json:"evidence"`
 	Source       string     `json:"source"`
 }
@@ -84,7 +85,7 @@ func Check(ctx context.Context, scanner Scanner, source []byte, constraints []Co
 	lines := strings.Split(string(source), "\n")
 	out := make([]Verdict, 0, len(constraints))
 	for _, c := range constraints {
-		v := Verdict{ConstraintID: c.ID, Verdict: "unsure", Evidence: []Evidence{}, Source: "semantic_pending"}
+		v := Verdict{ConstraintID: c.ID, Verdict: "unsure", Reason: "Semantic model check has not run.", Evidence: []Evidence{}, Source: "semantic_pending"}
 		names := bannedNames(c.Text)
 		if len(names) > 0 {
 			v.Verdict = "pass"

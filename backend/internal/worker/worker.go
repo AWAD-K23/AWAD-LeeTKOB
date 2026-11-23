@@ -80,9 +80,9 @@ func (w Worker) Complete(ctx context.Context, job Job, verdict, detail string, c
 			return err
 		}
 
-		if _, err = tx.Exec(ctx, `INSERT INTO constraint_verdicts(submission_id,constraint_id,verdict,evidence,source)
- VALUES($1,$2,$3,$4,$5) ON CONFLICT(submission_id,constraint_id) DO UPDATE
- SET verdict=excluded.verdict,evidence=excluded.evidence,source=excluded.source`, job.SubmissionID, check.ConstraintID, check.Verdict, evidence, check.Source); err != nil {
+		if _, err = tx.Exec(ctx, `INSERT INTO constraint_verdicts(submission_id,constraint_id,verdict,evidence,source,reason)
+ VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(submission_id,constraint_id) DO UPDATE
+ SET verdict=excluded.verdict,evidence=excluded.evidence,source=excluded.source,reason=excluded.reason`, job.SubmissionID, check.ConstraintID, check.Verdict, evidence, check.Source, check.Reason); err != nil {
 			return err
 		}
 	}
@@ -246,7 +246,11 @@ func (w Worker) judge(ctx context.Context, job Job) error {
 				source = "hard_rule"
 			}
 
-			checks = append(checks, hardrules.Verdict{ConstraintID: c.ID, Verdict: "unsure", Evidence: []hardrules.Evidence{}, Source: source})
+			reason := "Semantic model check has not run."
+			if source == "hard_rule" {
+				reason = "Syntax-aware ban-list analysis failed."
+			}
+			checks = append(checks, hardrules.Verdict{ConstraintID: c.ID, Verdict: "unsure", Reason: reason, Evidence: []hardrules.Evidence{}, Source: source})
 		}
 	}
 

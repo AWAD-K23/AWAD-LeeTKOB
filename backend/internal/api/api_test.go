@@ -140,6 +140,13 @@ func TestSubmissionContract(t *testing.T) {
 	if _, err = db.Exec(ctx, strings.Split(string(fourth), "-- +goose Down")[0]); err != nil {
 		t.Fatal(err)
 	}
+	reasons, err := os.ReadFile(filepath.Join("..", "..", "migrations", "00007_verdict_reasons.sql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = db.Exec(ctx, strings.Split(string(reasons), "-- +goose Down")[0]); err != nil {
+		t.Fatal(err)
+	}
 	student, other, ta, admin, lab := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
 	password, err := HashPassword("test-password")
 	if err != nil {
@@ -612,6 +619,91 @@ func TestSubmissionContract(t *testing.T) {
 		}
 		expectProblem(t, request("POST", path, `{"source":"x"}`, expired, "expired-session", origin), 401, "unauthenticated", "Authentication required")
 	})
+	t.Run("TA review is class scoped and cannot leak into student marks", func(t *testing.T) {
+		for _, name := range []string{"00006_reviews.sql"} {
+			migration, err := os.ReadFile(filepath.Join("..", "..", "migrations", name))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := db.Exec(ctx, strings.Split(string(migration), "-- +goose Down")[0]); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		classID, otherClass, labID := uuid.NewString(), uuid.NewString(), uuid.NewString()
+		constraintID, submissionID, oldID, otherTA := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
+		if _, err := db.Exec(ctx, "INSERT INTO users(id,email,password_hash,role) VALUES($1,'ta2@example.test',$2,'ta')", otherTA, password); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.Exec(ctx, "INSERT INTO classes(id,name) VALUES($1,'Review'),($2,'Other')", classID, otherClass); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.Exec(ctx, "INSERT INTO class_tas(class_id,ta_id) VALUES($1,$2),($3,$4)", classID, ta, otherClass, otherTA); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.Exec(ctx, "INSERT INTO labs(id,title,class_id,statement) VALUES($1,'Review lab',$2,'Sort')", labID, classID); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := db.Exec(ctx, "INSERT INTO lab_constraints(id,lab_id,description,deduction) VALUES($1,$2,'Do not call sort',3)", constraintID, labID); err != nil {
+			t.Fatal(err)
+		}
+		for _, submissionID := range []string{oldID, submissionID} {
+			if _, err := db.Exec(ctx, "INSERT INTO submissions(id,lab_id,student_id,source,created_at) VALUES($1,$2,$3,$4,now())", submissionID, labID, student, []byte("int main() { return 0; }")); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := db.Exec(ctx, "INSERT INTO jobs(id,submission_id,status) VALUES($1,$2,'completed')", uuid.NewString(), submissionID); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := db.Exec(ctx, "INSERT INTO judge_results(submission_id,verdict,detail) VALUES($1,'Accepted','Tests passed')", submissionID); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := db.Exec(ctx, `INSERT INTO constraint_verdicts(submission_id,constraint_id,verdict,evidence,source,reason)
+VALUES($1,$2,'unsure','[{"line":1,"text":"int main() { return 0; }"}]','model','Model returned unsure.')`, submissionID, constraintID); err != nil {
+				t.Fatal(err)
+			}
+		}
+		// The latest submission is the one the TA reviews (FAQ-02).
+		if _, err := db.Exec(ctx, "UPDATE submissions SET created_at=now()-interval '1 hour' WHERE id=$1", oldID); err != nil {
+			t.Fatal(err)
+		}
+		path := "/labs/" + labID + "/review-queue"
+		otherTACookie := login("ta2@example.test")
+		expectProblem(t, request("GET", path, "", otherTACookie, "", ""), 404, "not-found", "Lab not found")
+		expectProblem(t, request("GET", path, "", cookie, "", ""), 403, "forbidden", "Forbidden")
+		out := request("GET", path, "", taCookie, "", "")
+		if out.Code != 200 || !strings.Contains(out.Body.String(), submissionID) || strings.Contains(out.Body.String(), oldID) ||
+			!strings.Contains(out.Body.String(), `"deduction":3`) || !strings.Contains(out.Body.String(), `"evidence"`) ||
+			!strings.Contains(out.Body.String(), `"reason":"Model returned unsure."`) {
+			t.Fatalf("unsafe or incomplete TA queue: %d %s", out.Code, out.Body.String())
+		}
+		decisionPath := "/labs/" + labID + "/submissions/" + submissionID + "/constraints/" + constraintID + "/review"
+		expectProblem(t, request("POST", decisionPath, `{"decision":"violation","evidence":[{"line":1,"text":"fabricated"}]}`, taCookie, "", "http://localhost:5173"), 400, "invalid-request", "Invalid request")
+		expectProblem(t, request("POST", decisionPath, `{"decision":"pass"}`, otherTACookie, "", "http://localhost:5173"), 404, "not-found", "Lab not found")
+		var count int
+		if err := db.QueryRow(ctx, "SELECT count(*) FROM constraint_reviews WHERE submission_id=$1", submissionID).Scan(&count); err != nil || count != 0 {
+			t.Fatalf("model verdict became a review: %d %v", count, err)
+		}
+		out = request("POST", decisionPath, `{"decision":"violation","evidence":[{"line":1,"text":"int main() { return 0; }"}]}`, taCookie, "", "http://localhost:5173")
+		if out.Code != 200 {
+			t.Fatalf("TA review failed: %d %s", out.Code, out.Body.String())
+		}
+		var reviewer, decision string
+		var applied float64
+		if err := db.QueryRow(ctx, "SELECT ta_id::text,decision,applied_deduction::float8 FROM constraint_reviews WHERE submission_id=$1 AND constraint_id=$2", submissionID, constraintID).Scan(&reviewer, &decision, &applied); err != nil || reviewer != ta || decision != "violation" || applied != 3 {
+			t.Fatalf("review not attributed to TA: %s %s %v", reviewer, decision, err)
+		}
+		out = request("GET", path, "", taCookie, "", "")
+		if out.Code != 200 || !strings.Contains(out.Body.String(), `"decision":"violation"`) {
+			t.Fatalf("review not shown: %d %s", out.Code, out.Body.String())
+		}
+		for _, studentPath := range []string{"/submissions/" + submissionID, "/submissions"} {
+			out = request("GET", studentPath, "", cookie, "", "")
+			if out.Code != 200 || strings.Contains(out.Body.String(), "constraint") || strings.Contains(out.Body.String(), "deduction") || strings.Contains(out.Body.String(), "evidence") || strings.Contains(out.Body.String(), "violation") || strings.Contains(out.Body.String(), "reason") {
+				t.Fatalf("unpublished review leaked to student: %d %s", out.Code, out.Body.String())
+			}
+		}
+	})
+
 	t.Run("logout", func(t *testing.T) {
 		out := request("POST", "/auth/logout", "", cookie, "", origin)
 		if out.Code != 204 {

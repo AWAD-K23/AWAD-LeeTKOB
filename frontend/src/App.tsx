@@ -25,6 +25,7 @@ import {
 } from "@/components/layout";
 import { ClassesPage, ClassPage, ClassForm, PeoplePage } from "@/pages/classes";
 import { LabsPage, LabForm } from "@/pages/labs";
+import { ReviewQueuePage } from "@/pages/review";
 import {
   LabWorkspace,
   SubmissionPage,
@@ -260,6 +261,10 @@ function Application() {
             element={
               user.role !== "admin" ? <LabWorkspace user={user} /> : deny
             }
+          />
+          <Route
+            path="labs/:id/review"
+            element={user.role === "ta" ? <ReviewQueuePage /> : deny}
           />
           <Route
             path="submissions"

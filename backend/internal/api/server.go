@@ -22,6 +22,8 @@ func (s *Server) Routes() http.Handler {
 	r.Get("/classes", s.classes)
 	r.Post("/classes", s.createClass)
 	r.Get("/labs", s.labs)
+	r.Get("/labs/{labId}/review-queue", s.reviewQueue)
+	r.Post("/labs/{labId}/submissions/{submissionId}/constraints/{constraintId}/review", s.reviewDecision)
 	r.Get("/submissions/{submissionId}", s.submissionStatus)
 	r.Post("/classes/{classId}/labs", s.createLab)
 	r.Post("/auth/login", s.login)

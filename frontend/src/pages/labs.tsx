@@ -137,6 +137,11 @@ export function LabsPage({ user }: { user: User }) {
                     <Link className="text-link" to={`/labs/${lab.id}`}>
                       Open lab
                     </Link>
+                    {user.role === "ta" && (
+                      <Link className="text-link" to={`/labs/${lab.id}/review`}>
+                        Review queue
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}

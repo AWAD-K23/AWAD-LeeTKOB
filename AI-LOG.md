@@ -1,5 +1,15 @@
 # AI log
 
+## 2026-11-24 — TA review queue implementation
+
+- **Tool:** Codex.
+- **Asked for:** Finish the PA3 TA review queue, show constraint verdicts and evidence with the deduction chosen through TA review, enforce class ownership, and verify model findings cannot become student deductions or published marks without TA review.
+- **Kept:** Model findings separate from TA decisions and student-facing submission results. A TA decision is either pass (zero deduction) or violation (the configured constraint deduction); violation evidence must exactly match submitted source lines. Class access is checked from server-side TA membership.
+- **Changed:** Added a latest-counted-submission review queue, TA review records and decision history, a review UI with checker evidence and the TA-confirmed evidence text, and project-plan status plus verification notes. The queue applies a deduction only after a TA decision. Cited FAQ-02, FAQ-08, FAQ-09, FAQ-10, and FAQ-12 in the verification note.
+- **Verified:** The user ran the PostgreSQL-backed `TestSubmissionContract/TA_review_is_class_scoped_and_cannot_leak_into_student_marks` test in Ubuntu WSL using Docker; it passed with exit status 0. This verifies the focused API contract, not the deployed end-to-end flow or frontend build. The current backend has no Publish or marks endpoint; no future publish gate is claimed.
+- **By hand:** The user supplied the Docker run output. The assistant edited the queue implementation and UI based on the repository rubric and FAQ requirements.
+
+
 ## 2026-11-22 — Project overview and reference documentation refresh
 
 - **Tool:** Codex.
@@ -363,3 +373,12 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Verified:** Parsed workflow YAML and checked full checkout, scan arguments and failure propagation. Downloaded the official Windows CLI to a temporary folder and verified its release SHA-256. It scanned all 66 local commits with no leaks. A separate temporary Git repository passed when clean and failed with exit 1 after a synthetic token was committed and then removed from HEAD, confirming historical detection. No real credentials were used in the fixture.
 - **Limits:** The Linux install step and remote GitHub run have not been executed here; local validation used the same CLI release on Windows. No commit, push or remote CI success is claimed.
 - **Sources:** [Action licensing](https://github.com/gitleaks/gitleaks-action#environment-variables), [CLI documentation/license](https://github.com/gitleaks/gitleaks/tree/v8.30.1), [release checksums](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1).
+
+## 2026-11-24 — PA3 FAQ-09 unsure reasons
+
+- **Tool:** Codex.
+- **Asked for:** Add the FAQ-09 cause for each `unsure` finding to the TA review details, add tests, and record the work. Keep FAQ-10 random pass sampling as a separate PA4 follow-up.
+- **Changed:** Added locally determined reasons for model uncertainty, invalid response schema, mismatched evidence, provider failure, timeout/cancellation, exhausted lab budget, disabled or missing model configuration, and source preparation failure. Persisted the reason with each constraint finding, returned it only through the TA review queue, and displayed it for unsure findings. Added a schema migration and regression coverage for reason generation, persistence, API visibility, and student non-disclosure. FAQ-10 pass sampling remains a separate PA4 follow-up.
+- **Rejected:** Allowing model-generated explanation text; reasons are derived from checker outcomes.
+- **Verified:** [GitHub Actions run #43](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45243460493) passed all four jobs (gates, sandbox, end-to-end, and secret-history) for commit `53f66e2`. Gates ran Go format/vet/tests and frontend checks; sandbox ran Docker-backed tests. No separate local Ubuntu run is claimed for this addition.
+- **Evidence:** `backend/internal/semantic/check.go`, `backend/internal/semantic/check_test.go`, `backend/internal/worker/model.go`, `backend/internal/worker/worker.go`, `backend/internal/worker/worker_test.go`, `backend/internal/api/review.go`, `backend/internal/api/api_test.go`, `frontend/src/pages/review.tsx`, and `backend/migrations/00007_verdict_reasons.sql`.

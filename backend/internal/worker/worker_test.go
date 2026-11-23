@@ -157,7 +157,7 @@ func TestDurableWorker(t *testing.T) {
 			t.Fatal(found, err)
 		}
 
-		var results, checks, violations, pending int
+		var results, checks, violations, pending, pendingReasons int
 		var verdict string
 
 		if err := db.QueryRow(ctx, "SELECT verdict FROM judge_results WHERE submission_id=$1", id).Scan(&verdict); err != nil || verdict != "Accepted" {
@@ -165,9 +165,10 @@ func TestDurableWorker(t *testing.T) {
 		}
 
 		if err := db.QueryRow(ctx, `SELECT (SELECT count(*) FROM judge_results WHERE submission_id=$1),
-   count(*),count(*) FILTER(WHERE verdict='violation'),count(*) FILTER(WHERE source='semantic_pending')
-   FROM constraint_verdicts WHERE submission_id=$1`, id).Scan(&results, &checks, &violations, &pending); err != nil || results != 1 || checks != 2 || violations != 1 || pending != 1 {
-			t.Fatalf("results=%d checks=%d violations=%d pending=%d err=%v", results, checks, violations, pending, err)
+   count(*),count(*) FILTER(WHERE verdict='violation'),count(*) FILTER(WHERE source='semantic_pending'),
+   count(*) FILTER(WHERE source='semantic_pending' AND reason<>'')
+   FROM constraint_verdicts WHERE submission_id=$1`, id).Scan(&results, &checks, &violations, &pending, &pendingReasons); err != nil || results != 1 || checks != 2 || violations != 1 || pending != 1 || pendingReasons != 1 {
+			t.Fatalf("results=%d checks=%d violations=%d pending=%d pendingReasons=%d err=%v", results, checks, violations, pending, pendingReasons, err)
 		}
 	})
 

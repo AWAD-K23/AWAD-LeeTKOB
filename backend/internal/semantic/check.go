@@ -27,6 +27,14 @@ type Model interface {
 	Generate(context.Context, Request) ([]byte, error)
 }
 
+// Model-response failures are categorized locally so the model cannot invent
+// its own uncertainty explanation.
+var (
+	ErrInvalidModelResponse = errors.New("invalid model response")
+	ErrEvidenceMismatch     = errors.New("model evidence mismatch")
+	ErrBudgetExceeded       = errors.New("lab model budget exhausted")
+)
+
 // Checker is off unless explicitly enabled with a configured model.
 type Checker struct {
 	Model   Model
@@ -63,18 +71,26 @@ func (c Checker) Check(
 		}
 	}
 
-	if !c.Enabled || c.Model == nil || len(pending) == 0 {
+	if len(pending) == 0 {
 		return out
 	}
 
-	// Failed attempts remain unsure but are distinguished from offline work.
 	for _, constraint := range pending {
-		out[positions[constraint.ID]] = hardrules.Verdict{
-			ConstraintID: constraint.ID,
-			Verdict:      "unsure",
-			Evidence:     []hardrules.Evidence{},
-			Source:       "model",
+		finding := &out[positions[constraint.ID]]
+		finding.Verdict = "unsure"
+		finding.Evidence = []hardrules.Evidence{}
+		finding.Reason = "Semantic model check has not run."
+		if !c.Enabled {
+			finding.Reason = "Semantic model checking is disabled."
+		} else if c.Model == nil {
+			finding.Reason = "Semantic model is not configured."
+		} else {
+			finding.Source = "model"
+			finding.Reason = "Model request failed."
 		}
+	}
+	if !c.Enabled || c.Model == nil {
+		return out
 	}
 
 	timeout := c.Timeout
@@ -87,6 +103,9 @@ func (c Checker) Check(
 
 	cleaned, err := stripComments(string(source))
 	if err != nil {
+		for _, constraint := range pending {
+			out[positions[constraint.ID]].Reason = "Source could not be prepared for model review."
+		}
 		return out
 	}
 	cleaned = redact(cleaned, c.Redactions)
@@ -99,15 +118,37 @@ func (c Checker) Check(
 		Statement: statement, Constraints: pending, Source: cleaned,
 	})
 	if err != nil || callCtx.Err() != nil {
+		reason := "Model request failed."
+		switch {
+		case errors.Is(callCtx.Err(), context.DeadlineExceeded), errors.Is(err, context.DeadlineExceeded):
+			reason = "Model request timed out."
+		case errors.Is(callCtx.Err(), context.Canceled), errors.Is(err, context.Canceled):
+			reason = "Model request was cancelled."
+		case errors.Is(err, ErrBudgetExceeded):
+			reason = "Lab model budget exhausted."
+		}
+		for _, constraint := range pending {
+			out[positions[constraint.ID]].Reason = reason
+		}
 		return out
 	}
 
 	validated, err := validate(raw, pending, cleaned, string(source))
 	if err != nil {
+		reason := "Model response failed schema validation."
+		if errors.Is(err, ErrEvidenceMismatch) {
+			reason = "Model evidence did not match submitted code."
+		}
+		for _, constraint := range pending {
+			out[positions[constraint.ID]].Reason = reason
+		}
 		return out
 	}
 
 	for _, verdict := range validated {
+		if verdict.Verdict == "unsure" {
+			verdict.Reason = "Model returned unsure."
+		}
 		out[positions[verdict.ConstraintID]] = verdict
 	}
 
@@ -132,7 +173,7 @@ func validate(
 	cleaned string,
 	original string,
 ) ([]hardrules.Verdict, error) {
-	invalid := errors.New("invalid model response")
+	invalid := ErrInvalidModelResponse
 	if len(raw) > 256*1024 {
 		return nil, invalid
 	}
@@ -187,7 +228,7 @@ func validate(
 		for _, point := range *item.Evidence {
 			if point.Line < 1 || point.Line > len(cleanLines) ||
 				strings.TrimSpace(point.Text) == "" || point.Text != cleanLines[point.Line-1] {
-				return nil, invalid
+				return nil, ErrEvidenceMismatch
 			}
 
 			// Store exact original lines so the TA sees the submitted source.
@@ -196,9 +237,13 @@ func validate(
 			})
 		}
 
+		reason := ""
+		if item.Verdict == "unsure" {
+			reason = "Model returned unsure."
+		}
 		out = append(out, hardrules.Verdict{
 			ConstraintID: item.ConstraintID, Verdict: item.Verdict,
-			Evidence: evidence, Source: "model",
+			Reason: reason, Evidence: evidence, Source: "model",
 		})
 	}
 
