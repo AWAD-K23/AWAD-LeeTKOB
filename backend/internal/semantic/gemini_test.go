@@ -72,6 +72,81 @@ func TestGeminiRequestAndAudit(t *testing.T) {
 	}
 }
 
+// The model must copy line numbers, not count them: on 2026-11-24 the deployed
+// model cited every line one too low, and strict evidence validation turned
+// three correct verdicts into unsure.
+func TestGeminiSendsNumberedLines(t *testing.T) {
+	var saved CallLog
+	model, err := NewGemini(SupportedModel, "fake-secret", func(entry CallLog) error {
+		saved = entry
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	source := "int main() {\n\n    return 0;\n}"
+	model.client.Transport = fakeTransport(func(req *http.Request) (*http.Response, error) {
+		var sent struct {
+			SystemInstruction struct {
+				Parts []struct{ Text string } `json:"parts"`
+			} `json:"systemInstruction"`
+			Contents []struct {
+				Parts []struct{ Text string } `json:"parts"`
+			} `json:"contents"`
+		}
+		body, _ := io.ReadAll(req.Body)
+		if json.Unmarshal(body, &sent) != nil || len(sent.Contents) != 1 ||
+			len(sent.Contents[0].Parts) != 1 || len(sent.SystemInstruction.Parts) != 1 {
+			t.Fatalf("unexpected request: %s", body)
+		}
+		if !strings.Contains(sent.SystemInstruction.Parts[0].Text, "numbered lines") {
+			t.Fatalf("instruction does not explain numbered lines: %q", sent.SystemInstruction.Parts[0].Text)
+		}
+
+		var prompt struct {
+			Code []struct {
+				Line int    `json:"line"`
+				Text string `json:"text"`
+			} `json:"code"`
+		}
+		if err := json.Unmarshal([]byte(sent.Contents[0].Parts[0].Text), &prompt); err != nil {
+			t.Fatalf("code is not a list of numbered lines: %v", err)
+		}
+		want := []string{"int main() {", "", "    return 0;", "}"}
+		if len(prompt.Code) != len(want) {
+			t.Fatalf("got %d lines, want %d", len(prompt.Code), len(want))
+		}
+		for i, line := range prompt.Code {
+			if line.Line != i+1 || line.Text != want[i] {
+				t.Fatalf("line %d = %+v, want {%d %q}", i, line, i+1, want[i])
+			}
+		}
+
+		return &http.Response{
+			StatusCode: 200, Header: http.Header{},
+			Body: io.NopCloser(strings.NewReader(`{
+			  "responseId":"provider-1",
+			  "usageMetadata":{"promptTokenCount":100,"candidatesTokenCount":20},
+			  "candidates":[{"finishReason":"STOP","content":{"parts":[
+			    {"text":"{\"verdicts\":[{\"constraintId\":\"a\",\"verdict\":\"unsure\",\"evidence\":[]}]}"}
+			  ]}}]
+			}`)),
+		}, nil
+	})
+
+	if _, err := model.Generate(context.Background(), Request{
+		Statement: "Use recursion", Source: source,
+		Constraints: []hardrules.Constraint{{ID: "a", Text: "Use recursion"}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	// The audit keeps the plain source: the same data, without the wire framing.
+	if saved.Prompt.Source != source {
+		t.Fatalf("audit prompt changed: %q", saved.Prompt.Source)
+	}
+}
+
 func TestGeminiProviderFailures(t *testing.T) {
 	cases := []struct {
 		name   string
