@@ -28,7 +28,7 @@
 
 **Evidence:** See [Member 1 handoff](MEMBER1-HANDOFF.md) for code, tests, interfaces, and local deployment commands. The original PostgreSQL/Docker checks passed during Member 1 delivery. Later verification passed Go format/vet/PostgreSQL integration checks, eight frontend workflow tests, and the additional Markdown/C++ rendering test in a targeted run. Frontend lint, formatting, type-checking, and production build passed. Docker attack tests were not rerun during the frontend changes. CI is configured for the final `pa3` tag; no remote tag run or public hosting is claimed.
 
-**Frontend follow-up completed:** Dedicated role-aware pages, account selection by email, class details, lab authoring, submission history/source, Markdown statements, C++ highlighting, and page transitions are implemented. See [manual flow test](MANUAL-FLOW-TEST.md). A local database inspection confirmed an Accepted submission also had a separate `hard_rule` violation with exact source evidence. TA review UI and real model checking remain Members 3 and 2 work respectively.
+**Frontend follow-up completed:** Dedicated role-aware pages, account selection by email, class details, lab authoring, submission history/source, Markdown statements, C++ highlighting, and page transitions are implemented. See [manual flow test](MANUAL-FLOW-TEST.md). A local database inspection confirmed an Accepted submission also had a separate `hard_rule` violation with exact source evidence. TA review UI and real model checking were delivered by Members 3 and 2 respectively; public deployment verification remains open.
 
 **Handoff ownership:** Member 1 has published the interfaces and verification steps. Actual acceptance by Members 2 and 3 remains in their own first checklist items; no teammate agreement is claimed here.
 
@@ -63,13 +63,17 @@ verified Accepted with `g++ -std=c++17 -O2` and checked with the same command.
 
 ## Member 3 — review, deployment walkthrough, and submission
 
+**Handoff status and remaining work:** [Member 3 handoff](MEMBER3-HANDOFF.md).
+
+
 - [ ] Accept both handoffs and run their documented checks before integration.
-- [ ] Rebuild and smoke-test `compose.pa3.yaml` after the frontend redesign and `/api` proxy change. Check frontend loading and direct page refreshes through Caddy, `/api/me` authentication, sign-in, class/lab access, and a real submission processed by the separate worker. Record the tested commit and results; return Member 1 implementation defects to Member 1.
+- [x] Rebuild and smoke-test `compose.pa3.yaml` after the frontend redesign and `/api` proxy change. Check frontend loading and direct page refreshes through Caddy, `/api/me` authentication, sign-in, class/lab access, and a real submission processed by the separate worker. Record the tested commit and results; return Member 1 implementation defects to Member 1.
 - [x] Connect verdicts to the TA review queue. Show each counted submission and constraint with the checker verdict, model evidence, TA decision, and applied deduction; enforce class ownership on the server. See [TA review queue verification](TA-REVIEW-QUEUE.md).
 - [x] Keep model findings out of student marks unless a TA reviews them. The current build has no Publish or marks route; constraint reviews stay separate from student submission responses. If publishing is added, block it while any verdict is unreviewed. Follow [FAQ-08, FAQ-10, and FAQ-12](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md). See [TA review queue verification](TA-REVIEW-QUEUE.md).
 - [ ] Run the deployed end-to-end flow with the dev-set `sort-merge` lab and compliant, violation, and injection submissions. Verify another class's TA cannot access the lab or queue.
 - [ ] Run the documented checks and verify tag CI includes the sandbox attacks. Check that offline checks work without network and that the checker image works with `MODEL_OFF=1`.
-- [ ] Add the rubric's “Catching your assistant” mistakes to the rules file's never list. Check that the dev set and evaluator remain unchanged.
+- [x] Add the rubric's “Catching your assistant” mistakes to the rules file's never list.
+- [ ] Compare the official dev-set and evaluator hashes with the supplied materials and record the result.
 - [ ] Create `PA3.md` with the deployment URL, required test accounts, tag CI link, checker and Docker commands, model-off switch, real-run folder, and recording link.
 - [ ] Record a deployment walkthrough of at most five minutes. Keep the deployment running until PA4 marks are released.
 - [ ] Update `SELF_ASSESSMENT_REPORT.md` with one evidence-backed row per criterion, claimed points, and unfinished work. Agree on an honest total with the team.
@@ -84,3 +88,6 @@ verified Accepted with `g++ -std=c++17 -O2` and checked with the same command.
 - [ ] Confirm the ZIP, assessment total, tag, deployment, recording, and CI links all match the submitted version.
 
 
+
+
+**Local Compose smoke:** [2026-11-24 record](LOCAL-COMPOSE-SMOKE-2026-11-24.md) covers merged commit `1122f7c`, Caddy, sign-in, class ownership, TA review, and worker restart with `MODEL_OFF=1`. It is not the rubric’s public `sort-merge` model-on flow. The brief “Lab not available” message after creation needs reproduction.
