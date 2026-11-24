@@ -24,6 +24,10 @@ PA#4 red team attacks it), and PA#5 needs it again through the oral on 24/31 Dec
   - Any provider: a free DuckDNS subdomain (`<name>.duckdns.org`) set to the VM's IP.
 - Use a **static** public IP, so the address survives a VM restart.
 
+Azure shortcut: after `az login`, `bash deploy/azure-create-vm.sh` creates the resource group, the
+Ubuntu 24.04 VM (Standard_B2s), a static IP with the DNS name `leetkob-awad-k23.<region>.cloudapp.azure.com`,
+and a firewall allowing 80/443 from anywhere and SSH only from your current IP.
+
 ## 2. Install (you, on the VM)
 
 ```bash
