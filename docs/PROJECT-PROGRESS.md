@@ -1,7 +1,7 @@
 # LeeTKOB progress — PA1 to PA6
 
-**Updated:** November 23, 2026 (Asia/Saigon).  
-**Implementation reviewed:** `73f1ca1`.  
+**Updated:** November 24, 2026 (Asia/Saigon).  
+**Implementation reviewed:** [`97346d0`](https://github.com/AWAD-K23/AWAD-LeeTKOB/commit/97346d007b59fe9ff8a5963eade9e0a0b1b00290).  
 **Current checkpoint:** PA3, due November 25 at 22:00.
 
 This tracker compares the repository with the [class project brief](<LeeTKOB — class project brief.md>), the full PA2–PA6 rubrics, implementation, and saved evidence. The PA4–PA6 sections were revised after reading the complete [PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and red-team.md>), [PA5 rubric](<PA5/PA#5 rubric — Final build and operations.md>), and [PA6 rubric](<PA6/PA#6 rubric — Final demo and individual oral.md>). Checked work means implemented or supported by saved evidence, not an instructor mark, predicted score, or confirmation of submission.
@@ -20,12 +20,12 @@ All dates below are in 2026. PA2–PA5 deadlines are at 22:00, as stated in the 
 | --- | --- | --- | --- | --- |
 | PA1 | Not specified in the supplied brief | Original team proposal | ❔ Historical checkpoint; proposal/submission evidence not located | Confirm the team's original proposal record if this tracker must cover submission history |
 | PA2 | November 11 | Harness, quality gate, endpoint contract and tests | ✅ Core engineering delivered; submission evidence recorded separately | Keep the current checkout's checks green; see [PA2 evidence](../PA2.md) |
-| PA3 | November 25 | Working queue/sandbox/model pipeline ending in the TA review queue | ⬜ Judging and model pipeline implemented; complete TA flow unfinished | Review API/UI, deployed walkthrough, final cap verification, tag/CI and submission package |
+| PA3 | November 25 | Working queue/sandbox/model pipeline ending in the TA review queue | ⬜ Core review API/UI and local model-off smoke are implemented; public model-on flow and release evidence remain open | Public `sort-merge` walkthrough, final provider-cap check, teammate acceptance, `pa3` tag CI, `PA3.md`/video, self-assessment and ZIP/submission |
 | PA4 | December 2 | Real-model CI evaluation, held-out run, five guardrails, human gate, red-team report | ⬜ Guardrail foundations exist; saved evaluation fails two thresholds | Live required eval gate, ten custom cases, repeated-run evidence, Publish gate and red-team report |
 | PA5 | December 16 | Final build running and observed | ⬜ Submission updates and deployment scaffolding already exist | Publication/appeals, cross-queue traces, dashboard/SLO/fired alert, reproducible load proof and incident evidence |
 | PA6 | December 24 / December 31, 08:20–11:50; assigned slot | Final demo (40 shared points) and individual oral (60 points) | ⬜ Existing PA5 build must be demonstrated; individual readiness unverified | Commit/post OWNERS.md by December 21 at 22:00; rehearse all eleven features, failure cases and explanations |
 
-**Overall assessment:** The submission and checking foundation is substantial. The largest remaining work is the human grading workflow, semantic evaluation quality, and production verification. PA6 reuses the PA5 build but also scores a live demonstration, not just the oral. Any tested beyond-brief feature claimed for PA6 must already be in the submitted PA5 build.
+**Overall assessment:** PA3's TA review foundation is implemented, but the saved real-model run misses the semantic thresholds and public release evidence is still open. PA4 adds the Publish gate, pass sampling, repeated evaluation and red-team requirements. PA6 reuses the PA5 build and also scores a live demonstration, not just the oral; any beyond-brief feature claimed for PA6 must already be in the submitted PA5 build.
 
 | Checkpoint | Rubric criteria and weights | Course weight |
 | --- | --- | --- |
@@ -75,7 +75,7 @@ Detailed ownership and delivery requirements remain in the [PA3 plan](PA3/PA3-PL
 | ✅ | Compile and run C++ inside a restricted sandbox | `backend/internal/sandbox/runner.go`, `sandbox/Dockerfile` |
 | ✅ | Implement no network; CPU, wall, memory/swap, process and output limits | Sandbox runner and `backend/internal/sandbox/testdata/` |
 | ✅ | Run as non-root with no host mounts, Docker socket or application secrets | Sandbox container policy and attack fixtures |
-| ✅ | Add sandbox attack tests and a Docker-enabled CI job | `backend/internal/sandbox/runner_test.go`, [CI workflow](../.github/workflows/gates.yml); not rerun during this assessment |
+| ✅ | Add sandbox attack tests and a Docker-enabled CI job | [Main run #56](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45326541493) passed the sandbox job on `97346d0` |
 | ✅ | Run syntax-aware hard rules before semantic checking | `backend/internal/hardrules/`, `sandbox/scan.cpp` |
 | ✅ | Test hard-rule traps such as comments, strings and a student's own sort function | `backend/internal/hardrules/check_test.go` |
 | ✅ | Call the real model for pending semantic constraints on Accepted code | `backend/internal/semantic/`, [saved worker result](../eval/runs/real-worker/result.json) |
@@ -88,13 +88,13 @@ Detailed ownership and delivery requirements remain in the [PA3 plan](PA3/PA3-PL
 | ✅ | Save a real-model dev-set run, predictions, call logs, metrics and cost estimate | `eval/runs/real-dev/`, [Member 2 handoff](PA3/MEMBER2-HANDOFF.md) |
 | ✅ | Supply deployment files and host-worker instructions | `compose.pa3.yaml`, `deploy/`, [Member 1 handoff](PA3/MEMBER1-HANDOFF.md) |
 | ⬜ | Complete Member 3 acceptance of both handoffs | Run and record the documented integration checks |
-| ⬜ | Expose findings through a TA/class-protected review endpoint | No review route is currently registered in `backend/internal/api/server.go` |
-| ⬜ | Build the TA review queue with source, constraint, verdict, evidence and TA-set deduction | Database findings exist; review UI is pending |
-| ⬜ | Confirm and cite the relevant product-owner FAQ for pre-publication visibility | Student endpoints currently hide findings; the required FAQ reference remains open |
-| ⬜ | Rebuild and smoke-test the current deployment after the frontend/proxy changes | Verify Caddy refreshes, login, `/api` routing, class access and worker processing |
+| ✅ | Expose findings through a TA/class-protected review endpoint | `backend/internal/api/review.go`, `server.go`, and [TA review evidence](PA3/TA-REVIEW-QUEUE.md) |
+| ✅ | Build the TA review queue with source, constraint, verdict, evidence and TA-set deduction | Review UI, class-scoped API, TA decisions, configured deductions and FAQ-09 unsure reasons; [TA review evidence](PA3/TA-REVIEW-QUEUE.md) |
+| ✅ | Confirm and cite product-owner behavior for pre-publication visibility and unsure handling | [FAQ-08, FAQ-09, FAQ-10 and FAQ-12](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md) are cited in the TA review evidence; no Publish endpoint exists in this build |
+| ✅ | Rebuild and smoke-test the local deployment after the frontend/proxy changes | [November 24 local smoke](PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md) covers Caddy, login, `/api`, class isolation, TA review and worker restart on `1122f7c`; `MODEL_OFF=1`, not public/live-model evidence. Reproduce the transient “Lab not available” message |
 | ⬜ | Verify the final public model project/key spending cap | Historical provider-cap evidence and application budgets exist; final provisioning is unverified |
 | ⬜ | Demonstrate compliant, violating and injection submissions on the deployment | Include a second-class TA access-denial check |
-| ⬜ | Complete the PA3 rubric's assistant-mistake additions to the rules file | Follow the remaining Member 3 checklist; preserve data and evaluator unchanged |
+| ✅ | Add the PA3 rubric's assistant-mistake examples to the rules file's never list | Tracked complete in [PA3 plan](PA3/PA3-PLAN.md); preserve the official data and evaluator |
 | ⬜ | Write root `PA3.md` and update the self-assessment for PA3 | Current self-assessment still describes PA2 |
 | ⬜ | Record the deployment walkthrough and verify public availability | Recording must be at most five minutes; keep deployment running through PA4 marking |
 | ⬜ | Tag the submitted commit `pa3`, verify tag CI, prepare ZIP and confirm submission | Record matching commit, URLs, accounts, recording, claimed score and submission receipt |
@@ -231,20 +231,19 @@ For three members, plan about 23 minutes total: one-minute version check, eight-
 
 ## Current verification snapshot
 
-Checks below were run during the earlier November 23 implementation assessment, not rerun for this rubric-only documentation revision. Historical handoff results remain separate from this snapshot. No real model calls were made for either assessment.
+Current automated verification is GitHub Actions [run #56](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45326541493), triggered by the merge to `main` at `97346d0`. All four jobs passed: gates, browser end-to-end, full-history secret scan, and Docker sandbox/offline checker. This is CI evidence for that commit, not a public deployment or live-model demonstration. No real model calls were made in CI.
 
 | Check | Result | Qualification / action |
 | --- | --- | --- |
-| Go formatting | ✅ Passed | Used a process-scoped Git safe-directory exception for this workspace's ownership mismatch |
-| `go -C backend vet ./...` | ✅ Passed | Local run |
-| `go -C backend test ./... -count=1` | ✅ Passed | Optional PostgreSQL integration and real Docker attack suites were not enabled |
-| Official dataset integrity | ✅ Passed | 128 official files matched the recorded hashes |
-| Frontend ESLint | ✅ No errors | Two Fast Refresh warnings in the shared badge/button components |
-| Frontend Prettier | ⬜ Failed | `frontend/src/style.css` needs formatting; the combined frontend check stops here |
-| Separate TypeScript checks | ✅ Passed | `typecheck` and the `tsc -b` stage completed |
-| Vite production build | ⬜ Unverified in this environment | esbuild hit an access-denied error while resolving the Vite configuration; rerun in a suitable environment |
-| PostgreSQL integration, Docker attacks and browser workflows | ⬜ Not rerun | Existing historical evidence is linked in the PA3 handoffs |
-| Public deployment and current remote CI | ⬜ Not inspected | Local files and saved reports do not establish current hosting or remote CI status |
+| Go format, vet and unit tests | ✅ Passed | `gates` job in run #56 |
+| Frontend lint, formatting, type-check and production build | ✅ Passed | `npm run check --prefix frontend` in the `gates` job |
+| Official dataset integrity | ✅ Passed | `verify-eval` step in run #56; local manifest lists 128 official files |
+| Docker sandbox attack tests and offline checker | ✅ Passed | `sandbox` job in run #56; checker ran offline with semantic results left unsure |
+| Browser end-to-end workflows | ✅ Passed | `e2e` job in run #56 |
+| Full-history secret scan and dependency audit | ✅ Passed | `secret-history` job in run #56 |
+| Local Compose smoke | ✅ Recorded | Separate user-run smoke on `1122f7c`, `MODEL_OFF=1`; see [smoke record](PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md) |
+| Public deployment and live-model walkthrough | ⬜ Not verified | Public URL, required `sort-merge` flow, and final provider project/key cap remain open |
+| PA3 release checks | ⬜ Not complete | The `pa3` tag CI run, final report/video/self-assessment/ZIP, and submission receipt are still open |
 
 ## Recommended work order
 

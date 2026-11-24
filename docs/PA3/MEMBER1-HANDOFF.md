@@ -28,7 +28,8 @@
   Accepted, with a separate violation for the `std::sort` ban and evidence at line 12.
   Its comparison requirement remained `unsure` / `semantic_pending`.
 - Accepted does not mean all assignment constraints passed. The student UI intentionally
-  excludes protected findings; the TA review endpoint/UI is still Member 3 work.
+  excludes protected findings. Member 3 has since delivered the class-protected review
+  endpoint/UI and TA decision flow; see [TA review evidence](TA-REVIEW-QUEUE.md).
 - Public hosting, final tag CI, teammate acceptance, and final public model-cap
   verification are not claimed by these local checks.
 - **Assigned to Member 3:** rebuild and smoke-test the current Docker deployment

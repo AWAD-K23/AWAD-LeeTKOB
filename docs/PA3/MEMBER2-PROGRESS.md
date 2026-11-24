@@ -1,5 +1,7 @@
 # Member 2 progress
 
+**Status checked:** November 24, 2026. The implementation and saved evaluation facts below remain current; Member 3 acceptance, final public cap/deployment, and PA3 release evidence are tracked separately.
+
 ## Completed foundation
 
 | Part | Current result |
