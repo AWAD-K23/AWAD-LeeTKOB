@@ -5,7 +5,8 @@ Repository (public): https://github.com/AWAD-K23/AWAD-LeeTKOB · submitted tag: 
 
 ## Deployment
 
-**URL:** `TODO: https://<dns-name>` — serves `TODO: commit` (the `pa3` tag). It stays up until the
+**URL:** https://leetkob-awad-k23.japaneast.cloudapp.azure.com — serves `TODO: commit` (the `pa3` tag).
+Azure VM in Japan East (ARM64): Hong Kong, the first region, is refused by the Gemini API. It stays up until the
 PA#4 marks are out. How it is built and run: [public deployment runbook](docs/PA3/PUBLIC-DEPLOYMENT.md).
 
 Test accounts. They hold no real data and anyone who reads this repository can use them; the
@@ -63,18 +64,21 @@ docker run --rm --network none -e MODEL_OFF=1 -v <dataset-folder>:/data:ro leetk
 
 ## Committed dev-set run (real model)
 
-Folder: [`eval/runs/real-dev/`](eval/runs/real-dev/) — `predictions.jsonl`, the unchanged
-`eval.mjs` report `report.txt` and `summary.json`, and the call log `calls.jsonl` (provider request
-id, model, tokens, time and estimated cost per call; the five HTTP 503 calls have no id and are
-marked unknown, not invented).
+Folder: [`eval/runs/real-dev-numbered/`](eval/runs/real-dev-numbered/) (2026-11-24, code at `1cdc486`)
+— `predictions.jsonl`, the unchanged `eval.mjs` report `report.txt` and `summary.json`, the call
+log `calls.jsonl` (provider request id, model, tokens, time and estimated cost per call) and
+`usage-summary.json`. All 39 calls were answered.
 
-| Wrongful deductions | Violations caught | Unsure | `eval.mjs` exit |
-|---:|---:|---:|---:|
-| 0 | 56.8% (21/37) | 30.4% (31/102) | 1 (thresholds missed; the output is valid) |
+| Run | Wrongful deductions | Violations caught | Unsure | `eval.mjs` exit |
+|---|---:|---:|---:|---:|
+| [`real-dev-numbered`](eval/runs/real-dev-numbered/) (24 Nov) | 0 | **94.6% (35/37)** | **2.0% (2/102)** | **0 (PASS)** |
+| [`real-dev`](eval/runs/real-dev/) (22 Nov, kept) | 0 | 56.8% (21/37) | 30.4% (31/102) | 1 (thresholds missed) |
 
-Re-scored on 2026-11-24 with a fresh copy of the published `eval.mjs`: the same three numbers
-([acceptance record](docs/PA3/MEMBER3-ACCEPTANCE.md#the-markers-checker-run-reproduced)). PA#3 has no
-pass mark on these; they do not meet the PA#4 thresholds yet.
+What changed between the two runs: the model used to count line numbers itself and sometimes cited
+a line one too low, so the exact evidence check turned right verdicts into `unsure`. The code is
+now sent as numbered `{line, text}` objects (PR #22, test `TestGeminiSendsNumberedLines`); the
+evidence check is unchanged. The two pairs still missed are `dynamic-array/s05 C2` (unsure) and
+`dynamic-array/s07 C3` (predicted pass).
 
 Dev set: `eval/official/` is byte-identical to `github.com/fithcmus/awad-leetkob-eval`
 (`eval.mjs` SHA-256 `c836edd8713521bb…`, `labels.jsonl` `262cda7b0ef5612e…`; all 128 files in
@@ -86,9 +90,9 @@ Dev set: `eval/official/` is byte-identical to `github.com/fithcmus/awad-leetkob
 `gemini-3.5-flash-lite` (Google AI Studio, project AWAD-LeeTKOB, monthly cap ₫100,000 —
 `TODO: re-check date`). It receives only the statement, the semantic constraints and the code with
 comments and known identities removed, and returns `pass` / `violation` / `unsure` with evidence
-per constraint; it never sets a deduction. One lab of 80 submissions costs about **US$0.036**
-(US$0.013204 for 29 measured calls ÷ 29 × 80; arithmetic in the
-[Member 2 handoff](docs/PA3/MEMBER2-HANDOFF.md#measured-cost)).
+per constraint; it never sets a deduction. One lab of 80 submissions costs about **US$0.043**
+(US$0.020851 for the 39 measured calls of `real-dev-numbered` ÷ 39 × 80, from its
+`usage-summary.json`; the earlier run measured US$0.036 per 80).
 
 ## Where each criterion's evidence is
 
@@ -97,7 +101,7 @@ per constraint; it never sets a deduction. One lab of 80 submissions costs about
 | 1 | Flow on the deployment | URL and accounts above; recording; `docs/PA3/evidence/public-walk.json` |
 | 2 | Queue and sandbox | `backend/internal/sandbox/runner_test.go` (`TestAttacks`), `backend/internal/worker/worker_test.go` (`TestDurableWorker`), tag CI run |
 | 3 | Hard rules first | `backend/internal/hardrules/`, `sandbox/scan.cpp` (libclang), `TestSyntaxTraps`; model-off run [`eval/runs/offline/`](eval/runs/offline/) (0 wrongful, all 55 ban-list pairs decided) |
-| 4 | Model on semantic constraints | `backend/internal/semantic/`, [`eval/runs/real-dev/`](eval/runs/real-dev/) |
+| 4 | Model on semantic constraints | `backend/internal/semantic/`, [`eval/runs/real-dev-numbered/`](eval/runs/real-dev-numbered/) (PASS), earlier [`eval/runs/real-dev/`](eval/runs/real-dev/) |
 | 5 | Limits and review queue | `TestInvalidResponsesBecomeUnsure`, `TestTimeoutBecomesUnsure` (fake model, no network); [TA review queue](docs/PA3/TA-REVIEW-QUEUE.md); no Publish route exists |
 | 6 | Checker and first eval | *Checker command* above; `deploy/Dockerfile.checker`; `eval/extra/` |
 | 7 | Tests first, one part per commit | `git log` on `main`; `AI-LOG.md` |
