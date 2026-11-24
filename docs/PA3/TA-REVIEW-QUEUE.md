@@ -24,7 +24,7 @@ Test exit status: 0
 
 The test covers class ownership, latest submission selection, rejection of fabricated evidence, no review row before TA action, a TA-attributed violation decision and deduction, and no review-data leak through student submission endpoints. It is a focused API integration test; it does not cover a deployed end-to-end flow, frontend build, or a Publish action.
 
-For this FAQ-09 addition, [GitHub Actions run #43](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45243460493) passed gates, sandbox, end-to-end, and secret-history. The new semantic tests distinguish model uncertainty, schema failure, evidence mismatch, budget exhaustion, and timeout. The API contract now checks the TA-only reason and student non-disclosure; the worker test checks reason persistence. The earlier Ubuntu WSL result above predates this addition.
+For this FAQ-09 addition, [GitHub Actions run #43](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45243460493) passed gates, sandbox, end-to-end, and secret-history. The semantic tests distinguish model uncertainty, schema failure, evidence mismatch, budget exhaustion, and timeout. The API contract checks the TA-only reason and student non-disclosure; the worker test checks reason persistence. The latest [main run #56](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45326541493) also passed all four jobs on `97346d0` after the documentation PRs were merged. The earlier Ubuntu WSL result above predates this FAQ-09 addition.
 
 ## Product-owner FAQ references
 

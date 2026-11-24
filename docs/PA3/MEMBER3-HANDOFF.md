@@ -1,7 +1,7 @@
 # Member 3 handoff — PA#3
 
 **Status checked:** November 24, 2026
-**Current baseline:** [`1122f7c`](https://github.com/AWAD-K23/AWAD-LeeTKOB/commit/1122f7c7865da11257b50091641eaca17e6cd136) (PR #18)
+**Current baseline:** [`97346d0`](https://github.com/AWAD-K23/AWAD-LeeTKOB/commit/97346d007b59fe9ff8a5963eade9e0a0b1b00290) (main; PR #20 merged)
 **PA#3 deadline:** Wednesday, November 25, 2026 at 22:00 ICT
 
 This guide shows what is ready, what the evidence proves, and what still needs to happen before submission. It does not claim that Member 3 accepted the handoff, that a public deployment is running, or that PA#3 has been submitted.
@@ -57,4 +57,4 @@ After the provider cap is confirmed, test model-on submissions and inspect the p
 
 ## Product behavior references
 
-The current implementation follows [FAQ-02, FAQ-08, FAQ-09, FAQ-10, and FAQ-12](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md). In particular, students do not see constraint findings before publication, `unsure` findings require TA action, and the review queue includes a random sample of `pass` findings. The sample is tracked for PA#4 in the current plan.
+The current implementation follows [FAQ-02, FAQ-08, FAQ-09, FAQ-10, and FAQ-12](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md). Students do not see constraint findings or deductions through the current student endpoints, and `unsure` findings require TA action. This build has no Publish route. The FAQ-10 random 10% sample of `pass` findings is a PA#4 follow-up; it is not implemented in the current queue.
