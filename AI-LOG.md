@@ -382,3 +382,14 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Rejected:** Allowing model-generated explanation text; reasons are derived from checker outcomes.
 - **Verified:** [GitHub Actions run #43](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45243460493) passed all four jobs (gates, sandbox, end-to-end, and secret-history) for commit `53f66e2`. Gates ran Go format/vet/tests and frontend checks; sandbox ran Docker-backed tests. No separate local Ubuntu run is claimed for this addition.
 - **Evidence:** `backend/internal/semantic/check.go`, `backend/internal/semantic/check_test.go`, `backend/internal/worker/model.go`, `backend/internal/worker/worker.go`, `backend/internal/worker/worker_test.go`, `backend/internal/api/review.go`, `backend/internal/api/api_test.go`, `frontend/src/pages/review.tsx`, and `backend/migrations/00007_verdict_reasons.sql`.
+
+
+## 2026-11-24 — PA3 local smoke documentation and Member 3 handoff
+
+- **Tool:** Codex with GitHub browser; the user ran the Ubuntu WSL/Docker commands and supplied their output.
+- **Asked for:** Record the merged-build local smoke, review PR #19, reconcile handoff status and evidence links, and prepare Member 3's remaining work.
+- **Changed:** Added the local Compose smoke record, clarified AGENTS/README/PA3 plan documentation, reconciled the dated Member 1 handoff, corrected the durable-worker evidence link, and added the Member 3 handoff.
+- **Rejected:** Treating the local `MODEL_OFF=1` run as a public deployment or live-model result, or treating the TA review API test as proof of exactly one persisted worker result set. No provider call, final tag run, or public flow is invented.
+- **Verified:** Reviewed the current PA3 Classroom post and original assignment materials, the merged implementation evidence and user-supplied Ubuntu smoke outputs. PR #19 previously passed its four CI jobs on head `3717c62`; the final documentation head requires its own CI result. The local smoke observed Caddy navigation, sign-in, class isolation, TA confirmation, and queued work completing after restart.
+- **Limits:** The local two-integer lab is not the rubric's public `sort-merge` lab. Live semantic behavior, final spending-cap check, public walkthrough, official hash comparison, `pa3` tag CI, teammate acceptance, and submission remain open.
+- **Evidence:** [PR #19](https://github.com/AWAD-K23/AWAD-LeeTKOB/pull/19), `docs/PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md`, `docs/PA3/TA-REVIEW-QUEUE.md`, `docs/PA3/MEMBER1-HANDOFF.md`, `docs/PA3/MEMBER3-HANDOFF.md`, and `docs/PA3/PA3-PLAN.md`.
