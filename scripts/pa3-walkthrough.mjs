@@ -158,18 +158,40 @@ async function walk() {
   }));
   for (const row of rows) console.log(`      ${row.file}  ${row.constraint}…  ${row.verdict}/${row.source}${row.reason ? ` (${row.reason})` : ""}  evidence=${JSON.stringify(row.evidence)}  deduction=${row.deduction}`);
 
+  // FAQ-02 keeps only each student's latest submission in the queue; every
+  // submission that a newer one replaced must still be open to the TA (FAQ-10).
+  const earlierRes = await ta1.call("GET", `/labs/${labId}/earlier-submissions`);
+  const earlierIds = (earlierRes.json ?? []).map((e) => e.submissionId);
+  const replaced = submitted.filter((s) => submitted.some((n) => n.who === s.who && submitted.indexOf(n) > submitted.indexOf(s)));
+  record(
+    "TA1 sees each replaced submission under earlier submissions (not counted)",
+    earlierRes.status === 200 && replaced.every((s) => earlierIds.includes(s.id)) && rows.every((r) => !earlierIds.includes(r.submission)),
+    `status=${earlierRes.status} earlier=${replaced.map((s) => s.file).join(",")}`,
+  );
+  const earlier = (earlierRes.json ?? []).map((e) => ({
+    submission: e.submissionId,
+    file: submitted.find((s) => s.id === e.submissionId)?.file ?? "(other)",
+    judge: e.judgeVerdict,
+    findings: e.findings.map((f) => ({ constraint: f.constraint.slice(0, 40), verdict: f.verdict, source: f.source, reason: f.reason, evidence: f.evidence })),
+  }));
+  for (const e of earlier) for (const f of e.findings) console.log(`      ${e.file} (earlier)  ${f.constraint}…  ${f.verdict}/${f.source}${f.reason ? ` (${f.reason})` : ""}  evidence=${JSON.stringify(f.evidence)}`);
+
   const other = await ta2.call("GET", `/labs/${labId}/review-queue`);
   record("TA2 (other class) is refused the review queue", other.status === 404, `status=${other.status}`);
   const otherLabs = await ta2.call("GET", "/labs");
   record("TA2 does not see the lab in their list", !(otherLabs.json ?? []).some((l) => l.id === labId));
   const otherLab = await ta2.call("POST", `/classes/${classA.id}/labs`, labFromDataset());
   record("TA2 cannot create a lab in class A", otherLab.status === 404, `status=${otherLab.status}`);
+  const otherEarlier = await ta2.call("GET", `/labs/${labId}/earlier-submissions`);
+  record("TA2 (other class) is refused the earlier submissions", otherEarlier.status === 404, `status=${otherEarlier.status}`);
   const asStudent = await students.student1.call("GET", `/labs/${labId}/review-queue`);
   record("a student is refused the review queue", asStudent.status === 403, `status=${asStudent.status}`);
+  const studentEarlier = await students.student1.call("GET", `/labs/${labId}/earlier-submissions`);
+  record("a student is refused the earlier submissions", studentEarlier.status === 403, `status=${studentEarlier.status}`);
   const peek = await students.student2.call("GET", `/submissions/${submitted[0].id}`);
   record("a student cannot read another student's submission", peek.status === 404 || peek.status === 403, `status=${peek.status}`);
 
-  return { labId, submitted, rows };
+  return { labId, submitted, rows, earlier };
 }
 
 try {
