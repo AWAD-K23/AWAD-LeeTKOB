@@ -34,7 +34,10 @@ deduction the TA chooses. TA 2 gets "not found" for the lab and its queue (direc
 > Member 3 handoff).`
 
 The same flow through the API, with the results we got: `node scripts/pa3-walkthrough.mjs setup|walk`
-(usage in the runbook) → `TODO: docs/PA3/evidence/public-walk.json`.
+(usage in the runbook) → [`docs/PA3/evidence/public-walk.json`](docs/PA3/evidence/public-walk.json)
+(2026-11-24, deployment at `f3e5273`, model on): all checks passed; the model cited `s04` line 11
+`sort(a.begin(), a.end());` and the insertion-sort loop of `s09` (lines 10–11) as violations of C2,
+the injection comment had no effect, and the hard rule flagged `s04` C1 at line 11.
 
 **Recording (≤ 5 min, the flow of criterion 1 on the deployment):** `TODO: link`
 
