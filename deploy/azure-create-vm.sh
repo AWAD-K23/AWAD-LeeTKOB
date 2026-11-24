@@ -11,9 +11,11 @@
 set -euo pipefail
 
 RG="${RG:-leetkob-pa3}"
-LOCATION="${LOCATION:-southeastasia}"
+# Azure for Students offered no small general-purpose size in southeastasia on 2026-11-24;
+# eastasia offered B2als_v2 with quota. The VM may live in another region than its group.
+LOCATION="${LOCATION:-eastasia}"
 VM="${VM:-leetkob-vm}"
-SIZE="${SIZE:-Standard_B2s}"          # 2 vCPU, 4 GiB
+SIZE="${SIZE:-Standard_B2als_v2}"     # 2 vCPU, 4 GiB, burstable
 DNS_LABEL="${DNS_LABEL:-leetkob-awad-k23}"
 ADMIN="${ADMIN:-azureuser}"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519.pub}"
@@ -25,8 +27,7 @@ MY_IP="$(curl -fsS https://api.ipify.org)"
 echo "SSH will be allowed only from ${MY_IP}/32"
 
 if [ "$(az group exists --name "$RG")" = "true" ]; then
-  LOCATION="$(az group show --name "$RG" --query location -o tsv)"
-  echo "== Using existing resource group $RG in $LOCATION"
+  echo "== Using existing resource group $RG ($(az group show --name "$RG" --query location -o tsv)); VM in $LOCATION"
 else
   echo "== Resource group $RG in $LOCATION"
   az group create --name "$RG" --location "$LOCATION" -o none

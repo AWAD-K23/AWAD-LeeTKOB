@@ -25,7 +25,7 @@ PA#4 red team attacks it), and PA#5 needs it again through the oral on 24/31 Dec
 - Use a **static** public IP, so the address survives a VM restart.
 
 Azure shortcut: after `az login`, `bash deploy/azure-create-vm.sh` creates the resource group, the
-Ubuntu 24.04 VM (Standard_B2s), a static IP with the DNS name `leetkob-awad-k23.<region>.cloudapp.azure.com`,
+Ubuntu 24.04 VM (Standard_B2als_v2 in eastasia), a static IP with the DNS name `leetkob-awad-k23.eastasia.cloudapp.azure.com`,
 and a firewall allowing 80/443 from anywhere and SSH only from your current IP.
 
 ## 2. Install (you, on the VM)
