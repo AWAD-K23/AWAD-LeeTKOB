@@ -47,6 +47,12 @@ func TestSyntaxTraps(t *testing.T) {
 				t.Fatalf("%+v", got)
 			}
 
+			// A decided ban list is not uncertain: the TA must not read
+			// "Semantic model check has not run." on a hard-rule row.
+			if got[0].Source != "hard_rule" || got[0].Reason != "" {
+				t.Fatalf("decided hard-rule verdict: source %q, reason %q", got[0].Source, got[0].Reason)
+			}
+
 			if test.verdict == "violation" && (len(got[0].Evidence) != 1 || got[0].Evidence[0].Text == "") {
 				t.Fatal("missing exact evidence")
 			}
