@@ -1,0 +1,23 @@
+# Member 3 handoff — PA3
+
+Status as of November 24, 2026. The implementation baseline is merged commit `1122f7c` (PR #18); [PR #19](https://github.com/AWAD-K23/AWAD-LeeTKOB/pull/19) records local smoke evidence and documentation. This handoff does not claim Member 3 acceptance, public deployment, or a final submission. The Classroom PA3 deadline is November 25, 2026 at 22:00 ICT; check the course post for any later correction.
+
+## Current status and evidence
+
+| Area | Current evidence | Limit |
+| --- | --- | --- |
+| TA review | [Review queue and contract](TA-REVIEW-QUEUE.md) show each constraint verdict, evidence, and TA-selected deduction; another-class TA is denied. A model or hard-rule finding does not itself become a student deduction. | There is no Publish/marks route yet; a future publication path needs an explicit TA-approved gate. |
+| Student boundary | The local smoke showed judge Accepted without a constraint deduction or published mark on the student page, before and after TA confirmation. | This proves the observed build, not a future publishing feature. |
+| Worker and sandbox | [Member 1 handoff](MEMBER1-HANDOFF.md) describes the durable worker tests and nine sandbox attack submissions. The [local Compose smoke](LOCAL-COMPOSE-SMOKE-2026-11-24.md) saw a queued submission finish after worker restart. | The browser observation alone does not prove exactly one stored verdict set; use the worker integration test for persistence. |
+| Local deployment | Ubuntu WSL Compose on `1122f7c`: healthy PostgreSQL/API/Caddy, direct page refresh, sign-in, two classes with separate TAs, cross-class denial, hard-rule TA deduction 3, worker restart. | `MODEL_OFF=1`, local ports and a small test lab; no public HTTPS or live-model claim. |
+| Model evaluation | [Committed real dev run](../../eval/runs/real-dev/) reports zero wrongful deductions, 56.8% recall, and 30.4% unsure; evaluator exited 1. | Inspect provider failures and reach the rubric threshold before claiming a passing model evaluation. |
+
+## Remaining work, in order
+
+1. **Accept the handoffs and reproduce the gates.** Read the [PA3 plan](PA3-PLAN.md), [Member 1](MEMBER1-HANDOFF.md) and [Member 2](MEMBER2-HANDOFF.md) handoffs, [review queue](TA-REVIEW-QUEUE.md), and [local smoke](LOCAL-COMPOSE-SMOKE-2026-11-24.md). Run the documented Go, frontend, Docker sandbox, and review contract checks against the final commit. Record any failing command and fix it before marking acceptance.
+2. **Prepare the public deployment and spending guard.** Provision the HTTPS origin, persistent database, API, Caddy, and trusted host worker using [deployment instructions](../../README.md). Verify the final provider project/key and spending cap before enabling `MODEL_OFF=0`; keep the key on the server, out of frontend and student containers. Record URL, tested commit, cap evidence, and service status without committing secrets.
+3. **Run the rubric's exact public walkthrough.** Create the required `sort-merge` dev-set lab, its statement, tests, and two constraints with deductions. Use an admin, two TAs assigned to different classes, and enrolled students. Submit compliant, violating, and prompt-injection fixtures. Inspect each verdict, source evidence, unsure reason, TA decision, and chosen deduction. Verify the other TA cannot access the first class (including a direct request), students see only allowed judge status, and page refresh and sign-in work. Record a worker restart and verify durable exactly-once completion with the integration test or database evidence.
+4. **Check the live semantic path.** With the cap verified, run model-on submissions, inspect schema/timeout/provider failures and logs, and rerun the official dev evaluator. Do not count an unavailable or `unsure` response as a passing verdict. Keep FAQ-09's unsure reason visible to the TA. FAQ-10 random pass sampling remains a separate PA4 follow-up unless the team changes scope.
+5. **Finish release evidence.** Check the official dev/eval hashes against the supplied materials; run final CI including sandbox attacks and a `pa3` tag run. Complete `PA3.md` with public URL and test accounts, a five-minute-or-shorter recording, evidence-backed self-assessment, `AI-LOG.md`, and the required ZIP containing repository history and IDs. Keep the deployment available for marking and review the final Classroom instructions before submission.
+
+The [local smoke record](LOCAL-COMPOSE-SMOKE-2026-11-24.md) notes a brief “Lab not available” display after lab creation. Reproduce it before assigning a cause or closing it. A model verdict must never become a deduction or published mark without TA review.
