@@ -88,8 +88,10 @@ func Check(ctx context.Context, scanner Scanner, source []byte, constraints []Co
 		v := Verdict{ConstraintID: c.ID, Verdict: "unsure", Reason: "Semantic model check has not run.", Evidence: []Evidence{}, Source: "semantic_pending"}
 		names := bannedNames(c.Text)
 		if len(names) > 0 {
+			// The ban list decides this constraint; no uncertainty reason applies.
 			v.Verdict = "pass"
 			v.Source = "hard_rule"
+			v.Reason = ""
 			found := map[int]bool{}
 			for _, name := range names {
 				for called, numbers := range calls {
