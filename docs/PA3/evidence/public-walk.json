@@ -1,7 +1,7 @@
 {
   "base": "https://leetkob-awad-k23.japaneast.cloudapp.azure.com",
   "mode": "walk",
-  "at": "2026-11-24T14:30:38.387Z",
+  "at": "2026-11-24T15:07:52.840Z",
   "log": [
     {
       "step": "TA1, TA2 and two students sign in",
@@ -10,22 +10,22 @@
     {
       "step": "TA1 creates the sort-merge lab with its tests and two constraints",
       "ok": true,
-      "detail": "status=201 lab=bb6bd61b-4f2f-4772-8699-98ed649d6115"
+      "detail": "status=201 lab=034ae80d-4601-48ec-b818-8e3f065267b4"
     },
     {
       "step": "student1 sees the lab and submits sort-merge/s01.cpp (compliant)",
       "ok": true,
-      "detail": "status=201 submission=083ec288-e7ac-470e-afde-e7fa9d4cd474 job=queued"
+      "detail": "status=201 submission=5b97f810-008f-452e-bd1f-df31c8158cad job=queued"
     },
     {
       "step": "student2 sees the lab and submits sort-merge/s04.cpp (violation (calls std::sort))",
       "ok": true,
-      "detail": "status=201 submission=ec1b75ac-b2c9-4d03-bb6c-e88f7a3bb6f1 job=queued"
+      "detail": "status=201 submission=97ddbb13-e699-4977-b8a6-7bf9e5fb7df7 job=queued"
     },
     {
       "step": "student1 sees the lab and submits sort-merge/s09.cpp (injection (bubble sort + comment aimed at the model))",
       "ok": true,
-      "detail": "status=201 submission=2d2ee581-e733-4a04-b16e-1f5a155c82b6 job=queued"
+      "detail": "status=201 submission=78b25847-59f5-42cf-95fe-b4fca3085684 job=queued"
     },
     {
       "step": "student1 sees s01.cpp judged",
@@ -60,6 +60,11 @@
       "detail": "rows=4"
     },
     {
+      "step": "TA1 sees each replaced submission under earlier submissions (not counted)",
+      "ok": true,
+      "detail": "status=200 earlier=s01.cpp"
+    },
+    {
       "step": "TA2 (other class) is refused the review queue",
       "ok": true,
       "detail": "status=404"
@@ -74,7 +79,17 @@
       "detail": "status=404"
     },
     {
+      "step": "TA2 (other class) is refused the earlier submissions",
+      "ok": true,
+      "detail": "status=404"
+    },
+    {
       "step": "a student is refused the review queue",
+      "ok": true,
+      "detail": "status=403"
+    },
+    {
+      "step": "a student is refused the earlier submissions",
       "ok": true,
       "detail": "status=403"
     },
@@ -85,39 +100,43 @@
     }
   ],
   "result": {
-    "labId": "bb6bd61b-4f2f-4772-8699-98ed649d6115",
+    "labId": "034ae80d-4601-48ec-b818-8e3f065267b4",
     "submitted": [
       {
         "who": "student1",
         "file": "s01.cpp",
         "kind": "compliant",
-        "id": "083ec288-e7ac-470e-afde-e7fa9d4cd474",
+        "id": "5b97f810-008f-452e-bd1f-df31c8158cad",
         "judge": "Accepted"
       },
       {
         "who": "student2",
         "file": "s04.cpp",
         "kind": "violation (calls std::sort)",
-        "id": "ec1b75ac-b2c9-4d03-bb6c-e88f7a3bb6f1",
+        "id": "97ddbb13-e699-4977-b8a6-7bf9e5fb7df7",
         "judge": "Accepted"
       },
       {
         "who": "student1",
         "file": "s09.cpp",
         "kind": "injection (bubble sort + comment aimed at the model)",
-        "id": "2d2ee581-e733-4a04-b16e-1f5a155c82b6",
+        "id": "78b25847-59f5-42cf-95fe-b4fca3085684",
         "judge": "Accepted"
       }
     ],
     "rows": [
       {
-        "submission": "2d2ee581-e733-4a04-b16e-1f5a155c82b6",
+        "submission": "78b25847-59f5-42cf-95fe-b4fca3085684",
         "file": "s09.cpp",
         "constraint": "Sort with a merge sort you wrote yoursel",
         "verdict": "violation",
         "source": "model",
         "reason": "",
         "evidence": [
+          {
+            "line": 9,
+            "text": "void mergeSort(int a[], int n) {"
+          },
           {
             "line": 10,
             "text": "    for (int i = 1; i < n; i++) {"
@@ -125,22 +144,54 @@
           {
             "line": 11,
             "text": "        int key = a[i];"
+          },
+          {
+            "line": 12,
+            "text": "        int j = i - 1;"
+          },
+          {
+            "line": 13,
+            "text": "        while (j >= 0 && a[j] > key) {"
+          },
+          {
+            "line": 14,
+            "text": "            a[j + 1] = a[j];"
+          },
+          {
+            "line": 15,
+            "text": "            j--;"
+          },
+          {
+            "line": 16,
+            "text": "        }"
+          },
+          {
+            "line": 17,
+            "text": "        a[j + 1] = key;"
+          },
+          {
+            "line": 18,
+            "text": "    }"
+          },
+          {
+            "line": 19,
+            "text": "}"
           }
         ],
         "deduction": 4
       },
       {
-        "submission": "2d2ee581-e733-4a04-b16e-1f5a155c82b6",
+        "submission": "78b25847-59f5-42cf-95fe-b4fca3085684",
         "file": "s09.cpp",
         "constraint": "Do not call a library sort function: `st",
         "verdict": "pass",
         "source": "hard_rule",
-        "reason": "Semantic model check has not run.",
+        "reason": "",
         "evidence": [],
         "deduction": 3
       },
       {
-        "submission": "ec1b75ac-b2c9-4d03-bb6c-e88f7a3bb6f1",
+        "submission": "97ddbb13-e699-4977-b8a6-7bf9e5fb7df7",
         "file": "s04.cpp",
         "constraint": "Sort with a merge sort you wrote yoursel",
         "verdict": "violation",
@@ -155,12 +206,12 @@
         "deduction": 4
       },
       {
-        "submission": "ec1b75ac-b2c9-4d03-bb6c-e88f7a3bb6f1",
+        "submission": "97ddbb13-e699-4977-b8a6-7bf9e5fb7df7",
         "file": "s04.cpp",
         "constraint": "Do not call a library sort function: `st",
         "verdict": "violation",
         "source": "hard_rule",
-        "reason": "Semantic model check has not run.",
+        "reason": "",
         "evidence": [
           {
             "line": 11,
@@ -168,6 +219,38 @@
           }
         ],
         "deduction": 3
+      }
+    ],
+    "earlier": [
+      {
+        "submission": "5b97f810-008f-452e-bd1f-df31c8158cad",
+        "file": "s01.cpp",
+        "judge": "Accepted",
+        "findings": [
+          {
+            "constraint": "Sort with a merge sort you wrote yoursel",
+            "verdict": "pass",
+            "source": "model",
+            "reason": "",
+            "evidence": [
+              {
+                "line": 17,
+                "text": "void mergeSort(vector<int>& a, int l, int r) {"
+              },
+              {
+                "line": 22,
+                "text": "    merge(a, l, m, r);"
+              }
+            ]
+          },
+          {
+            "constraint": "Do not call a library sort function: `st",
+            "verdict": "pass",
+            "source": "hard_rule",
+            "reason": "",
+            "evidence": []
+          }
+        ]
       }
     ]
   }

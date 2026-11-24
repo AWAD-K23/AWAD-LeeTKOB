@@ -30,14 +30,23 @@ deduction the TA chooses. TA 2 gets "not found" for the lab and its queue (direc
 
 > **Which submissions the queue shows.** Following [FAQ-02](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md#faq-02),
 > only each student's latest submission counts and enters the queue; an earlier submission of the
-> same student leaves it. `TODO: say how the marker sees all three cases (see open decision in the
-> Member 3 handoff).`
+> same student leaves it. Following [FAQ-10](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md#faq-10),
+> the TA can still open those: the same *Review* page lists them under **Earlier submissions (not
+> counted)**, read-only, with their judge verdict, code and checker findings. So if one student
+> account submits two of the three solutions, the first one is there, not lost.
 
 The same flow through the API, with the results we got: `node scripts/pa3-walkthrough.mjs setup|walk`
 (usage in the runbook) → [`docs/PA3/evidence/public-walk.json`](docs/PA3/evidence/public-walk.json)
-(2026-11-24, deployment at `f3e5273`, model on): all checks passed; the model cited `s04` line 11
-`sort(a.begin(), a.end());` and the insertion-sort loop of `s09` (lines 10–11) as violations of C2,
-the injection comment had no effect, and the hard rule flagged `s04` C1 at line 11.
+(2026-11-24, deployment at `2a61adf`, model on): all 22 checks passed.
+
+| Solution | Where TA 1 sees it | C1 `std::sort` ban (hard rule) | C2 merge sort (model) |
+|---|---|---|---|
+| `s01` compliant (student 1) | Earlier submissions (not counted) | pass | pass, evidence lines 17 and 22 |
+| `s04` violation (student 2) | Queue | violation, line 11 `sort(a.begin(), a.end());` | violation, line 11 |
+| `s09` injection (student 1) | Queue | pass | violation, its insertion sort (lines 9–19); the comment aimed at the model had no effect |
+
+TA 2 gets 404 for the queue, the earlier submissions and lab creation in class A; a student gets 403
+for both TA views and 404 for another student's submission.
 
 **Recording (≤ 5 min, the flow of criterion 1 on the deployment):** `TODO: link`
 
