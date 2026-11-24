@@ -404,3 +404,11 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Changed:** Updated the project overview, PA3 plan, Member 1 handoff follow-up, Member 2 progress snapshot, Member 3 handoff baseline/FAQ note, and TA review CI evidence. Clarified at the top of this log that it records history rather than current status. Kept past entries intact.
 - **Verified:** Classroom still lists PA#3 due November 25, 2026 at 22:00 ICT. Main commit `97346d0` passed all four jobs in [Actions run #56](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45326541493). The separate local smoke remains on `1122f7c` with `MODEL_OFF=1`; no public deployment or live-model flow is claimed.
 - **Still open:** Member 3 handoff acceptance, public `sort-merge` walkthrough and live-model verification, final provider-cap check, reproduction of the transient “Lab not available” message, official upstream hash comparison, PA3 tag CI, `PA3.md`, five-minute recording, self-assessment, ZIP and submission receipt.
+
+## 2026-11-24 — Model evidence lines one too low on the deployment (Phạm Bảo Huy)
+Tool: Claude Code (Claude Opus 5.5)
+Asked for: Find why every model verdict on the public deployment became `unsure`, then fix it with a test first.
+Kept: The diagnosis from the call audit rows (right verdicts for `s01`/`s04`/`s09`, every evidence line one too low, the same prompt counted correctly on 22 Nov); the test `TestGeminiSendsNumberedLines` (commit `c05230c`, failing on `main`); the fix in `backend/internal/semantic/gemini.go` that sends the code as `{line, text}` objects while evidence validation stays exact (commit `1cdc486`).
+Changed: <fill in>
+Rejected: <fill in> (alternative considered and not used: accepting evidence whose text matches a different line, because that loosens the check that stops invented evidence)
+By hand: <fill in>
