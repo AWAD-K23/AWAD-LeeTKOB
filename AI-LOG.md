@@ -409,26 +409,26 @@ Kept: the existing local test result and the CI workflow command; no application
 Tool: Claude Code (Claude Opus 5.5)
 Asked for: Do the Member 3 work. Run the Member 1 and 2 handoff checks, rehearse the `sort-merge` flow locally, and prepare the public deployment, `PA3.md` and the tracker updates.
 Kept: The acceptance record (`docs/PA3/MEMBER3-ACCEPTANCE.md`): every documented check passed on `df6f621`, run in Docker. The dev set is byte-identical to a fresh clone of the published repository. The marker-style `docker run --network none` checker run exits 1, never 2. `scripts/pa3-walkthrough.mjs` passed every step locally with the worker started after the submissions. `deploy/vm-bootstrap.sh`, `deploy/vm-accounts.sh` and `docs/PA3/PUBLIC-DEPLOYMENT.md`. The `PA3.md` draft.
-Changed: <fill in>
-Rejected: <fill in>. Found by the assistant's own checks: shellcheck caught an apostrophe in `${DOMAIN:?...}` that broke quoting in the first `vm-bootstrap.sh`. Gitleaks flagged a `password: value` line in a sample PA3.md, so the accounts go in a table instead.
-By hand: <fill in>
+Changed: None in the files. I directed the work: chose a new cloud VM over the alternatives and the team's AI Studio project key; asked what a stopped VM costs, which led to the deallocate notes in deploy/azure-create-vm.sh.
+Rejected: The first VM in Azure eastasia (Hong Kong): Gemini refused every call from it ("User location is not supported"), so I deallocated it and created a new one in Japan East. Found by the assistant's own checks: shellcheck caught an apostrophe in `${DOMAIN:?...}` that broke quoting in the first `vm-bootstrap.sh`. Gitleaks flagged a `password: value` line in a sample PA3.md, so the accounts go in a table instead.
+By hand: Installed Azure CLI and signed in; arranged subscription access with the subscription owner; ran azure-create-vm.sh twice (Hong Kong, then Japan East); ran vm-bootstrap.sh and vm-accounts.sh on the VM; put the model key into /etc/leetkob/worker.env with sudoedit and set MODEL_OFF=0; deallocated the Hong Kong VM; opened PR #23.
 Limits: the local rehearsal ran with `MODEL_OFF=1`; no public deployment, live-model flow or tag CI is claimed here. Three findings are recorded for their owners: the queue shows only each student's latest submission (FAQ-02); "Lab not available" comes from a stale `["labs"]` cache; hard-rule verdicts keep the reason "Semantic model check has not run."
 
 ## 2026-11-24 — Model evidence lines one too low on the deployment (Phạm Bảo Huy)
 Tool: Claude Code (Claude Opus 5.5)
 Asked for: Find why every model verdict on the public deployment became `unsure`, then fix it with a test first.
 Kept: The diagnosis from the call audit rows (right verdicts for `s01`/`s04`/`s09`, every evidence line one too low, the same prompt counted correctly on 22 Nov); the test `TestGeminiSendsNumberedLines` (commit `c05230c`, failing on `main`); the fix in `backend/internal/semantic/gemini.go` that sends the code as `{line, text}` objects while evidence validation stays exact (commit `1cdc486`).
-Changed: <fill in>
-Rejected: <fill in> (alternative considered and not used: accepting evidence whose text matches a different line, because that loosens the check that stops invented evidence)
-By hand: <fill in>
+Changed: None in the code. I chose to have the fix made in Member 2's area with my name on the commits instead of handing it back.
+Rejected: None (assistant's design choice: alternative considered and not used: accepting evidence whose text matches a different line, because that loosens the check that stops invented evidence)
+By hand: Created the git-ignored local .env with the key for the real dev-set run (key never pasted into the chat); approved the push; opened PR #22; redeployed the VM to the fixed commit.
 
 ## 2026-11-24 — PA3 review fixes: earlier submissions, lab cache, hard-rule reason (Phạm Bảo Huy)
 Tool: Claude Code (Claude Opus 5.5)
 Asked for: Fix the three Member 3 acceptance findings, each with a failing test first.
 Kept: Read-only `GET /labs/{labId}/earlier-submissions` and the review page section *Earlier submissions (not counted)* (tests `7f9aa78`, code `44523a9`); `refetchType: "all"` before opening a new lab (browser test `bf10683` delays the list request so the stale render is seen every run, fix `2c69b0e`); clearing the pending reason when a ban list decides (test `f9bf22b`, fix `744188a`). Findings 2 and 3 are in files owned by Tô Thanh Long; the commits say so.
-Changed: <fill in>
-Rejected: <fill in> (not used: putting earlier submissions into the queue itself, which FAQ-02 rules out)
-By hand: <fill in>
+Changed: None in the code.
+Rejected: Two of the three options for the disappearing submission: only a note in PA3.md (the marker could still read it as missing), and a third student account (the rubric asks for two). Also rejected handing findings 2 and 3 back to Long or leaving them as known issues. (assistant's design choice: not used: putting earlier submissions into the queue itself, which FAQ-02 rules out)
+By hand: Chose the read-only "Earlier submissions" design; opened PRs #24 and #25; redeployed the VM twice.
 
 ## 2026-11-24 — PA3 self-assessment draft and README model cost (Phạm Bảo Huy)
 Tool: Claude Code (Claude Opus 5.5)
