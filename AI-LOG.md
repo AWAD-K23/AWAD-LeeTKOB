@@ -412,3 +412,11 @@ Kept: The diagnosis from the call audit rows (right verdicts for `s01`/`s04`/`s0
 Changed: <fill in>
 Rejected: <fill in> (alternative considered and not used: accepting evidence whose text matches a different line, because that loosens the check that stops invented evidence)
 By hand: <fill in>
+
+## 2026-11-24 — PA3 review fixes: earlier submissions, lab cache, hard-rule reason (Phạm Bảo Huy)
+Tool: Claude Code (Claude Opus 5.5)
+Asked for: Fix the three Member 3 acceptance findings, each with a failing test first.
+Kept: Read-only `GET /labs/{labId}/earlier-submissions` and the review page section *Earlier submissions (not counted)* (tests `7f9aa78`, code `44523a9`); `refetchType: "all"` before opening a new lab (browser test `bf10683` delays the list request so the stale render is seen every run, fix `2c69b0e`); clearing the pending reason when a ban list decides (test `f9bf22b`, fix `744188a`). Findings 2 and 3 are in files owned by Tô Thanh Long; the commits say so.
+Changed: <fill in>
+Rejected: <fill in> (not used: putting earlier submissions into the queue itself, which FAQ-02 rules out)
+By hand: <fill in>
