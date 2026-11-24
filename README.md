@@ -163,6 +163,14 @@ forwarding to Go. Direct clients on port 8080 use unprefixed paths such as `/me`
 The supported model is `gemini-3.5-flash-lite`. With `MODEL_OFF=1`, hard rules
 still run and semantic constraints remain unsure without provider calls.
 
+**What one lab of 80 submissions costs.** Measured on the committed dev-set run
+[`eval/runs/real-dev-numbered/`](eval/runs/real-dev-numbered/) (one call per submission with a
+semantic constraint): 39 calls, 37,838 input and 3,795 output tokens, no thinking tokens, at
+US$0.30 / US$2.50 per million tokens, rounded up per call = US$0.020851
+(`usage-summary.json`). For 80 submissions: `0.020851 / 39 × 80 = US$0.043`. Each call first
+reserves US$0.478 (the model's full input and output limits) against the lab's US$1 budget and is
+charged its measured cost once the provider reports usage.
+
 For real checking, set `MODEL_NAME` and `MODEL_API_KEY` in the ignored `.env`,
 verify the intended provider spending cap, then explicitly set `MODEL_OFF=0`.
 The key belongs only in the trusted worker or standalone checker environment.

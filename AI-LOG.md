@@ -429,3 +429,11 @@ Kept: Read-only `GET /labs/{labId}/earlier-submissions` and the review page sect
 Changed: <fill in>
 Rejected: <fill in> (not used: putting earlier submissions into the queue itself, which FAQ-02 rules out)
 By hand: <fill in>
+
+## 2026-11-24 — PA3 self-assessment draft and README model cost (Phạm Bảo Huy)
+Tool: Claude Code (Claude Opus 5.5)
+Asked for: Draft SELF_ASSESSMENT_REPORT.md for PA#3 against the rubric, checking every claimed piece of evidence.
+Kept: The draft claims 92 / 100. Checks behind it: 39/39 logged prompts carry provider ids, none holds a ban-list constraint or comment markers; the sandbox flags; the memory read-back; five labelled own cases. The README gained the measured cost of one 80-submission lab: 0.020851 / 39 × 80 = US$0.043 (`eval/runs/real-dev-numbered/usage-summary.json`).
+Changed: <fill in>
+Rejected: <fill in> (the assistant corrected its own draft: it had credited the AI-LOG with a "15 RPM pacing" Changed entry that does not exist)
+By hand: <fill in>
