@@ -7,6 +7,7 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.html text eol=lf
+*.sh text eol=lf
 
 # Preserve the lecturer's published files byte for byte on every platform.
 eval/official/** -text
