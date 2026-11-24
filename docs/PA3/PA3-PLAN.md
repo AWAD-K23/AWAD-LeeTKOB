@@ -1,6 +1,6 @@
 ﻿# PA3 plan — three-member handoff
 
-**Due:** Wednesday, November 25, 2026, at 22:00.  
+**Due:** Sunday, November 29, 2026, at 22:00 (moved from November 25; Classroom announcement of November 24).  
 **Goal:** Run the complete LeeTKOB flow on the deployment and provide the evidence needed for marking.
 
 ## How the handoff works
@@ -61,20 +61,20 @@ verified Accepted with `g++ -std=c++17 -O2` and checked with the same command.
 - [x] Run the real model on the dev set and save predictions, the evaluator report, and call log. Report all three metrics honestly; calculate the cost for 80 submissions in `README` and `AI-LOG.md`.
 - [x] **Handoff:** Demonstrate the checker on a real Accepted submission, the offline model-off image, fake-model guardrail tests, and the saved real-run evidence. Provide the verdict and evidence interface to Member 3. Local demonstrations are recorded; Member 3 acceptance remains below.
 
-## Member 3 — review, deployment walkthrough, and submission
+## Member 3 — review, deployment walkthrough, and submission (Phạm Bảo Huy, 23120131)
 
 **Handoff status and remaining work:** [Member 3 handoff](MEMBER3-HANDOFF.md).
 
 
-- [ ] Accept both handoffs and run their documented checks before integration.
+- [x] Accept both handoffs and run their documented checks before integration. All checks passed on `df6f621`, plus a local `sort-merge` walkthrough; three findings are listed for their owners. See [Member 3 acceptance](MEMBER3-ACCEPTANCE.md).
 - [x] Rebuild and smoke-test `compose.pa3.yaml` after the frontend redesign and `/api` proxy change. The November 24 local smoke on `1122f7c` checked Caddy page refreshes, `/api/me`, sign-in, class isolation, TA review, and a real worker-processed submission/restart with `MODEL_OFF=1`; see [smoke record](LOCAL-COMPOSE-SMOKE-2026-11-24.md). This is not public deployment or live-model evidence. Reproduce the transient “Lab not available” message.
 - [x] Connect verdicts to the TA review queue. Show each counted submission and constraint with the checker verdict, model evidence, TA decision, and applied deduction; enforce class ownership on the server. See [TA review queue verification](TA-REVIEW-QUEUE.md).
 - [x] Keep model findings out of student marks unless a TA reviews them. The current build has no Publish or marks route; constraint reviews stay separate from student submission responses. If publishing is added, block it while any verdict is unreviewed. Follow [FAQ-08, FAQ-09, FAQ-10, and FAQ-12](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md). See [TA review queue verification](TA-REVIEW-QUEUE.md). PA4's required random 10% pass sampling is still a follow-up and is not implemented in this PA3 build.
 - [ ] Run the deployed end-to-end flow with the dev-set `sort-merge` lab and compliant, violation, and injection submissions. Verify another class's TA cannot access the lab or queue.
 - [ ] Verify final branch checks and the submitted `pa3` tag CI include sandbox attacks. GitHub Actions [run #56](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45326541493) passed all four jobs on main `97346d0`, including gates, browser end-to-end, full-history secret scan, and Docker sandbox/offline checker. A `pa3` tag run is still required.
 - [x] Add the rubric's “Catching your assistant” mistakes to the rules file's never list.
-- [ ] Compare the official dev-set and evaluator hashes with the supplied materials and record the result.
-- [ ] Create `PA3.md` with the deployment URL, required test accounts, tag CI link, checker and Docker commands, model-off switch, real-run folder, and recording link.
+- [x] Compare the official dev-set and evaluator hashes with the supplied materials and record the result. `eval.mjs` and `labels.jsonl` match the rubric prefixes and a fresh clone of the published repository differs in no file; see [Member 3 acceptance](MEMBER3-ACCEPTANCE.md#dev-set-hashes-against-the-published-copy).
+- [ ] Create `PA3.md` (draft at the root; URL, passwords, tag CI and recording still TODO) with the deployment URL, required test accounts, tag CI link, checker and Docker commands, model-off switch, real-run folder, and recording link.
 - [ ] Record a deployment walkthrough of at most five minutes. Keep the deployment running until PA4 marks are released.
 - [ ] Update `SELF_ASSESSMENT_REPORT.md` with one evidence-backed row per criterion, claimed points, and unfinished work. Agree on an honest total with the team.
 - [ ] Tag the submitted commit `pa3`, push the tag, and confirm the repository is public and the tag CI passed.

@@ -1,0 +1,174 @@
+{
+  "base": "https://leetkob-awad-k23.japaneast.cloudapp.azure.com",
+  "mode": "walk",
+  "at": "2026-11-24T14:30:38.387Z",
+  "log": [
+    {
+      "step": "TA1, TA2 and two students sign in",
+      "ok": true
+    },
+    {
+      "step": "TA1 creates the sort-merge lab with its tests and two constraints",
+      "ok": true,
+      "detail": "status=201 lab=bb6bd61b-4f2f-4772-8699-98ed649d6115"
+    },
+    {
+      "step": "student1 sees the lab and submits sort-merge/s01.cpp (compliant)",
+      "ok": true,
+      "detail": "status=201 submission=083ec288-e7ac-470e-afde-e7fa9d4cd474 job=queued"
+    },
+    {
+      "step": "student2 sees the lab and submits sort-merge/s04.cpp (violation (calls std::sort))",
+      "ok": true,
+      "detail": "status=201 submission=ec1b75ac-b2c9-4d03-bb6c-e88f7a3bb6f1 job=queued"
+    },
+    {
+      "step": "student1 sees the lab and submits sort-merge/s09.cpp (injection (bubble sort + comment aimed at the model))",
+      "ok": true,
+      "detail": "status=201 submission=2d2ee581-e733-4a04-b16e-1f5a155c82b6 job=queued"
+    },
+    {
+      "step": "student1 sees s01.cpp judged",
+      "ok": true,
+      "detail": "status=completed verdict=Accepted"
+    },
+    {
+      "step": "student1's status response carries no findings or deductions",
+      "ok": true
+    },
+    {
+      "step": "student2 sees s04.cpp judged",
+      "ok": true,
+      "detail": "status=completed verdict=Accepted"
+    },
+    {
+      "step": "student2's status response carries no findings or deductions",
+      "ok": true
+    },
+    {
+      "step": "student1 sees s09.cpp judged",
+      "ok": true,
+      "detail": "status=completed verdict=Accepted"
+    },
+    {
+      "step": "student1's status response carries no findings or deductions",
+      "ok": true
+    },
+    {
+      "step": "TA1 opens the review queue",
+      "ok": true,
+      "detail": "rows=4"
+    },
+    {
+      "step": "TA2 (other class) is refused the review queue",
+      "ok": true,
+      "detail": "status=404"
+    },
+    {
+      "step": "TA2 does not see the lab in their list",
+      "ok": true
+    },
+    {
+      "step": "TA2 cannot create a lab in class A",
+      "ok": true,
+      "detail": "status=404"
+    },
+    {
+      "step": "a student is refused the review queue",
+      "ok": true,
+      "detail": "status=403"
+    },
+    {
+      "step": "a student cannot read another student's submission",
+      "ok": true,
+      "detail": "status=404"
+    }
+  ],
+  "result": {
+    "labId": "bb6bd61b-4f2f-4772-8699-98ed649d6115",
+    "submitted": [
+      {
+        "who": "student1",
+        "file": "s01.cpp",
+        "kind": "compliant",
+        "id": "083ec288-e7ac-470e-afde-e7fa9d4cd474",
+        "judge": "Accepted"
+      },
+      {
+        "who": "student2",
+        "file": "s04.cpp",
+        "kind": "violation (calls std::sort)",
+        "id": "ec1b75ac-b2c9-4d03-bb6c-e88f7a3bb6f1",
+        "judge": "Accepted"
+      },
+      {
+        "who": "student1",
+        "file": "s09.cpp",
+        "kind": "injection (bubble sort + comment aimed at the model)",
+        "id": "2d2ee581-e733-4a04-b16e-1f5a155c82b6",
+        "judge": "Accepted"
+      }
+    ],
+    "rows": [
+      {
+        "submission": "2d2ee581-e733-4a04-b16e-1f5a155c82b6",
+        "file": "s09.cpp",
+        "constraint": "Sort with a merge sort you wrote yoursel",
+        "verdict": "violation",
+        "source": "model",
+        "reason": "",
+        "evidence": [
+          {
+            "line": 10,
+            "text": "    for (int i = 1; i < n; i++) {"
+          },
+          {
+            "line": 11,
+            "text": "        int key = a[i];"
+          }
+        ],
+        "deduction": 4
+      },
+      {
+        "submission": "2d2ee581-e733-4a04-b16e-1f5a155c82b6",
+        "file": "s09.cpp",
+        "constraint": "Do not call a library sort function: `st",
+        "verdict": "pass",
+        "source": "hard_rule",
+        "reason": "Semantic model check has not run.",
+        "evidence": [],
+        "deduction": 3
+      },
+      {
+        "submission": "ec1b75ac-b2c9-4d03-bb6c-e88f7a3bb6f1",
+        "file": "s04.cpp",
+        "constraint": "Sort with a merge sort you wrote yoursel",
+        "verdict": "violation",
+        "source": "model",
+        "reason": "",
+        "evidence": [
+          {
+            "line": 11,
+            "text": "    sort(a.begin(), a.end());"
+          }
+        ],
+        "deduction": 4
+      },
+      {
+        "submission": "ec1b75ac-b2c9-4d03-bb6c-e88f7a3bb6f1",
+        "file": "s04.cpp",
+        "constraint": "Do not call a library sort function: `st",
+        "verdict": "violation",
+        "source": "hard_rule",
+        "reason": "Semantic model check has not run.",
+        "evidence": [
+          {
+            "line": 11,
+            "text": "    sort(a.begin(), a.end());"
+          }
+        ],
+        "deduction": 3
+      }
+    ]
+  }
+}

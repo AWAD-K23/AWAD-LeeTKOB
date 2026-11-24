@@ -405,6 +405,15 @@ Kept: the existing local test result and the CI workflow command; no application
 - **Verified:** Classroom still lists PA#3 due November 25, 2026 at 22:00 ICT. Main commit `97346d0` passed all four jobs in [Actions run #56](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45326541493). The separate local smoke remains on `1122f7c` with `MODEL_OFF=1`; no public deployment or live-model flow is claimed.
 - **Still open:** Member 3 handoff acceptance, public `sort-merge` walkthrough and live-model verification, final provider-cap check, reproduction of the transient “Lab not available” message, official upstream hash comparison, PA3 tag CI, `PA3.md`, five-minute recording, self-assessment, ZIP and submission receipt.
 
+## 2026-11-24 — PA3 Member 3: handoff acceptance, deployment runbook, PA3.md draft (Phạm Bảo Huy)
+Tool: Claude Code (Claude Opus 5.5)
+Asked for: Do the Member 3 work. Run the Member 1 and 2 handoff checks, rehearse the `sort-merge` flow locally, and prepare the public deployment, `PA3.md` and the tracker updates.
+Kept: The acceptance record (`docs/PA3/MEMBER3-ACCEPTANCE.md`): every documented check passed on `df6f621`, run in Docker. The dev set is byte-identical to a fresh clone of the published repository. The marker-style `docker run --network none` checker run exits 1, never 2. `scripts/pa3-walkthrough.mjs` passed every step locally with the worker started after the submissions. `deploy/vm-bootstrap.sh`, `deploy/vm-accounts.sh` and `docs/PA3/PUBLIC-DEPLOYMENT.md`. The `PA3.md` draft.
+Changed: <fill in>
+Rejected: <fill in>. Found by the assistant's own checks: shellcheck caught an apostrophe in `${DOMAIN:?...}` that broke quoting in the first `vm-bootstrap.sh`. Gitleaks flagged a `password: value` line in a sample PA3.md, so the accounts go in a table instead.
+By hand: <fill in>
+Limits: the local rehearsal ran with `MODEL_OFF=1`; no public deployment, live-model flow or tag CI is claimed here. Three findings are recorded for their owners: the queue shows only each student's latest submission (FAQ-02); "Lab not available" comes from a stale `["labs"]` cache; hard-rule verdicts keep the reason "Semantic model check has not run."
+
 ## 2026-11-24 — Model evidence lines one too low on the deployment (Phạm Bảo Huy)
 Tool: Claude Code (Claude Opus 5.5)
 Asked for: Find why every model verdict on the public deployment became `unsure`, then fix it with a test first.
