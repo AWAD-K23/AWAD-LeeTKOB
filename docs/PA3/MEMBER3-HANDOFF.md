@@ -2,7 +2,7 @@
 
 **Status checked:** November 24, 2026
 **Current baseline:** [`97346d0`](https://github.com/AWAD-K23/AWAD-LeeTKOB/commit/97346d007b59fe9ff8a5963eade9e0a0b1b00290) (main; PR #20 merged)
-**PA#3 deadline:** Wednesday, November 25, 2026 at 22:00 ICT
+**PA#3 deadline:** Sunday, November 29, 2026 at 22:00 ICT (moved from November 25)
 
 This guide shows what is ready, what the evidence proves, and what still needs to happen before submission. It does not claim that Member 3 accepted the handoff, that a public deployment is running, or that PA#3 has been submitted.
 
@@ -20,11 +20,11 @@ The core implementation and local checks are in place. The key release evidence 
 
 ## Finish in this order
 
-### 1. Accept the implementation handoffs
+### 1. Accept the implementation handoffs — done 2026-11-24, see [acceptance record](MEMBER3-ACCEPTANCE.md)
 
 Read the [PA3 plan](PA3-PLAN.md), [Member 1 handoff](MEMBER1-HANDOFF.md), [Member 2 handoff](MEMBER2-HANDOFF.md), [TA review evidence](TA-REVIEW-QUEUE.md), and the [local smoke record](LOCAL-COMPOSE-SMOKE-2026-11-24.md). Run their documented checks against the final commit and record the results before marking either handoff accepted.
 
-### 2. Prepare the public deployment
+### 2. Prepare the public deployment — runbook and scripts: [public deployment](PUBLIC-DEPLOYMENT.md)
 
 Follow the deployment steps in the [README](../../README.md). Set up public HTTPS, persistent storage, the API, web app, and trusted worker. Verify the spending cap on the exact provider project and key before enabling `MODEL_OFF=0`. Keep the key on the server and out of the browser and student-code sandbox.
 
