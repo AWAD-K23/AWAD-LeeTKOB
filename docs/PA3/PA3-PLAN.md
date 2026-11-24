@@ -71,7 +71,8 @@ verified Accepted with `g++ -std=c++17 -O2` and checked with the same command.
 - [x] Connect verdicts to the TA review queue. Show each counted submission and constraint with the checker verdict, model evidence, TA decision, and applied deduction; enforce class ownership on the server. See [TA review queue verification](TA-REVIEW-QUEUE.md).
 - [x] Keep model findings out of student marks unless a TA reviews them. The current build has no Publish or marks route; constraint reviews stay separate from student submission responses. If publishing is added, block it while any verdict is unreviewed. Follow [FAQ-08, FAQ-10, and FAQ-12](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md). See [TA review queue verification](TA-REVIEW-QUEUE.md).
 - [ ] Run the deployed end-to-end flow with the dev-set `sort-merge` lab and compliant, violation, and injection submissions. Verify another class's TA cannot access the lab or queue.
-- [ ] Run the documented checks and verify tag CI includes the sandbox attacks. Check that offline checks work without network and that the checker image works with `MODEL_OFF=1`.- [x] Add the rubric's “Catching your assistant” mistakes to the rules file's never list.
+- [ ] Run the documented checks and verify tag CI includes the sandbox attacks. Check that offline checks work without network and that the checker image works with `MODEL_OFF=1`.
+- [x] Add the rubric's “Catching your assistant” mistakes to the rules file's never list.
 - [ ] Compare the official dev-set and evaluator hashes with the supplied materials and record the result.
 - [ ] Create `PA3.md` with the deployment URL, required test accounts, tag CI link, checker and Docker commands, model-off switch, real-run folder, and recording link.
 - [ ] Record a deployment walkthrough of at most five minutes. Keep the deployment running until PA4 marks are released.
