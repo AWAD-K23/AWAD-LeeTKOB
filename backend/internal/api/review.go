@@ -100,6 +100,54 @@ func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, out)
 }
 
+// earlierSubmissions lists, read-only, the submissions the queue leaves out
+// because a newer one from the same student counts (FAQ-02). FAQ-10 lets the
+// assigned TA open every submission; decisions stay on the counted one only.
+func (s *Server) earlierSubmissions(w http.ResponseWriter, r *http.Request) {
+	_, lab, ok := s.assignedTA(w, r)
+	if !ok {
+		return
+	}
+	rows, err := s.DB.Query(r.Context(), `
+		SELECT s.id::text,s.student_id::text,s.created_at::text,COALESCE(j.verdict,''),
+		convert_from(s.source,'UTF8'),
+		COALESCE((SELECT json_agg(json_build_object('constraint',c.description,
+			'verdict',v.verdict,'source',v.source,'reason',v.reason,'evidence',v.evidence)
+			ORDER BY c.id)
+			FROM constraint_verdicts v JOIN lab_constraints c ON c.id=v.constraint_id AND c.lab_id=s.lab_id
+			WHERE v.submission_id=s.id),'[]'::json)
+		FROM submissions s
+		LEFT JOIN judge_results j ON j.submission_id=s.id
+		WHERE s.lab_id=$1
+		AND EXISTS (SELECT 1 FROM submissions newer WHERE newer.lab_id=s.lab_id
+			AND newer.student_id=s.student_id AND
+			(newer.created_at, newer.id) > (s.created_at, s.id))
+		ORDER BY s.created_at DESC,s.id`, lab)
+	if err != nil {
+		internal(w)
+		return
+	}
+	defer rows.Close()
+	out := []map[string]any{}
+	for rows.Next() {
+		var submissionID, studentID, createdAt, judge, code string
+		var findings []byte
+		if err := rows.Scan(&submissionID, &studentID, &createdAt, &judge, &code, &findings); err != nil {
+			internal(w)
+			return
+		}
+		out = append(out, map[string]any{
+			"submissionId": submissionID, "studentId": studentID, "createdAt": createdAt,
+			"judgeVerdict": judge, "sourceCode": code, "findings": json.RawMessage(findings),
+		})
+	}
+	if rows.Err() != nil {
+		internal(w)
+		return
+	}
+	jsonResponse(w, out)
+}
+
 func exactEvidence(code string, evidence []reviewEvidence) bool {
 	if len(evidence) == 0 {
 		return false

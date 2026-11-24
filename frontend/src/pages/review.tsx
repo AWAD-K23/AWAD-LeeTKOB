@@ -29,6 +29,62 @@ type Finding = {
   appliedDeduction: number;
 };
 
+type EarlierSubmission = {
+  submissionId: string;
+  studentId: string;
+  createdAt: string;
+  judgeVerdict: string;
+  sourceCode: string;
+  findings: {
+    constraint: string;
+    verdict: "pass" | "violation" | "unsure";
+    source: string;
+    reason: string;
+    evidence: Evidence[];
+  }[];
+};
+
+// Only each student's latest submission counts (FAQ-02); the TA can still open
+// the earlier ones (FAQ-10). They are shown read-only: no decision applies.
+function EarlierSubmissions({ items }: { items: EarlierSubmission[] }) {
+  return (
+    <section className="panel form-section" aria-labelledby="earlier-heading">
+      <h2 id="earlier-heading">Earlier submissions (not counted)</h2>
+      <p className="muted">
+        Only each student&apos;s latest submission counts and enters the queue.
+        These earlier ones are shown for reference; they cannot be decided.
+      </p>
+      {items.map((item) => (
+        <details key={item.submissionId}>
+          <summary>
+            Submission {item.submissionId} · Student {item.studentId} ·{" "}
+            {item.createdAt} · {item.judgeVerdict || "Not judged"}
+          </summary>
+          <pre className="mono">{item.sourceCode}</pre>
+          <ul className="review-rules">
+            {item.findings.map((finding, index) => (
+              <li key={index}>
+                {finding.constraint}:{" "}
+                <strong>
+                  {finding.verdict} ({finding.source})
+                </strong>
+                {finding.verdict === "unsure" && finding.reason
+                  ? ` · ${finding.reason}`
+                  : ""}
+                {finding.evidence.map((line) => (
+                  <div key={line.line}>
+                    Line {line.line}: <code>{line.text}</code>
+                  </div>
+                ))}
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))}
+    </section>
+  );
+}
+
 function FindingDecision({
   labId,
   finding,
@@ -135,6 +191,11 @@ export function ReviewQueuePage() {
     queryFn: () => api<Finding[]>(`/labs/${id}/review-queue`),
     refetchInterval: 5000,
   });
+  const earlier = useQuery({
+    queryKey: ["earlier-submissions", id],
+    queryFn: () => api<EarlierSubmission[]>(`/labs/${id}/earlier-submissions`),
+    refetchInterval: 5000,
+  });
   if (queue.isPending) return <Loading />;
   const submissions = (queue.data ?? []).reduce<Record<string, Finding[]>>(
     (groups, item) => {
@@ -176,6 +237,8 @@ export function ReviewQueuePage() {
           </ul>
         </section>
       ))}
+      <Feedback error={earlier.error} retry={() => void earlier.refetch()} />
+      {!!earlier.data?.length && <EarlierSubmissions items={earlier.data} />}
     </div>
   );
 }

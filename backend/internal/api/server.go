@@ -23,6 +23,7 @@ func (s *Server) Routes() http.Handler {
 	r.Post("/classes", s.createClass)
 	r.Get("/labs", s.labs)
 	r.Get("/labs/{labId}/review-queue", s.reviewQueue)
+	r.Get("/labs/{labId}/earlier-submissions", s.earlierSubmissions)
 	r.Post("/labs/{labId}/submissions/{submissionId}/constraints/{constraintId}/review", s.reviewDecision)
 	r.Get("/submissions/{submissionId}", s.submissionStatus)
 	r.Post("/classes/{classId}/labs", s.createLab)
