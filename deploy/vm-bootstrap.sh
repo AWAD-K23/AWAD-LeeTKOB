@@ -91,9 +91,29 @@ docker run --rm -e CGO_ENABLED=0 -v "$APP:/src" -w /src/backend golang:1.26 \
   sh -c 'go build -buildvcs=false -o /src/bin/worker ./cmd/worker && go build -buildvcs=false -o /src/bin/create-user ./cmd/create-user'
 chmod 755 "$APP/bin/worker" "$APP/bin/create-user"
 
-echo "== 8. Worker service"
+echo "== 8. Start the stack and the worker at every boot (VM stop/start, Azure maintenance reboot)"
+# compose.pa3.yaml has no restart policy, so without this unit the site stays down after a reboot.
+cat > /etc/systemd/system/leetkob-stack.service <<EOF
+[Unit]
+Description=LeeTKOB web, API and database (Docker Compose)
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=${APP}
+ExecStart=/usr/bin/docker compose --project-name leetkob -f compose.pa3.yaml up -d
+ExecStop=/usr/bin/docker compose --project-name leetkob -f compose.pa3.yaml stop
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
+EOF
 install -m 644 "$APP/deploy/leetkob-worker.service" /etc/systemd/system/leetkob-worker.service
 systemctl daemon-reload
+systemctl enable leetkob-stack >/dev/null
 systemctl enable leetkob-worker >/dev/null
 systemctl restart leetkob-worker
 

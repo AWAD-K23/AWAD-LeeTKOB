@@ -3,9 +3,11 @@
 #   az login
 #   bash deploy/azure-create-vm.sh            # defaults below
 #   LOCATION=eastasia DNS_LABEL=leetkob-k23 bash deploy/azure-create-vm.sh
-# It creates one resource group holding: an Ubuntu 24.04 VM, a static public IP with a DNS
-# name, and a firewall that allows 80/443 from anywhere and SSH only from this machine's IP.
-# Delete everything later with:  az group delete --name "$RG"   (only after PA#5/PA#6 are marked)
+# It creates, in a new or an existing resource group (RG=<name>): an Ubuntu 24.04 VM, a static
+# public IP "<vm>-ip" with a DNS name, and a firewall "<vm>-nsg" that allows 80/443 from anywhere
+# and SSH only from this machine's IP. To stop paying for compute: az vm deallocate -g RG -n VM.
+# Remove it after PA#5/PA#6 are marked: delete the VM, then its disk, NIC, <vm>-ip and <vm>-nsg.
+# Do not delete the whole group if it holds other resources.
 set -euo pipefail
 
 RG="${RG:-leetkob-pa3}"
@@ -22,19 +24,25 @@ az account show --query "{subscription:name, user:user.name}" -o table
 MY_IP="$(curl -fsS https://api.ipify.org)"
 echo "SSH will be allowed only from ${MY_IP}/32"
 
-echo "== Resource group $RG in $LOCATION"
-az group create --name "$RG" --location "$LOCATION" -o none
+if [ "$(az group exists --name "$RG")" = "true" ]; then
+  LOCATION="$(az group show --name "$RG" --query location -o tsv)"
+  echo "== Using existing resource group $RG in $LOCATION"
+else
+  echo "== Resource group $RG in $LOCATION"
+  az group create --name "$RG" --location "$LOCATION" -o none
+fi
 
 echo "== VM $VM ($SIZE, Ubuntu 24.04), static IP, DNS label $DNS_LABEL"
 az vm create \
   --resource-group "$RG" --name "$VM" --location "$LOCATION" \
   --image Canonical:ubuntu-24_04-lts:server:latest --size "$SIZE" \
   --admin-username "$ADMIN" --ssh-key-values "$SSH_KEY" --authentication-type ssh \
+  --public-ip-address "${VM}-ip" --nsg "${VM}-nsg" \
   --public-ip-sku Standard --public-ip-address-allocation static \
   --public-ip-address-dns-name "$DNS_LABEL" \
   --os-disk-size-gb 30 --nsg-rule NONE -o none
 
-NSG="$(az network nsg list -g "$RG" --query "[0].name" -o tsv)"
+NSG="${VM}-nsg"
 echo "== Firewall $NSG: SSH from ${MY_IP}, HTTP/HTTPS from anywhere"
 az network nsg rule create -g "$RG" --nsg-name "$NSG" -n ssh-from-admin --priority 1000 \
   --access Allow --protocol Tcp --direction Inbound --destination-port-ranges 22 \
@@ -43,8 +51,8 @@ az network nsg rule create -g "$RG" --nsg-name "$NSG" -n web --priority 1010 \
   --access Allow --protocol Tcp --direction Inbound --destination-port-ranges 80 443 \
   --source-address-prefixes Internet -o none
 
-FQDN="$(az network public-ip list -g "$RG" --query "[0].dnsSettings.fqdn" -o tsv)"
-IP="$(az network public-ip list -g "$RG" --query "[0].ipAddress" -o tsv)"
+FQDN="$(az network public-ip show -g "$RG" -n "${VM}-ip" --query dnsSettings.fqdn -o tsv)"
+IP="$(az network public-ip show -g "$RG" -n "${VM}-ip" --query ipAddress -o tsv)"
 echo
 echo "VM ready: ${FQDN} (${IP})"
 echo "Next (runbook step 2):"
