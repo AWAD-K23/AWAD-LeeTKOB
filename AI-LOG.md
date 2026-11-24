@@ -434,6 +434,6 @@ By hand: Chose the read-only "Earlier submissions" design; opened PRs #24 and #2
 Tool: Claude Code (Claude Opus 5.5)
 Asked for: Draft SELF_ASSESSMENT_REPORT.md for PA#3 against the rubric, checking every claimed piece of evidence.
 Kept: The draft claims 92 / 100. Checks behind it: 39/39 logged prompts carry provider ids, none holds a ban-list constraint or comment markers; the sandbox flags; the memory read-back; five labelled own cases. The README gained the measured cost of one 80-submission lab: 0.020851 / 39 × 80 = US$0.043 (`eval/runs/real-dev-numbered/usage-summary.json`).
-Changed: <fill in>
-Rejected: <fill in> (the assistant corrected its own draft: it had credited the AI-LOG with a "15 RPM pacing" Changed entry that does not exist)
-By hand: <fill in>
+Changed: none
+Rejected: none
+By hand: recorded and uploaded the video, took the screenshot
