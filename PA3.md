@@ -1,11 +1,11 @@
 # PA#3 — Prototype with the LLM feature running
 
 Team: 23120131 Phạm Bảo Huy · 23120135 Trần Anh Khoa · 23120143 Tô Thanh Long
-Repository (public): https://github.com/AWAD-K23/AWAD-LeeTKOB · submitted tag: `pa3` → `TODO: commit`
+Repository (public): https://github.com/AWAD-K23/AWAD-LeeTKOB · submitted tag: `pa3`
 
 ## Deployment
 
-**URL:** https://leetkob-awad-k23.japaneast.cloudapp.azure.com — serves `TODO: commit` (the `pa3` tag).
+**URL:** https://leetkob-awad-k23.japaneast.cloudapp.azure.com — serves the commit the `pa3` tag points to.
 Azure VM in Japan East (ARM64): Hong Kong, the first region, is refused by the Gemini API. It stays up until the
 PA#4 marks are out. How it is built and run: [public deployment runbook](docs/PA3/PUBLIC-DEPLOYMENT.md).
 
@@ -14,11 +14,11 @@ model project has a monthly spending cap and each lab a US$1 model budget (see *
 
 | Role | Class | Email | Password |
 |---|---|---|---|
-| Admin | — | `pa3-admin@leetkob.test` | `TODO` |
-| TA 1 | Class A — Sorting lab | `pa3-ta1@leetkob.test` | `TODO` |
-| TA 2 | Class B — other TA | `pa3-ta2@leetkob.test` | `TODO` |
-| Student 1 | Class A | `pa3-student1@leetkob.test` | `TODO` |
-| Student 2 | Class A | `pa3-student2@leetkob.test` | `TODO` |
+| Admin | — | `pa3-admin@leetkob.test` | `orchid-tundra-raven-17` |
+| TA 1 | Class A — Sorting lab | `pa3-ta1@leetkob.test` | `nectar-amber-kestrel-14` |
+| TA 2 | Class B — other TA | `pa3-ta2@leetkob.test` | `harbor-tundra-nectar-51` |
+| Student 1 | Class A | `pa3-student1@leetkob.test` | `glade-fjord-lagoon-10` |
+| Student 2 | Class A | `pa3-student2@leetkob.test` | `amber-ember-tundra-67` |
 
 **Walking through criterion 1.** Sign in as TA 1 → *Classes* → Class A → *New lab*: paste the
 `sort-merge` statement, its tests and its two constraints with deductions 3 and 4. Sign in as a
@@ -48,11 +48,12 @@ The same flow through the API, with the results we got: `node scripts/pa3-walkth
 TA 2 gets 404 for the queue, the earlier submissions and lab creation in class A; a student gets 403
 for both TA views and 404 for another student's submission.
 
-**Recording (≤ 5 min, the flow of criterion 1 on the deployment):** `TODO: link`
+**Recording (the flow of criterion 1 on the deployment, in the browser):** https://youtu.be/VHWiPBBcwHg
+(unlisted). It runs 8:48, longer than the 5 minutes asked.
 
 ## CI for the tag
 
-`TODO: link to the GitHub Actions run for tag pa3` — jobs `gates`, `secret-history`, `e2e`,
+[GitHub Actions runs for the `pa3` tag](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions?query=branch%3Apa3) — jobs `gates`, `secret-history`, `e2e`,
 `sandbox`. The `sandbox` job builds the sandbox image and runs `TestAttacks` (one attack submission
 per minimum: network, cpu, wall, memory, process, output, user, mounts, secrets; sources in
 `backend/internal/sandbox/testdata/`), `TestDurableWorker` (worker stopped → submit → restart →
@@ -99,8 +100,8 @@ Dev set: `eval/official/` is byte-identical to `github.com/fithcmus/awad-leetkob
 
 ## Model
 
-`gemini-3.5-flash-lite` (Google AI Studio, project AWAD-LeeTKOB, monthly cap ₫100,000 —
-`TODO: re-check date`). It receives only the statement, the semantic constraints and the code with
+`gemini-3.5-flash-lite` (Google AI Studio, project "AWAD-Leetkob Project", monthly spend cap ₫100,000,
+₫634 spent so far: [screenshot, 2026-11-25](docs/PA3/evidence/ai-studio-cap.png)). It receives only the statement, the semantic constraints and the code with
 comments and known identities removed, and returns `pass` / `violation` / `unsure` with evidence
 per constraint; it never sets a deduction. One lab of 80 submissions costs about **US$0.043**
 (US$0.020851 for the 39 measured calls of `real-dev-numbered` ÷ 39 × 80, from its
