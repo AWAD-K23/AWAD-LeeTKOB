@@ -676,6 +676,34 @@ VALUES($1,$2,'unsure','[{"line":1,"text":"int main() { return 0; }"}]','model','
 			!strings.Contains(out.Body.String(), `"reason":"Model returned unsure."`) {
 			t.Fatalf("unsafe or incomplete TA queue: %d %s", out.Code, out.Body.String())
 		}
+		// FAQ-10: outside the queue the assigned TA can still open every
+		// submission. Earlier ones are listed read-only with their findings.
+		earlierPath := "/labs/" + labID + "/earlier-submissions"
+		expectProblem(t, request("GET", earlierPath, "", otherTACookie, "", ""), 404, "not-found", "Lab not found")
+		expectProblem(t, request("GET", earlierPath, "", cookie, "", ""), 403, "forbidden", "Forbidden")
+		out = request("GET", earlierPath, "", taCookie, "", "")
+		var earlier []struct {
+			SubmissionID string `json:"submissionId"`
+			StudentID    string `json:"studentId"`
+			JudgeVerdict string `json:"judgeVerdict"`
+			SourceCode   string `json:"sourceCode"`
+			Findings     []struct {
+				Constraint string `json:"constraint"`
+				Verdict    string `json:"verdict"`
+				Source     string `json:"source"`
+				Reason     string `json:"reason"`
+			} `json:"findings"`
+		}
+		if out.Code != 200 || json.Unmarshal(out.Body.Bytes(), &earlier) != nil || len(earlier) != 1 ||
+			earlier[0].SubmissionID != oldID || earlier[0].StudentID != student ||
+			earlier[0].JudgeVerdict != "Accepted" || earlier[0].SourceCode != "int main() { return 0; }" ||
+			len(earlier[0].Findings) != 1 || earlier[0].Findings[0].Constraint != "Do not call sort" ||
+			earlier[0].Findings[0].Verdict != "unsure" || earlier[0].Findings[0].Reason != "Model returned unsure." {
+			t.Fatalf("earlier submissions: %d %s", out.Code, out.Body.String())
+		}
+		// Earlier submissions stay outside the queue and cannot be decided.
+		oldDecision := "/labs/" + labID + "/submissions/" + oldID + "/constraints/" + constraintID + "/review"
+		expectProblem(t, request("POST", oldDecision, `{"decision":"pass"}`, taCookie, "", "http://localhost:5173"), 404, "not-found", "Submission not found")
 		decisionPath := "/labs/" + labID + "/submissions/" + submissionID + "/constraints/" + constraintID + "/review"
 		expectProblem(t, request("POST", decisionPath, `{"decision":"violation","evidence":[{"line":1,"text":"fabricated"}]}`, taCookie, "", "http://localhost:5173"), 400, "invalid-request", "Invalid request")
 		expectProblem(t, request("POST", decisionPath, `{"decision":"pass"}`, otherTACookie, "", "http://localhost:5173"), 404, "not-found", "Lab not found")

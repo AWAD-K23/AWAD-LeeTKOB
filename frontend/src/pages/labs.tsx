@@ -209,7 +209,9 @@ export function LabForm() {
     onSuccess: async (result) => {
       allowNavigation();
       setDirty(false);
-      await cache.invalidateQueries({ queryKey: ["labs"] });
+      // Refetch the list even though no list is on screen: the new lab's page
+      // reads it, and a cached copy without the lab shows "Lab not available".
+      await cache.invalidateQueries({ queryKey: ["labs"], refetchType: "all" });
       navigate(`/labs/${result.id}`, {
         state: { created: true },
         viewTransition: true,
