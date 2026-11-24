@@ -23,9 +23,12 @@ PA#4 red team attacks it), and PA#5 needs it again through the oral on 24/31 Dec
   - Azure: the VM's public IP → *Configuration* → **DNS name label** gives `<label>.<region>.cloudapp.azure.com`.
   - Any provider: a free DuckDNS subdomain (`<name>.duckdns.org`) set to the VM's IP.
 - Use a **static** public IP, so the address survives a VM restart.
+- Pick a region where the **Gemini API is available**. Hong Kong is not: our first VM in Azure
+  `eastasia` got `400 User location is not supported for the API use.` on every model call.
+  Azure for Students only allows malaysiawest, eastasia, japaneast, uaenorth and indonesiacentral.
 
 Azure shortcut: after `az login`, `bash deploy/azure-create-vm.sh` creates the resource group, the
-Ubuntu 24.04 VM (Standard_B2als_v2 in eastasia), a static IP with the DNS name `leetkob-awad-k23.eastasia.cloudapp.azure.com`,
+Ubuntu 24.04 ARM64 VM (Standard_B2pls_v2 in japaneast; all our images are multi-arch), a static IP with the DNS name `leetkob-awad-k23.japaneast.cloudapp.azure.com`,
 and a firewall allowing 80/443 from anywhere and SSH only from your current IP.
 
 ## 2. Install (you, on the VM)
@@ -61,6 +64,16 @@ It prints five `LK_…=email:password` lines once. They are public by design (th
 2. Create or copy that project's API key. Do not paste it into a chat or a commit.
 3. `sudoedit /etc/leetkob/worker.env` → set `MODEL_API_KEY=…` and `MODEL_OFF=0`.
 4. `sudo systemctl restart leetkob-worker && sudo journalctl -u leetkob-worker -n 20 --no-pager`.
+5. Check that Google accepts calls from this VM (prints the model's metadata, never the key; an
+   `error` here means every model verdict will be `unsure` with "Model request failed."):
+
+   ```bash
+   sudo sh -c '. /etc/leetkob/worker.env; curl -sS -H "x-goog-api-key: $MODEL_API_KEY" \
+     https://generativelanguage.googleapis.com/v1beta/models/$MODEL_NAME' | head -c 300
+   ```
+
+A failed call keeps its full US$0.48 reservation (usage unknown), so two failures exhaust a lab's
+US$1 budget and later submissions show "Lab model budget exhausted." Test the call before a demo.
 
 The key is now readable only by root and the `leetkob` group. The API container, the browser
 bundle and the sandbox never receive it (`compose.pa3.yaml` passes no model variable to `api`;

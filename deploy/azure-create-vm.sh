@@ -11,11 +11,16 @@
 set -euo pipefail
 
 RG="${RG:-leetkob-pa3}"
-# Azure for Students offered no small general-purpose size in southeastasia on 2026-11-24;
-# eastasia offered B2als_v2 with quota. The VM may live in another region than its group.
-LOCATION="${LOCATION:-eastasia}"
+# The region must be one where the Gemini API is offered: eastasia is Hong Kong, and Gemini
+# answers every call from there with "User location is not supported" (seen 2026-11-24).
+# Azure for Students allows only malaysiawest, eastasia, japaneast, uaenorth and
+# indonesiacentral (policy sys.regionrestriction). On 2026-11-24 the only small size with quota
+# among the Gemini regions was the ARM64 B2pls_v2 in japaneast; every image we build is multi-arch.
+# The VM may live in another region than its group.
+LOCATION="${LOCATION:-japaneast}"
 VM="${VM:-leetkob-vm}"
-SIZE="${SIZE:-Standard_B2als_v2}"     # 2 vCPU, 4 GiB, burstable
+SIZE="${SIZE:-Standard_B2pls_v2}"     # 2 vCPU (ARM64), 4 GiB, burstable
+IMAGE="${IMAGE:-Canonical:ubuntu-24_04-lts:server-arm64:latest}"   # x86 sizes: ...:server:latest
 DNS_LABEL="${DNS_LABEL:-leetkob-awad-k23}"
 ADMIN="${ADMIN:-azureuser}"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519.pub}"
@@ -36,7 +41,7 @@ fi
 echo "== VM $VM ($SIZE, Ubuntu 24.04), static IP, DNS label $DNS_LABEL"
 az vm create \
   --resource-group "$RG" --name "$VM" --location "$LOCATION" \
-  --image Canonical:ubuntu-24_04-lts:server:latest --size "$SIZE" \
+  --image "$IMAGE" --size "$SIZE" \
   --admin-username "$ADMIN" --ssh-key-values "$SSH_KEY" --authentication-type ssh \
   --public-ip-address "${VM}-ip" --nsg "${VM}-nsg" \
   --public-ip-sku Standard --public-ip-address-allocation static \
