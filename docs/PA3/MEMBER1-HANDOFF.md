@@ -35,7 +35,9 @@
   using `compose.pa3.yaml`. Check frontend loading, direct page refreshes, `/api/me`,
   sign-in, class/lab access, and a real worker-processed submission. Record the tested
   commit and results. Member 1 remains responsible for fixes to their supplied
-  deployment files and backend components.## Follow-up verification — November 24, 2026
+  deployment files and backend components.
+
+## Follow-up verification — November 24, 2026
 
 The post-redesign local Compose and Caddy smoke test ran against merged commit `1122f7c` with `MODEL_OFF=1`. It covered direct page refresh, sign-in, separate class ownership, a TA-reviewed hard-rule deduction, and worker restart. See the [smoke record](LOCAL-COMPOSE-SMOKE-2026-11-24.md). The November 22 assignment above records status at that time. Public deployment, live model checks, teammate acceptance, and final `pa3` tag CI remain pending.
 
