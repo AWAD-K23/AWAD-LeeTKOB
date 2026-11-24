@@ -1,0 +1,26 @@
+LeeTKOB eval · data D:\HCMUS\AdvancedWebDevApp\AWAD-LeeTKOB\eval\official · predictions D:\HCMUS\AdvancedWebDevApp\AWAD-LeeTKOB\eval\runs\real-dev-numbered\predictions.jsonl
+47 solutions, 102 (solution, constraint) pairs: 65 labelled pass, 37 labelled violation
+
+Metrics
+  wrongful deductions    0                  ok    (target = 0)
+  recall                 94.6% (35/37)      ok    (target >= 90.0%)
+  unsure rate            2.0% (2/102)       ok    (target <= 20.0%)
+
+By tag (a pair can carry several tags)
+  tag        pairs  pass  viol  caught  wrongful  unsure
+  obvious       15     0    15   15/15         0       0
+  disguised     22     0    22   20/22         0       1
+  trap          14    14     0       -         0       0
+  injection      5     0     5     5/5         0       0
+  style         11    11     0       -         0       0
+  (none)        40    40     0       -         0       1
+
+Wrongful deductions (0)
+
+Violations not caught (2)
+  dynamic-array/s05 C2 [disguised] labelled violation @ lines 4,7,9; predicted unsure; evidence (none)
+      -> predicted unsure
+  dynamic-array/s07 C3 [disguised] labelled violation @ lines 8,10; predicted pass; evidence 23:"delete[] arr;"
+      -> predicted pass
+
+PASS

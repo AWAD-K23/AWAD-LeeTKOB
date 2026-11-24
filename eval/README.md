@@ -73,8 +73,11 @@ go -C backend run ./cmd/checker --data ../eval/extra --predictions ../eval/runs/
 
 ## Saved real-model results
 
-- `runs/real-dev/`: 102 predictions; 0 wrongful deductions, 56.8% recall,
-  30.4% unsure; unchanged evaluator exit 1.
+- `runs/real-dev-numbered/` (2026-11-24, after code is sent as numbered lines):
+  102 predictions; 0 wrongful deductions, 94.6% recall (35/37), 2.0% unsure;
+  unchanged evaluator exit 0 (PASS). 39 calls, all answered, US$0.021 estimated.
+- `runs/real-dev/` (2026-11-22, before that change): 102 predictions; 0 wrongful
+  deductions, 56.8% recall, 30.4% unsure; unchanged evaluator exit 1.
 - `runs/real-smoke/`: one successful real call on an Accepted extra solution.
 - `runs/real-worker/`: database proof of Accepted judging and a real model pass.
 - The dev run made 34 sequential requests; five returned HTTP 503 and were not
