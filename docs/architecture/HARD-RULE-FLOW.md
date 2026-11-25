@@ -2,7 +2,7 @@
 
 ## 1. What does this checker do?
 
-- It checks supported rules that ban named functions or references.
+- It checks supported rules that ban named functions, references, loop/goto statements and types, including container aliases.
 - Example: ``Do not call `std::sort` ``.
 - It uses a C++ code scanner, not a plain text search of the student's code.
 - It makes no model calls and chooses no deductions.
@@ -11,10 +11,10 @@
 
 | File | Responsibility |
 | --- | --- |
-| [check.go](../../../backend/internal/hardrules/check.go) | Reads rules, matches scanner findings, and creates verdicts |
-| [check_test.go](../../../backend/internal/hardrules/check_test.go) | Tests rule format and tricky C++ examples |
-| [scan.cpp](../../../sandbox/scan.cpp) | Uses Clang to find referenced names and source lines |
-| [runner.go](../../../backend/internal/sandbox/runner.go) | Runs the scanner inside Docker |
+| [check.go](../../backend/internal/hardrules/check.go) | Reads rules, matches scanner findings, and creates verdicts |
+| [check_test.go](../../backend/internal/hardrules/check_test.go) | Tests rule format and tricky C++ examples |
+| [scan.cpp](../../sandbox/scan.cpp) | Uses Clang to find referenced names and source lines |
+| [runner.go](../../backend/internal/sandbox/runner.go) | Runs the scanner inside Docker |
 
 ```mermaid
 flowchart TD
@@ -54,7 +54,7 @@ int main() {
 | C2 | `Use merge sort` |
 
 - C1 can be checked by looking for the banned name.
-- C2 needs a meaning-based check. Member 1 leaves it pending.
+- C2 needs a meaning-based check. This package leaves it pending for the worker's optional semantic checker.
 - The expected C1 evidence is line 4.
 
 ## 3. Understand the data types
@@ -79,6 +79,7 @@ type Evidence struct {
 type Verdict struct {
     ConstraintID string     `json:"constraintId"`
     Verdict      string     `json:"verdict"`
+    Reason       string     `json:"reason"`
     Evidence     []Evidence `json:"evidence"`
     Source       string     `json:"source"`
 }
@@ -88,6 +89,7 @@ type Verdict struct {
 | --- | --- | --- |
 | `ConstraintID` | `C1` | Which rule was checked |
 | `Verdict` | `violation` | What the checker found |
+| `Reason` | `Semantic model check has not run.` | Local explanation for unresolved work; empty for decided bans |
 | `Evidence` | Line 4 and its exact source text | Where the finding came from |
 | `Source` | `hard_rule` | Which kind of checker produced it |
 
@@ -224,7 +226,7 @@ if err == nil {
 **File:** `check.go`, inside the rule loop.
 
 ```go
-v := Verdict{ConstraintID: c.ID, Verdict: "unsure", Evidence: []Evidence{}, Source: "semantic_pending"}
+v := Verdict{ConstraintID: c.ID, Verdict: "unsure", Reason: "Semantic model check has not run.", Evidence: []Evidence{}, Source: "semantic_pending"}
 ```
 
 - C2 has no supported ban list, so it keeps this result.
@@ -238,6 +240,7 @@ names := bannedNames(c.Text)
 if len(names) > 0 {
     v.Verdict = "pass"
     v.Source = "hard_rule"
+    v.Reason = ""
     found := map[int]bool{}
 ```
 
@@ -332,7 +335,7 @@ if result.Verdict != "Executed" {
 | Other rule | `unsure` | `semantic_pending` |
 
 - Failed analysis is not an automatic pass or deduction.
-- Hard-rule failure is kept separate from work intended for the future model checker.
+- Hard-rule failure is kept separate from semantic work: failed ban analysis is not routed to the model. The worker assigns an analysis-failure reason; semantic findings remain eligible for the implemented semantic checker.
 
 ## 12. What the tests cover
 
@@ -342,6 +345,7 @@ if result.Verdict != "Executed" {
 | --- | --- |
 | `TestBanListFormat` | Supported prefixes and extracting backtick names |
 | `TestSyntaxTraps` | Seven C++ examples using the real scanner in Docker |
+| `TestStatementAndTypeBans` | Statement and type bans, including aliases and compliant traps |
 
 | C++ example | Expected C1 result |
 | --- | --- |

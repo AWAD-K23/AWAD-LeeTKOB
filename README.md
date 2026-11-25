@@ -24,8 +24,8 @@ are published; the model never chooses deductions.
 - Student responses exclude protected constraint findings and deductions.
 
 **Current limits:** TA review is available; mark publication and appeals are pending.
-Public deployment verification and final submission work are tracked separately.
-See [the PA3 plan](docs/PA3/PA3-PLAN.md) and [local Compose smoke](docs/PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md) for delivery status and limits.
+PA3 is complete per the team; final evidence and limitations are in [PA3.md](PA3.md).
+See [project progress](docs/PROJECT-PROGRESS.md) and the [PA4 plan](docs/PA4/PA4-PLAN.md) for current work.
 
 ## How it works
 
@@ -241,16 +241,17 @@ npm run check --prefix frontend
 
 | Guide | Contents |
 | --- | --- |
-| [Backend structure](docs/BACKEND.md) | Go files, commands, routes, and model controls |
-| [Database structure](docs/DATABASE.md) | Tables, relationships, queue state, and cost reservations |
-| [Backend connections](docs/PA3/backend-mechanism/BACKEND-CONNECTIONS.md) | Server, worker, sandbox, and hard rules |
-| [Model checker flow](docs/PA3/backend-mechanism/MODEL-CHECKER-FLOW.md) | Visual walkthrough with real data and code snippets |
+| [Architecture and mechanisms](docs/architecture/README.md) | Central index of the current system, mechanism guides and planned PA4 publication flow |
+| [Backend structure](docs/architecture/BACKEND.md) | Go files, commands, routes, and model controls |
+| [Database structure](docs/architecture/DATABASE.md) | Tables, relationships, queue state, and cost reservations |
+| [Backend connections](docs/architecture/BACKEND-CONNECTIONS.md) | Server, worker, sandbox, hard rules, model and TA review |
+| [Model checker flow](docs/architecture/MODEL-CHECKER-FLOW.md) | Visual walkthrough with real data and code snippets |
+| [Review and Publish flow](docs/architecture/REVIEW-PUBLISH-FLOW.md) | Implemented TA decisions/history and planned PA4 sampling/Publish |
 | [Manual test](docs/PA3/MANUAL-FLOW-TEST.md) | Accounts, example labs, submission cases, and database checks |
 | [Evaluation](eval/README.md) | Dataset layout, checker image, commands, and reports |
 | [Deployment setup](docs/PA3/MEMBER1-HANDOFF.md) | Compose/Caddy setup and separate host worker |
 | [PA3 plan](docs/PA3/PA3-PLAN.md) | Completed work, remaining tasks, and ownership |
 | [AI log](AI-LOG.md) | Assistant use, changes, rejected suggestions, and verification |
 
-The local deployment stack is configured in `compose.pa3.yaml`; the worker runs
-separately on the Docker host. Deployment files and local evidence do not claim
-that public hosting, the deployed dev-set walkthrough, live model checking, or final tag CI are complete.
+The deployment stack is configured in `compose.pa3.yaml`; the worker runs
+separately on the Docker host. Final public PA3 evidence is linked in [PA3.md](PA3.md); dated local smoke records retain their original scope.

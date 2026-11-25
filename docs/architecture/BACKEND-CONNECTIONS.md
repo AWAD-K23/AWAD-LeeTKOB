@@ -4,10 +4,12 @@
 
 | Part | Simple job | Main file |
 | --- | --- | --- |
-| Server | Receives browser requests and returns saved data | [cmd/server/main.go](../../../backend/cmd/server/main.go) |
-| Worker | Picks waiting submissions and judges them | [worker.go](../../../backend/internal/worker/worker.go) |
-| Hard rules | Checks supported bans without AI | [check.go](../../../backend/internal/hardrules/check.go) |
-| Sandbox runner | Creates restricted Docker containers for running or analyzing code | [runner.go](../../../backend/internal/sandbox/runner.go) |
+| Server | Receives browser requests and returns saved data | [cmd/server/main.go](../../backend/cmd/server/main.go) |
+| Worker | Picks waiting submissions and judges them | [worker.go](../../backend/internal/worker/worker.go) |
+| Hard rules | Checks supported bans without AI | [check.go](../../backend/internal/hardrules/check.go) |
+| Semantic checker | Sanitizes and numbers source, validates model findings | [semantic/check.go](../../backend/internal/semantic/check.go) |
+| TA review API | Reads findings and records separate TA decisions/history | [review.go](../../backend/internal/api/review.go) |
+| Sandbox runner | Creates restricted Docker containers for running or analyzing code | [runner.go](../../backend/internal/sandbox/runner.go) |
 | PostgreSQL | Stores submissions, waiting jobs, and results | Database tables |
 
 - The server and worker are **two separate Go programs**.
@@ -30,9 +32,14 @@ flowchart TD
     Rules -->|Request analyze mode| Runner
     Runner -->|Referenced names and line numbers| Rules
     Rules -->|Pass, violation, or unsure with evidence| Worker
+    Worker -->|Pending semantic constraints when enabled| Model[Semantic checker and Gemini]
+    Model -->|Reserve budget and record calls| DB
+    Model -->|Validated findings or unsure with reason| Worker
     Worker -->|Save judge result and rule findings| DB
     DB -->|Saved status and judge result| Server
     Server -->|Return status response| Browser
+    TA[Assigned TA] -->|Queue and review decisions| Server
+    Server -->|Read findings and save separate reviews/history| DB
 ```
 
 ## 3. Follow one submission
@@ -60,7 +67,7 @@ flowchart TD
 
 ### Server → database
 
-- The existing submission handler in [submission.go](../../../backend/internal/api/submission.go)
+- The existing submission handler in [submission.go](../../backend/internal/api/submission.go)
   saves the submission and job together.
 - This leaves work in PostgreSQL even when the worker is stopped.
 
@@ -74,6 +81,9 @@ w := worker.Worker{
     Runner: sandbox.Runner{
         Image: os.Getenv("SANDBOX_IMAGE"),
     },
+    SemanticFor: func(lab, submission string) semantic.Checker {
+        return modelConfig.Checker(db, lab, submission)
+    },
 }
 ```
 
@@ -83,6 +93,7 @@ found, err := w.ProcessOne(ctx)
 
 - Give the worker its database connections and real sandbox runner.
 - Repeatedly process one available job.
+- The command loads local environment configuration and supplies a per-lab model checker. Calls remain off unless explicitly enabled.
 
 ### Worker → sandbox: run mode
 
@@ -119,6 +130,12 @@ result, err := scanner.Run(ctx, source, "", "analyze")
 - Analyze mode runs the C++ scanner, not the student's `main()`.
 - A scan is needed only when there is a supported ban-list rule.
 
+### Worker → model: pending semantic constraints
+
+- After hard rules, `SemanticFor(lab, submission)` supplies the optional semantic checker. The worker passes the statement, source, constraints, existing findings and locally known account identifiers for redaction.
+- Only unresolved semantic constraints reach the model; hard-rule decisions and uncertain ban analysis are preserved. The adapter sends cleaned source as numbered `{line, text}` objects.
+- The worker's persistent lab ledger reserves budget before provider access and stores audit data. Failed calls/schema/evidence checks produce unsure with a local reason. See [model flow](MODEL-CHECKER-FLOW.md).
+
 ### Worker → database: save results
 
 **File:** `internal/worker/worker.go`, end of `judge()`.
@@ -151,11 +168,11 @@ return w.Complete(ctx, job, "Accepted", "All test cases passed.", checks)
 | Published mark | Not produced here | Requires the separate TA review/publication workflow |
 
 - Accepted and a constraint violation can both be correct.
-- The diagram above describes the Member 1 base flow. Member 2 now adds optional
-  semantic model checks between hard rules and the final result save.
+- The diagram includes the completed PA3 semantic and TA review paths. Model findings and TA decisions are stored separately; review decisions do not publish marks.
 - With model calls off, meaning-based rules remain `unsure` / `semantic_pending`.
 - See [model checker flow](MODEL-CHECKER-FLOW.md) for the current model path.
 - The student status endpoint does not expose protected constraint findings or deductions.
+- The queue currently includes every finding for latest counted Accepted submissions. Persisted random sampling and Publish are planned in [review/publication flow](REVIEW-PUBLISH-FLOW.md).
 
 ## 7. Read next
 

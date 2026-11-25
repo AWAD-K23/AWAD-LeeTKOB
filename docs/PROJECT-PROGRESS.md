@@ -1,8 +1,10 @@
 # LeeTKOB progress — PA1 to PA6
 
-**Updated:** November 24, 2026 (Asia/Saigon).  
-**Implementation reviewed:** [`97346d0`](https://github.com/AWAD-K23/AWAD-LeeTKOB/commit/97346d007b59fe9ff8a5963eade9e0a0b1b00290).  
-**Current checkpoint:** PA3, due November 25 at 22:00.
+**Updated:** November 25, 2026 (Asia/Saigon).
+
+**Implementation reviewed:** [`ce82a9d`](https://github.com/AWAD-K23/AWAD-LeeTKOB/commit/ce82a9d897754547a898bac6e06056f9a015d5dc), with the final PA3 report and saved evaluation evidence.
+
+**Current checkpoint:** PA4, due December 2 at 22:00; PA3 is complete per the team. See the [PA4 plan](PA4/PA4-PLAN.md).
 
 This tracker compares the repository with the [class project brief](<LeeTKOB — class project brief.md>), the full PA2–PA6 rubrics, implementation, and saved evidence. The PA4–PA6 sections were revised after reading the complete [PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and red-team.md>), [PA5 rubric](<PA5/PA#5 rubric — Final build and operations.md>), and [PA6 rubric](<PA6/PA#6 rubric — Final demo and individual oral.md>). Checked work means implemented or supported by saved evidence, not an instructor mark, predicted score, or confirmation of submission.
 
@@ -20,12 +22,12 @@ All dates below are in 2026. PA2–PA5 deadlines are at 22:00, as stated in the 
 | --- | --- | --- | --- | --- |
 | PA1 | Not specified in the supplied brief | Original team proposal | ❔ Historical checkpoint; proposal/submission evidence not located | Confirm the team's original proposal record if this tracker must cover submission history |
 | PA2 | November 11 | Harness, quality gate, endpoint contract and tests | ✅ Core engineering delivered; submission evidence recorded separately | Keep the current checkout's checks green; see [PA2 evidence](../PA2.md) |
-| PA3 | November 25 | Working queue/sandbox/model pipeline ending in the TA review queue | ⬜ Core review API/UI and local model-off smoke are implemented; public model-on flow and release evidence remain open | Public `sort-merge` walkthrough, final provider-cap check, teammate acceptance, `pa3` tag CI, `PA3.md`/video, self-assessment and ZIP/submission |
-| PA4 | December 2 | Real-model CI evaluation, held-out run, five guardrails, human gate, red-team report | ⬜ Guardrail foundations exist; saved evaluation fails two thresholds | Live required eval gate, ten custom cases, repeated-run evidence, Publish gate and red-team report |
+| PA3 | November 29 (extended from November 25 per PA3 plan) | Working queue/sandbox/model pipeline ending in the TA review queue | ✅ Complete per team; public model-on walkthrough, report and self-assessment recorded | Keep deployment available through PA4 marking; retain the disclosed 8:48 recording limitation |
+| PA4 | December 2 | Real-model CI evaluation, held-out run, five guardrails, human gate, red-team report | ⬜ Saved numbered-line dev run passes all three thresholds; PA4 integration and evidence remain | Follow the [PA4 plan](PA4/PA4-PLAN.md): live required eval gate, ten custom cases, repeated runs, Publish/random sampling and red-team report |
 | PA5 | December 16 | Final build running and observed | ⬜ Submission updates and deployment scaffolding already exist | Publication/appeals, cross-queue traces, dashboard/SLO/fired alert, reproducible load proof and incident evidence |
 | PA6 | December 24 / December 31, 08:20–11:50; assigned slot | Final demo (40 shared points) and individual oral (60 points) | ⬜ Existing PA5 build must be demonstrated; individual readiness unverified | Commit/post OWNERS.md by December 21 at 22:00; rehearse all eleven features, failure cases and explanations |
 
-**Overall assessment:** PA3's TA review foundation is implemented, but the saved real-model run misses the semantic thresholds and public release evidence is still open. PA4 adds the Publish gate, pass sampling, repeated evaluation and red-team requirements. PA6 reuses the PA5 build and also scores a live demonstration, not just the oral; any beyond-brief feature claimed for PA6 must already be in the submitted PA5 build.
+**Overall assessment:** PA3 is complete per the team, with a recorded public model-on flow and a saved dev run meeting all three thresholds. PA4 adds a required live evaluation gate, Publish, random pass sampling, repeated-run evidence and the red-team report; a single passing dev run does not establish held-out performance. PA6 reuses the PA5 build and also scores a live demonstration, not just the oral; any beyond-brief feature claimed for PA6 must already be in the submitted PA5 build.
 
 | Checkpoint | Rubric criteria and weights | Course weight |
 | --- | --- | --- |
@@ -33,7 +35,7 @@ All dates below are in 2026. PA2–PA5 deadlines are at 22:00, as stated in the 
 | PA5 | Deployment 10; publishing/appeals/results 20; observability 20; load 20; post-mortem 20; AI log 10 | 3% |
 | PA6 | B1 eleven features 22; B2 submitted build/persistence 4; B3 two failure cases 6; B4 authorization 4; B5 beyond brief 4; individual explanation 60 | 15% |
 
-These weights are not claimed marks. The existing PA2 self-assessment must not be reused as a PA4 or PA5 score.
+These weights are not claimed marks. The current [self-assessment](../SELF_ASSESSMENT_REPORT.md) covers PA3; prepare a rubric-specific assessment for PA4 and PA5.
 
 ## PA1 — proposal
 
@@ -60,11 +62,11 @@ These rows describe completed engineering and historical verification. They do n
 | ✅ | Configure local checks and CI for lint, format, types, build and backend tests | [CI workflow](../.github/workflows/gates.yml), [quality-gate verification](PA2/PA2-QUALITY-GATE-VERIFICATION.md) |
 | ✅ | Record a failing required check blocking merge and the subsequent fix | [PA2 report](../PA2.md), [quality-gate verification](PA2/PA2-QUALITY-GATE-VERIFICATION.md); historical evidence, not a fresh remote-settings check |
 | ✅ | Record assistant use and an evidence-backed PA2 self-assessment | [AI log](../AI-LOG.md), [self-assessment](../SELF_ASSESSMENT_REPORT.md) |
-| ⬜ | Restore a fully green check run on the current checkout | Current frontend formatting failure and environment-limited build verification are listed below |
+| ✅ | Record later green checks after PA2 | Historical run #56 passed the checks below; this documentation update does not claim a fresh full-suite run on the current checkout |
 
 ## PA3 — prototype with the LLM feature running
 
-Detailed ownership and delivery requirements remain in the [PA3 plan](PA3/PA3-PLAN.md).
+Detailed ownership and delivery history remain in the [PA3 plan](PA3/PA3-PLAN.md). Some handoff checklists predate completion; use [PA3.md](../PA3.md) and the [PA3 self-assessment](../SELF_ASSESSMENT_REPORT.md) for final evidence and disclosed limitations.
 
 | Status | Job | Evidence / next action |
 | --- | --- | --- |
@@ -85,31 +87,31 @@ Detailed ownership and delivery requirements remain in the [PA3 plan](PA3/PA3-PL
 | ✅ | Record model calls and enforce a persistent per-lab application budget | `backend/internal/worker/model.go`, migration 00005, [Member 2 handoff](PA3/MEMBER2-HANDOFF.md) |
 | ✅ | Provide a generic checker command and an offline model-off Docker image | `backend/cmd/checker/`, `deploy/Dockerfile.checker`, [eval guide](../eval/README.md) |
 | ✅ | Preserve the official dataset/evaluator and add five separate labelled cases | `eval/official-sha256.json`, `eval/extra/`, integrity scripts |
-| ✅ | Save a real-model dev-set run, predictions, call logs, metrics and cost estimate | `eval/runs/real-dev/`, [Member 2 handoff](PA3/MEMBER2-HANDOFF.md) |
+| ✅ | Save a real-model dev-set run, predictions, call logs, metrics and cost estimate | Passing [numbered-line run](../eval/runs/real-dev-numbered/report.txt); original `eval/runs/real-dev/` retained |
 | ✅ | Supply deployment files and host-worker instructions | `compose.pa3.yaml`, `deploy/`, [Member 1 handoff](PA3/MEMBER1-HANDOFF.md) |
-| ⬜ | Complete Member 3 acceptance of both handoffs | Run and record the documented integration checks |
+| ✅ | Complete Member 3 acceptance of both handoffs | [Acceptance record](PA3/MEMBER3-ACCEPTANCE.md): checks on `df6f621`, local walkthrough and upstream hash comparison |
 | ✅ | Expose findings through a TA/class-protected review endpoint | `backend/internal/api/review.go`, `server.go`, and [TA review evidence](PA3/TA-REVIEW-QUEUE.md) |
 | ✅ | Build the TA review queue with source, constraint, verdict, evidence and TA-set deduction | Review UI, class-scoped API, TA decisions, configured deductions and FAQ-09 unsure reasons; [TA review evidence](PA3/TA-REVIEW-QUEUE.md) |
 | ✅ | Confirm and cite product-owner behavior for pre-publication visibility and unsure handling | [FAQ-08, FAQ-09, FAQ-10 and FAQ-12](https://github.com/tkob-team/LeeTKOB-FAQ/blob/main/FAQ.md) are cited in the TA review evidence; no Publish endpoint exists in this build |
-| ✅ | Rebuild and smoke-test the local deployment after the frontend/proxy changes | [November 24 local smoke](PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md) covers Caddy, login, `/api`, class isolation, TA review and worker restart on `1122f7c`; `MODEL_OFF=1`, not public/live-model evidence. Reproduce the transient “Lab not available” message |
-| ⬜ | Verify the final public model project/key spending cap | Historical provider-cap evidence and application budgets exist; final provisioning is unverified |
-| ⬜ | Demonstrate compliant, violating and injection submissions on the deployment | Include a second-class TA access-denial check |
+| ✅ | Rebuild and smoke-test the local deployment after the frontend/proxy changes | [November 24 local smoke](PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md), model off; subsequent stale lab-cache, earlier-submission and hard-rule-reason fixes are recorded in [AI-LOG](../AI-LOG.md) |
+| ✅ | Verify the final public model project/key spending cap | [PA3 model section](../PA3.md#model) and [November 25 cap evidence](PA3/evidence/ai-studio-cap.png); per-lab application budget remains separate |
+| ✅ | Demonstrate compliant, violating and injection submissions on the deployment | [Public walkthrough](PA3/evidence/public-walk.json), model on at `2a61adf`: 22/22 checks, including TA2/student access denial |
 | ✅ | Add the PA3 rubric's assistant-mistake examples to the rules file's never list | Tracked complete in [PA3 plan](PA3/PA3-PLAN.md); preserve the official data and evaluator |
-| ⬜ | Write root `PA3.md` and update the self-assessment for PA3 | Current self-assessment still describes PA2 |
-| ⬜ | Record the deployment walkthrough and verify public availability | Recording must be at most five minutes; keep deployment running through PA4 marking |
-| ⬜ | Tag the submitted commit `pa3`, verify tag CI, prepare ZIP and confirm submission | Record matching commit, URLs, accounts, recording, claimed score and submission receipt |
+| ✅ | Write root `PA3.md` and update the self-assessment for PA3 | [PA3 report](../PA3.md), [self-assessment](../SELF_ASSESSMENT_REPORT.md), claimed 92/100 |
+| ✅ | Record the deployment walkthrough and verify public availability | [Recording linked in PA3.md](../PA3.md#deployment) is 8:48, exceeding the five-minute requirement; limitation disclosed in self-assessment. Keep deployment running through PA4 marking |
+| ✅ | Tag the submitted commit `pa3`, verify tag CI, prepare ZIP and confirm submission | Complete per team; [PA3 report](../PA3.md#ci-for-the-tag) links tag runs. No Classroom receipt or fresh remote CI verification was inspected in this update |
 
 ## PA4 — evaluation, guardrails, human gate and red-team
 
-Source: [full PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and red-team.md>). Existing guardrail code is useful progress; its complete test matrix, UI behavior and history requirements still need verification.
+Source: [full PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and red-team.md>). Execution and member handoffs: [PA4 plan](PA4/PA4-PLAN.md). Existing guardrail code is useful progress; its complete test matrix, UI behavior and history requirements still need verification.
 
 | Status | Job | Evidence / next action |
 | --- | --- | --- |
 | ✅ | Implement schema, source-evidence and timeout validation foundations | `backend/internal/semantic/check.go` and fake-model tests; complete rubric coverage remains open below |
-| ✅ | Enforce a persistent application cost cap per lab | Worker budget ledger and tests; no TA-facing explanation is currently implemented |
-| ✅ | Reject model deduction fields and keep configured deductions separate | Unknown fields are rejected; model request excludes deductions; TA display is pending |
+| ✅ | Enforce a persistent application cost cap per lab | Worker budget ledger and tests; persisted cap-exhaustion reason is displayed to the TA; full PA4 acceptance remains below |
+| ✅ | Reject model deduction fields and keep configured deductions separate | Unknown fields are rejected; model request excludes deductions; TA queue displays configured and TA-applied deductions |
 | ✅ | Produce valid generic prediction JSONL without reading labels to decide answers | Checker command and saved evaluation artifacts |
-| ✅ | Demonstrate zero wrongful deductions on the saved official dev-set run | 0 wrongful deductions in [real evaluation](../eval/runs/real-dev/report.txt); this is one run, not proof for unseen data |
+| ✅ | Demonstrate zero wrongful deductions on the saved official dev-set run | 0 wrongful deductions in the passing [numbered-line run](../eval/runs/real-dev-numbered/report.txt); one run, not proof for unseen data |
 | ✅ | Add five own labelled/tagged Accepted cases separately from official data | `eval/extra/`; PA4 requires at least ten and the history/coverage checks below |
 | ⬜ | Generate fresh real-model predictions inside CI for official and own cases | Every eval exit other than 0 must fail; committed predictions and model-off runs do not meet this requirement; unit tests still use fakes |
 | ⬜ | Make the live eval job a required check on main and run it for PRs | Document fork PR handling because forks receive no secrets; keep CI key in repository secrets |
@@ -117,12 +119,12 @@ Source: [full PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and 
 | ⬜ | Extend own cases from five to at least ten, covering trap, injection and disguised | Each case must precede the checker change that handles it; inspect real history without reconstructing it |
 | ⬜ | Record three real dev-set runs of the same commit | In PA4.md: changed-verdict pair count, lowest/highest recall and unsure rate, and cost of one CI run |
 | ⬜ | Meet all three thresholds on the lecturer's held-out run | 0 wrongful, recall ≥90%, unsure ≤20%; ≥95% recall reaches the top of the held-out band; dev results are only an estimate |
-| ⬜ | Diagnose provider failures, budget blocks and evidence mismatches | Preserve safe unsure behavior; saved dev results below fail recall and unsure thresholds |
+| ⬜ | Validate reliability after the numbered-line evidence fix | Latest saved run passes; earlier provider 503/budget/evidence failures remain useful regression evidence. Preserve safe unsure fallback and confirm stability across fresh runs |
 | ⬜ | Audit G1–G5 with meaningful fake-model/no-network tests | Cover fenced/prose JSON, unknown verdict, missing/duplicate constraints, invented/misnumbered/comment-only evidence, timeout, exhausted cap, and injected marks; tests must fail if their guardrail is removed |
-| ⬜ | Show the TA why a check became unsure, including cap exhaustion | Current budget/audit records alone do not satisfy the review UI requirement; preserve original source-line mapping |
+| ✅ | Show the TA why a check became unsure, including cap exhaustion | FAQ-09 local reasons are persisted, returned through the TA-only API and displayed in review; [TA review evidence](PA3/TA-REVIEW-QUEUE.md). Complete the G1–G5 audit above |
 | ⬜ | Verify no model instruction changes the TA-set deduction on screen | Prove configured deduction survives injected fields/instructions; checker must have no mark-writing path |
 | ⬜ | Verify guardrail/test commit history and deployed injection behavior | Each guardrail/test in its own real commit, test no later than code; injections must become violation or unsure, never pass; record historical limitations honestly |
-| ⬜ | Persist TA decisions independently of model findings | Add review state, reviewer identity and decision history |
+| ✅ | Persist TA decisions independently of model findings | `constraint_reviews` and `constraint_review_history`, reviewer identity and configured deductions; [TA review evidence](PA3/TA-REVIEW-QUEUE.md) |
 | ⬜ | Require review of every violation and unsure finding | Enforce requirements on the server |
 | ⬜ | Randomly sample 10% of pass verdicts, rounded up, on the server | Fixed-seed test demonstrates the random sample; persist selection; selecting the first passes is insufficient |
 | ⬜ | Implement Publish as the only action exposing a deduction to students | Direct API tests must reject pending reviews, student callers and another class's TA; absence of Publish earns no human-gate completion |
@@ -138,15 +140,19 @@ The rubric also highlights CODEOWNERS review for tests, `.github/` and eval data
 
 ### Saved real-model evaluation
 
-Source: [original report](../eval/runs/real-dev/report.txt), [metrics](../eval/runs/real-dev/summary.json), [limitations](PA3/MEMBER2-HANDOFF.md).
+Latest saved run: [report](../eval/runs/real-dev-numbered/report.txt), [metrics](../eval/runs/real-dev-numbered/summary.json), [usage](../eval/runs/real-dev-numbered/usage-summary.json), and [call log](../eval/runs/real-dev-numbered/calls.jsonl), recorded November 24 on checker code `1cdc486`. The unchanged evaluator reports **PASS (exit 0)** for all 102 pairs, with no missing pairs.
 
 | Metric | Saved result | Required | Status |
 | --- | --- | --- | --- |
 | Wrongful deductions | 0 | 0 | ✅ Meets threshold in this run |
-| Violations caught with correct evidence | 21/37 = 56.8% | At least 90% | ⬜ Need at least 34/37: 13 more correctly evidenced violations |
-| Unsure verdicts | 31/102 = 30.4% | At most 20% | ⬜ Need at most 20/102: 11 fewer unsure verdicts |
+| Violations caught with correct evidence | 35/37 = 94.6% | At least 90% | ✅ Meets threshold in this run |
+| Unsure verdicts | 2/102 = 2.0% | At most 20% | ✅ Meets threshold in this run |
 
-The original evaluator returned exit code 1. A valid prediction file and zero wrongful deductions do not make this run a full evaluation pass. The handoff records provider 503 responses, conservative retained budget reservations, and evidence rejection as contributing causes.
+All 39 calls succeeded and have provider request IDs and known usage: 37,838 input tokens, 3,795 output tokens, estimated **US$0.020851**. This is the cost of this official dev run; PA4 must measure the complete CI run including own cases. Extrapolating 80 similar calls gives approximately US$0.043, as reported in PA3.
+
+The checker now sends source as numbered `{line, text}` objects (PR #22, test `c05230c`, fix `1cdc486`), avoiding model line-count drift while keeping exact evidence validation. Two labelled violations remain missed: `dynamic-array/s05 C2` is unsure and `dynamic-array/s07 C3` is predicted pass. These IDs describe evaluation findings only; they must not appear in production prompts or hard rules.
+
+The earlier [November 22 report](../eval/runs/real-dev/report.txt) remains unchanged: 0 wrongful, 21/37 recall (56.8%), 31/102 unsure (30.4%), evaluator exit 1. Its provider 503 responses lacked request IDs/usage and are documented separately from successful calls; budget blocks and rejected evidence also contributed. The newer passing run is neither the required three runs of one commit nor a live CI or held-out result. PA4 still needs all of that evidence.
 
 ## PA5 — final build, running and observed
 
@@ -216,7 +222,7 @@ Each feature earns 2 if working live, 1 if partial/second-try/recording-only, or
 
 ### Individual explanation (60 points per member)
 
-Documentation already exists in the [backend guide](BACKEND.md), [database guide](DATABASE.md), and [mechanism walkthroughs](PA3/backend-mechanism/BACKEND-CONNECTIONS.md). Each member must find and explain the actual source/evidence independently; reading documentation is not completion evidence.
+Documentation already exists in the [backend guide](architecture/BACKEND.md), [database guide](architecture/DATABASE.md), and [mechanism walkthroughs](architecture/BACKEND-CONNECTIONS.md). Each member must find and explain the actual source/evidence independently; reading documentation is not completion evidence.
 
 | Status | Job | Completion evidence to collect |
 | --- | --- | --- |
@@ -231,7 +237,7 @@ For three members, plan about 23 minutes total: one-minute version check, eight-
 
 ## Current verification snapshot
 
-Current automated verification is GitHub Actions [run #56](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45326541493), triggered by the merge to `main` at `97346d0`. All four jobs passed: gates, browser end-to-end, full-history secret scan, and Docker sandbox/offline checker. This is CI evidence for that commit, not a public deployment or live-model demonstration. No real model calls were made in CI.
+The table retains the explicitly recorded GitHub Actions [run #56](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45326541493) at `97346d0` as historical automated verification. It is not the latest-head or `pa3` tag result. Final PA3 evidence is in [PA3.md](../PA3.md) and the [self-assessment](../SELF_ASSESSMENT_REPORT.md); that report links tag runs. This documentation update inspected local source and saved artifacts, without freshly querying remote CI or the deployment. The current workflow still uses model-off evaluation; PA4's required live gate remains open.
 
 | Check | Result | Qualification / action |
 | --- | --- | --- |
@@ -242,16 +248,18 @@ Current automated verification is GitHub Actions [run #56](https://github.com/AW
 | Browser end-to-end workflows | ✅ Passed | `e2e` job in run #56 |
 | Full-history secret scan and dependency audit | ✅ Passed | `secret-history` job in run #56 |
 | Local Compose smoke | ✅ Recorded | Separate user-run smoke on `1122f7c`, `MODEL_OFF=1`; see [smoke record](PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md) |
-| Public deployment and live-model walkthrough | ⬜ Not verified | Public URL, required `sort-merge` flow, and final provider project/key cap remain open |
-| PA3 release checks | ⬜ Not complete | The `pa3` tag CI run, final report/video/self-assessment/ZIP, and submission receipt are still open |
+| Public deployment and live-model walkthrough | ✅ Recorded | [Public API walkthrough](PA3/evidence/public-walk.json), 22/22 checks at `2a61adf`; URL, recording and cap evidence in [PA3.md](../PA3.md). No fresh availability probe in this update |
+| Saved real-model dev evaluation | ✅ Pass | `real-dev-numbered`: 0 wrongful, 94.6% recall, 2.0% unsure; 39 successful provider-identified calls; one saved run |
+| PA3 release checks | ✅ Complete per team | Root report/self-assessment and tag-run links recorded; 8:48 video exceeds the limit. Submission receipt was not independently inspected |
+| PA4 live CI / Publish / red-team | ⬜ Open | See [PA4 plan](PA4/PA4-PLAN.md); no completion inferred from PA3 evidence |
 
 ## Recommended work order
 
 | Priority | Work package | Finish when |
 | --- | --- | --- |
-| 1 | Finish PA3 integration and submission | A TA sees real findings on the public deployment; checks and evidence match the submitted tag |
-| 2 | Complete PA4 trust and evidence requirements | Fresh real-model eval required in CI; ten cases and three repeated runs; guardrails/TA reasons; Publish/random sampling; eight-attack report; held-out credentials and evidence package |
+| 1 | Establish PA4 contracts and history before fixes | Agree Publish/sampling behavior, audit G1–G5, commit own cases before checker changes, obtain the assigned target |
+| 2 | Complete PA4 trust and evidence requirements | Follow [member handoffs and dates](PA4/PA4-PLAN.md): fresh required real-model CI; ten cases/three runs; guardrail audit; Publish/random sampling; eight-attack report; held-out credentials and evidence package |
 | 3 | Complete PA5 workflows and reproducible operations | Publication/appeals; traces across queue; dashboard, SLO and fired alert; 80 students/10 seconds/15-minute result; incident follow-ups; versioned HTTPS release and private access package |
 | 4 | Prepare PA6 demo and explanations before PA5 freezes | Choose/test any B5 extra in pa5; OWNERS.md posted by December 21; live F1–F11, failure cases, persistence and independent evidence-based answers rehearsed |
 
-**Revised planning estimate:** approximately 20–35 focused person-days for remaining implementation, integration and required evidence, excluding seminar and individual oral rehearsal. The earlier 15–25 estimate was based on the brief and understated live-CI/repeated-eval work, operational proof and release artifacts. This is an engineering estimate, not a rubric score or a guaranteed schedule; plan around three to four focused calendar weeks for three members with integration time. PA4 is only nine days away, so finish PA3 and start its evaluation/human-gate work immediately. Semantic quality, provider reliability and load-test findings remain the largest uncertainties.
+**Immediate schedule:** PA4 is due in one week, December 2 at 22:00. Use the dated [PA4 delivery plan](PA4/PA4-PLAN.md#delivery-order-and-checkpoints), with an integrated candidate and repeated-run evidence by December 1. Report an unavailable assigned red-team target by November 30. Provider variability, publication concurrency and deployment integration remain the immediate uncertainties; PA5 operations and PA6 rehearsal follow after this checkpoint.

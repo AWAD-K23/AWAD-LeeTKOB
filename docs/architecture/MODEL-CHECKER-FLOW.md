@@ -31,11 +31,11 @@ flowchart TD
     Valid -->|Yes| Merge[Merge validated model findings]
     Merge --> Save
     Unsure --> Save
-    Save --> Review[Member 3 adds protected TA review UI]
+    Save --> Review[Assigned TA reviews findings in protected UI]
 ```
 
 - Comment-cleaning failures and timeouts also become `unsure`.
-- The TA review UI is Member 3 work; it is not implemented by this checker.
+- The TA review API/UI is implemented separately from this checker. It stores decisions/history and shows local unsure reasons; it does not yet publish marks. See [review flow](REVIEW-PUBLISH-FLOW.md).
 - See [worker flow](WORKER-FLOW.md) for job ownership and normal judging.
 
 ## 2. Follow a real submission
@@ -72,20 +72,20 @@ int main() {
 - The comment was blanked before provider access.
 - The known email inside the literal was replaced with spaces.
 - Line numbers stayed unchanged. Line 8 still pointed to the comparison.
-- [Saved database evidence](../../../eval/runs/real-worker/result.json)
+- [Saved database evidence](../../eval/runs/real-worker/result.json)
   records this actual run.
 
 ## 3. Files involved
 
 | File | Simple job |
 |---|---|
-| [worker.go](../../../backend/internal/worker/worker.go) | Runs tests and then requests constraint checking |
-| [semantic/check.go](../../../backend/internal/semantic/check.go) | Selects semantic rules and validates answers |
-| [semantic/source.go](../../../backend/internal/semantic/source.go) | Removes comments while keeping source lines |
-| [worker/model.go](../../../backend/internal/worker/model.go) | Reserves lab budget and saves call logs |
-| [semantic/rate.go](../../../backend/internal/semantic/rate.go) | Spaces requests at least five seconds apart per process |
-| [semantic/gemini.go](../../../backend/internal/semantic/gemini.go) | Calls Google and reads usage information |
-| [checker/dataset.go](../../../backend/internal/checker/dataset.go) | Uses the same checking flow on dataset files |
+| [worker.go](../../backend/internal/worker/worker.go) | Runs tests and then requests constraint checking |
+| [semantic/check.go](../../backend/internal/semantic/check.go) | Selects semantic rules and validates answers |
+| [semantic/source.go](../../backend/internal/semantic/source.go) | Removes comments while keeping source lines |
+| [worker/model.go](../../backend/internal/worker/model.go) | Reserves lab budget and saves call logs |
+| [semantic/rate.go](../../backend/internal/semantic/rate.go) | Spaces requests at least five seconds apart per process |
+| [semantic/gemini.go](../../backend/internal/semantic/gemini.go) | Calls Google and reads usage information |
+| [checker/dataset.go](../../backend/internal/checker/dataset.go) | Uses the same checking flow on dataset files |
 
 ## 4. Step by step, with code
 
@@ -123,7 +123,7 @@ if check.Source != "semantic_pending" {
 ```
 
 ```go
-if !c.Enabled || c.Model == nil || len(pending) == 0 {
+if len(pending) == 0 {
     return out
 }
 ```
@@ -133,6 +133,8 @@ if !c.Enabled || c.Model == nil || len(pending) == 0 {
 | Sort ban: `pass` / `hard_rule` | Preserved; not sent to Gemini |
 | Comparison rule: `unsure` / `semantic_pending` | Selected for semantic checking |
 | Any hard-rule analysis failure | Preserved as unsure; not sent to Gemini |
+
+The checker initializes pending findings and their local reasons before returning when disabled or unconfigured. With a configured enabled model, their source becomes `model`; otherwise they retain `semantic_pending`.
 
 ### Step 3: clean the input and set a deadline
 
@@ -206,6 +208,14 @@ res, err := g.client.Do(req)
 - There are no automatic retries.
 - Separate worker processes or other apps using the key need coordinated limits.
 
+Before sending, `semantic/gemini.go` turns cleaned source into numbered objects:
+
+```json
+{"code":[{"line":1,"text":"#include <iostream>"},{"line":2,"text":"int main() {}"}]}
+```
+
+This is an excerpt of the wire payload; it also carries the statement and pending constraints. Numbering makes the line number explicit instead of asking the model to count. The regression test `TestGeminiSendsNumberedLines` preceded the fix (test `c05230c`, fix `1cdc486`, PR #22). Evidence validation remains exact; it never accepts matching text from a different line.
+
 ### Step 6: log usage and validate the answer
 
 **File:** `internal/semantic/check.go`, function `Check()`.
@@ -219,6 +229,7 @@ raw, err := c.Model.Generate(callCtx, Request{
 ```go
 validated, err := validate(raw, pending, cleaned, string(source))
 if err != nil {
+    // Actual code assigns a locally determined schema/evidence reason.
     return out
 }
 ```
@@ -270,7 +281,7 @@ return w.Complete(ctx, job, "Accepted", "All test cases passed.", checks)
 
 - The model finding does not change Accepted into Wrong Answer.
 - Student status endpoints exclude these protected findings and deductions.
-- A TA review workflow must decide what happens to marks.
+- The implemented TA review workflow records a separate decision, TA identity/history and configured deduction. Unsure reasons distinguish schema/evidence failures, timeout/cancellation, provider failure, exhausted budget, disabled/unconfigured checking and source preparation failure. These reasons are determined locally, not accepted from the model. Publishing remains PA4 work.
 
 ## 5. The second flow: evaluating the checker
 
@@ -297,16 +308,18 @@ flowchart LR
 | Real dev-set result | Value |
 |---|---:|
 | Wrongful deductions | 0 |
-| Recall | 56.8%: 21 of 37 violations caught with accepted evidence |
-| Unsure | 30.4%: 31 of 102 pairs |
-| Peak request rate | 12 per rolling minute |
-| Original evaluator exit | 1: thresholds missed; valid prediction format |
+| Recall | 94.6%: 35 of 37 violations caught with accepted evidence |
+| Unsure | 2.0%: 2 of 102 pairs |
+| Successful calls with provider request IDs | 39 of 39 |
+| Estimated cost | US$0.020851 for this official-only run |
+| Original evaluator exit | 0: PASS |
 
-- These are saved results, not promises about future model answers.
-- PA3 requires honest reporting; the numerical targets count in PA4.
+- Source: [November 24 numbered-line run](../../eval/runs/real-dev-numbered/report.txt), [metrics](../../eval/runs/real-dev-numbered/summary.json), [usage](../../eval/runs/real-dev-numbered/usage-summary.json), checker code `1cdc486`.
+- Keep the [November 22 run](../../eval/runs/real-dev/report.txt) unchanged: 0 wrongful, 56.8% recall, 30.4% unsure, exit 1. Provider 503 errors without request IDs/usage, retained budget reservations and evidence rejection are historical limitations; do not describe them as successful identified calls.
+- These are saved results, not promises about future model answers. The later run meets all three dev thresholds; PA4 still requires fresh real-model CI, ten own cases, three runs of one commit and the lecturer's held-out run. See [PA4 plan](../PA4/PA4-PLAN.md).
 
 ## 6. Read next
 
-- [Member 2 handoff](../MEMBER2-HANDOFF.md): evidence, costs, interfaces, and limits.
-- [Evaluation commands](../../../eval/README.md): native and Docker commands.
+- [Member 2 handoff](../PA3/MEMBER2-HANDOFF.md): evidence, costs, interfaces, and limits.
+- [Evaluation commands](../../eval/README.md): native and Docker commands.
 - [Backend connections](BACKEND-CONNECTIONS.md): server, queue, sandbox, and hard rules.

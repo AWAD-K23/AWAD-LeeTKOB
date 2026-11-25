@@ -13,6 +13,15 @@
 - **By hand:** The user supplied the Docker run output. The assistant edited the queue implementation and UI based on the repository rubric and FAQ requirements.
 
 
+## 2026-11-25 — Centralized architecture and mechanism documentation
+
+- **Tool:** Codex.
+- **Asked for:** Consolidate architecture/mechanism guides into one folder and update them for the completed PA3 baseline and upcoming PA4.
+- **Changed:** Moved seven guides into `docs/architecture/`, added an index and review/Publish mechanism guide, rebased links, documented review schema through migration 00007, current TA routes/history/reasons, worker environment loading, numbered model input and the newer passing evaluation. Linked the central folder from README.
+- **Rejected:** Treating the planned PA4 sampling or Publish design as implemented, duplicating current guides per milestone, or rewriting historical handoff evidence as fresh verification.
+- **Verified:** Compared documentation with current Go routes, worker/checker source, migrations and saved evaluation artifacts. Architecture/README/progress/PA4 local links and code fences passed, and Git whitespace checks passed. A wider scan found 16 existing broken links in historical PA2 documents, outside this consolidation. No application code, schema, provider calls or deployment was changed.
+- **Evidence:** [Architecture index](docs/architecture/README.md), [review/Publish flow](docs/architecture/REVIEW-PUBLISH-FLOW.md). Older entries below may use the guides' former paths; the index records the consolidation.
+
 ## 2026-11-22 — Project overview and reference documentation refresh
 
 - **Tool:** Codex.

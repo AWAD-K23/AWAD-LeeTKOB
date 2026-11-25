@@ -10,9 +10,9 @@
 
 | File or folder | Purpose |
 | --- | --- |
-| [testdata](../../../backend/internal/sandbox/testdata/) | Nine C++ attack programs |
-| [runner_test.go](../../../backend/internal/sandbox/runner_test.go) | Runs attacks and checks their outcomes |
-| [runner.go](../../../backend/internal/sandbox/runner.go) | Applies Docker limits and removes containers |
+| [testdata](../../backend/internal/sandbox/testdata) | Nine C++ attack programs |
+| [runner_test.go](../../backend/internal/sandbox/runner_test.go) | Runs attacks and checks their outcomes |
+| [runner.go](../../backend/internal/sandbox/runner.go) | Applies Docker limits and removes containers |
 
 ## 2. Overall flow
 
@@ -63,7 +63,7 @@ result, err := (Runner{Wall: 8 * time.Second}).Run(context.Background(), source,
 
 ## 4. Network access: network.cpp
 
-**File:** [network.cpp](../../../backend/internal/sandbox/testdata/network.cpp).
+**File:** [network.cpp](../../backend/internal/sandbox/testdata/network.cpp).
 
 ```cpp
 address.sin_port = htons(443);
@@ -84,7 +84,7 @@ std::cout << (connect(fd, (sockaddr*)&address, sizeof(address)) == 0 ? "ESCAPED"
 
 ## 5. CPU usage: cpu.cpp
 
-**File:** [cpu.cpp](../../../backend/internal/sandbox/testdata/cpu.cpp).
+**File:** [cpu.cpp](../../backend/internal/sandbox/testdata/cpu.cpp).
 
 ```cpp
 int main() { for (volatile unsigned long long n = 0;; ++n) {} }
@@ -101,7 +101,7 @@ int main() { for (volatile unsigned long long n = 0;; ++n) {} }
 
 ## 6. Elapsed time: wall.cpp
 
-**File:** [wall.cpp](../../../backend/internal/sandbox/testdata/wall.cpp).
+**File:** [wall.cpp](../../backend/internal/sandbox/testdata/wall.cpp).
 
 ```cpp
 int main() { sleep(60); }
@@ -128,7 +128,7 @@ if err := exec.Command("docker", "inspect", result.Container).Run(); err == nil 
 
 ## 7. Memory usage: memory.cpp
 
-**File:** [memory.cpp](../../../backend/internal/sandbox/testdata/memory.cpp).
+**File:** [memory.cpp](../../backend/internal/sandbox/testdata/memory.cpp).
 
 ```cpp
 volatile unsigned char* memory = (volatile unsigned char*)malloc(1024ULL * 1024 * 1024);
@@ -155,7 +155,7 @@ std::cout << total;
 
 ## 8. Too many processes: process.cpp
 
-**File:** [process.cpp](../../../backend/internal/sandbox/testdata/process.cpp).
+**File:** [process.cpp](../../backend/internal/sandbox/testdata/process.cpp).
 
 ```cpp
 for (int i = 0; i < 64; ++i) {
@@ -179,7 +179,7 @@ while (children-- > 0) wait(nullptr);
 
 ## 9. Too much output: output.cpp
 
-**File:** [output.cpp](../../../backend/internal/sandbox/testdata/output.cpp).
+**File:** [output.cpp](../../backend/internal/sandbox/testdata/output.cpp).
 
 ```cpp
 int main() { char buffer[4096]{}; for (;;) write(1, buffer, sizeof(buffer)); }
@@ -204,7 +204,7 @@ if len(result.Output) > 64*1024 {
 
 ## 10. Root access: user.cpp
 
-**File:** [user.cpp](../../../backend/internal/sandbox/testdata/user.cpp).
+**File:** [user.cpp](../../backend/internal/sandbox/testdata/user.cpp).
 
 ```cpp
 int main() { std::cout << (getuid() != 0 && setuid(0) != 0 ? "BLOCKED" : "ESCAPED"); }
@@ -221,7 +221,7 @@ int main() { std::cout << (getuid() != 0 && setuid(0) != 0 ? "BLOCKED" : "ESCAPE
 
 ## 11. Host files and Docker socket: mounts.cpp
 
-**File:** [mounts.cpp](../../../backend/internal/sandbox/testdata/mounts.cpp).
+**File:** [mounts.cpp](../../backend/internal/sandbox/testdata/mounts.cpp).
 
 ```cpp
 std::strcpy(address.sun_path, "/var/run/docker.sock");
@@ -244,7 +244,7 @@ std::cout << (socketVisible || hostVisible ? "ESCAPED" : "BLOCKED");
 
 ## 12. Secrets: secrets.cpp
 
-**File:** [secrets.cpp](../../../backend/internal/sandbox/testdata/secrets.cpp).
+**File:** [secrets.cpp](../../backend/internal/sandbox/testdata/secrets.cpp).
 
 Check secret-file paths during compilation:
 

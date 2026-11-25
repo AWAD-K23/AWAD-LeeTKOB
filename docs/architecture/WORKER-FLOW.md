@@ -10,11 +10,13 @@
 
 | File | Responsibility |
 | --- | --- |
-| [cmd/worker/main.go](../../../backend/cmd/worker/main.go) | Starts the worker and keeps looking for jobs |
-| [worker.go](../../../backend/internal/worker/worker.go) | Claims a job, runs tests, checks rules, and saves results |
-| [worker_test.go](../../../backend/internal/worker/worker_test.go) | Checks restart, ownership, and result-saving behavior |
-| [runner.go](../../../backend/internal/sandbox/runner.go) | Runs or analyzes C++ inside Docker |
-| [check.go](../../../backend/internal/hardrules/check.go) | Checks supported banned-function rules |
+| [cmd/worker/main.go](../../backend/cmd/worker/main.go) | Starts the worker and keeps looking for jobs |
+| [worker.go](../../backend/internal/worker/worker.go) | Claims a job, runs tests, checks rules, and saves results |
+| [worker_test.go](../../backend/internal/worker/worker_test.go) | Checks restart, ownership, and result-saving behavior |
+| [runner.go](../../backend/internal/sandbox/runner.go) | Runs or analyzes C++ inside Docker |
+| [check.go](../../backend/internal/hardrules/check.go) | Checks supported banned-function rules |
+| [model.go](../../backend/internal/worker/model.go) | Supplies persistent lab budgets and call audits for semantic checking |
+| [semantic/check.go](../../backend/internal/semantic/check.go) | Validates semantic findings and sets local unsure reasons |
 
 ```mermaid
 sequenceDiagram
@@ -24,6 +26,7 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Worker
     participant Sandbox as Docker sandbox
+    participant Model as Semantic checker / Gemini
     Student->>Browser: Submit C++
     Browser->>API: Send source code
     API->>DB: Save submission and pending job together
@@ -36,6 +39,11 @@ sequenceDiagram
     opt All test outputs match
         Worker->>Sandbox: Analyze code for banned calls
         Sandbox-->>Worker: Names and source line numbers
+        opt Model enabled and semantic constraints pending
+            Worker->>Model: Sanitized statement, semantic constraints and code
+            Model->>DB: Reserve lab budget and record call audit
+            Model-->>Worker: Validated findings or unsure with reason
+        end
     end
     Worker->>DB: Save judge result and rule findings
     Worker->>DB: Mark job completed in the same save
@@ -94,14 +102,16 @@ db, err := pgxpool.New(ctx, url)
 
 - Read the database address from the process environment.
 - Create a pool of reusable database connections.
-- The worker command does not automatically load `.env`; the server's `env.go`
-  belongs to a different command.
+- Before reading settings, the worker calls `localenv.Load()` to load `.env` from the current directory or its parent. Existing process variables take precedence. The worker reads/validates model configuration before entering the loop.
 
 ```go
 w := worker.Worker{
     DB: db,
     Runner: sandbox.Runner{
         Image: os.Getenv("SANDBOX_IMAGE"),
+    },
+    SemanticFor: func(lab, submission string) semantic.Checker {
+        return modelConfig.Checker(db, lab, submission)
     },
 }
 ```
@@ -111,6 +121,7 @@ w := worker.Worker{
 | `DB` | Database connections used to read jobs and save results |
 | `Runner` | Tool that runs and analyzes code in Docker |
 | `Image` | Sandbox Docker image; an empty value uses the runner's default |
+| `SemanticFor` | Creates the optional checker with this lab's budget and submission audit context |
 
 ## 4. Keep asking for a job
 
@@ -365,12 +376,13 @@ checks, err := hardrules.Check(ctx, w.Runner, source, constraints)
 | C1: banned `std::sort` | `violation` | `hard_rule` | Line 7 from the submitted source |
 | C2: use merge sort | `unsure` | `semantic_pending` | Empty |
 
-- Member 1 does not make a real model call here.
-- Meaning-based rules remain pending for Member 2.
+- The table shows the intermediate hard-rule result. If enabled, `w.SemanticFor(lab, job.SubmissionID)` supplies the checker; the worker loads the statement and student identifiers and passes pending semantic constraints to `checker.Check(...)`.
+- The semantic checker strips comments/redacts known identifiers, sends numbered source lines, and validates the response. Hard-rule findings are not sent for reconsideration. See [model flow](MODEL-CHECKER-FLOW.md).
+- With calls off, C2 stays unsure with source `semantic_pending` and a disabled-model reason. Enabled checking returns source `model`, either a validated verdict or unsure with a locally determined failure reason. This example's library sort fails the semantic merge-sort requirement, but no real call is claimed for the illustrative program.
 - If analysis fails, the worker makes the findings `unsure`:
 
 ```go
-checks = append(checks, hardrules.Verdict{ConstraintID: c.ID, Verdict: "unsure", Evidence: []hardrules.Evidence{}, Source: source})
+checks = append(checks, hardrules.Verdict{ConstraintID: c.ID, Verdict: "unsure", Reason: reason, Evidence: []hardrules.Evidence{}, Source: source})
 ```
 
 ## 11. Save results together
@@ -413,7 +425,7 @@ The save statements write to:
 | --- | --- |
 | `judge_results` | `submission-01`, `Accepted`, `All test cases passed.` |
 | `constraint_verdicts` | C1 violation with source-line evidence |
-| `constraint_verdicts` | C2 unsure with source `semantic_pending` |
+| `constraint_verdicts` | C2 semantic result, or unsure with `semantic_pending` when disabled; each finding includes a persisted `reason` |
 
 Evidence is converted to JSON first:
 
@@ -440,6 +452,7 @@ return tx.Commit(ctx)
 - Completed means processing ended; a completed job may contain Wrong Answer or
   Judge Error as well as Accepted.
 - No mark is published by this code.
+- TA decisions/history are written later by the class-protected review API, separately from worker findings. See [review flow](REVIEW-PUBLISH-FLOW.md). No random pass sampling or Publish is implemented yet.
 
 ## 12. What if a worker stops?
 
@@ -531,7 +544,7 @@ flowchart TD
 
 ## 15. Tests to read next
 
-**File:** [worker_test.go](../../../backend/internal/worker/worker_test.go).
+**File:** [worker_test.go](../../backend/internal/worker/worker_test.go).
 
 | Test | What it proves |
 | --- | --- |
@@ -551,7 +564,7 @@ flowchart TD
 | Did the program print the expected output? | Yes: `1 3` |
 | Judge verdict | Accepted |
 | Did it obey the ban on `std::sort`? | No: violation at line 7 |
-| Did Member 1 prove it used merge sort? | No: semantic checking is pending |
+| Does it implement merge sort? | The example only calls library sort; the enabled semantic checker reviews this requirement, while model-off leaves it unsure |
 | Did the worker publish marks or apply a deduction? | No |
 
 - Accepted describes the judge tests.

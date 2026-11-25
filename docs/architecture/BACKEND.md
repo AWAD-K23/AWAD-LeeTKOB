@@ -4,7 +4,8 @@
 - **HTTP:** Chi router with SCS server-side sessions.
 - **Database:** PostgreSQL 17, accessed through `pgx`.
 - **Judging:** Separate worker and restricted Docker containers.
-- **Current scope:** Class setup, labs, submissions, judging, and optional model findings.
+- **Current scope:** Class setup, labs, submissions, judging, optional model findings, and TA review with separate decisions/history.
+- **Baseline:** Final PA3 implementation, reviewed November 25, 2026. PA4 sampling and Publish are planned in [REVIEW-PUBLISH-FLOW.md](REVIEW-PUBLISH-FLOW.md).
 
 ## Main parts
 
@@ -18,6 +19,8 @@ flowchart TD
     Rules -->|Request code analysis| Runner
     Worker -->|Pending semantic rules, when enabled| Model[Gemini checker]
     Model -->|Budget reservations and call logs| DB
+    TA[Assigned class TA] -->|Read findings and save review decisions| API
+    API -->|Separate review rows and decision history| DB
     Runner -->|Create and remove restricted containers| Docker[Docker sandbox]
 ```
 
@@ -96,6 +99,7 @@ backend/
 | `workspace.go` | Current identity, class creation/listing, accessible lab listing, and submission status |
 | `browse.go` | Admin account search, protected class details, and student submission history |
 | `submission.go` | Validates submissions and retry keys; saves submission, job, and retry response together |
+| `review.go` | Class-scoped TA queue, read-only earlier submissions, separate TA decisions and history |
 | `api_test.go` | Password checks, HTTP contracts, ownership checks, and database-backed flows |
 
 ## Routes and access
@@ -119,10 +123,15 @@ backend/
 | `POST /labs/{labId}/submissions` | Enrolled student and valid Origin; requires retry key |
 | `GET /submissions` | Student's latest 200 submissions |
 | `GET /submissions/{submissionId}` | Submission owner or assigned TA; status, judge result, source, and lab ID |
+| `GET /labs/{labId}/review-queue` | Assigned class TA; findings for latest counted Accepted submissions, reasons, deductions and TA decisions |
+| `GET /labs/{labId}/earlier-submissions` | Assigned class TA; read-only source, judge results and findings for replaced submissions |
+| `POST /labs/{labId}/submissions/{submissionId}/constraints/{constraintId}/review` | Assigned class TA and valid Origin; records a decision for a counted Accepted submission and its history |
 
 - Roles and ownership are checked on the server, not trusted from browser inputs.
 - Protected constraint findings and deductions are excluded from student results.
 - Account creation currently uses the CLI, not an HTTP endpoint.
+- Review routes return 403 for non-TA roles and 404 for an unknown lab or another class's TA. Review writes reject stale submissions and nonmatching evidence.
+- There is no Publish or student marks route. The current queue returns all constraint findings for counted Accepted submissions; it does not yet draw PA4's random 10% pass sample.
 
 ## Worker and judging
 
@@ -154,7 +163,7 @@ backend/
 
 | Control | Current behavior |
 | --- | --- |
-| Prompt | Statement, pending semantic constraints, and code; comments and known account identifiers removed |
+| Prompt | Statement, pending semantic constraints, and code as numbered `{line, text}` objects; comments and known account identifiers removed |
 | Hard-rule findings | Preserved; never sent to Gemini for another decision |
 | Deadline | Bounds checking time, including budget/rate waiting |
 | Validation | Required IDs/verdicts, strict JSON fields, and matching evidence lines |
@@ -162,6 +171,7 @@ backend/
 | Rate | Spaces request starts within one process |
 | Budget | Reserve maximum estimated cost before network access; unknown usage keeps its reservation |
 | Audit | Provider ID when returned, model, prompt/response, tokens, duration, and estimated cost |
+| TA reason | Locally generated unsure cause persisted with each finding and displayed only to the assigned TA |
 
 - Production reservations and logs live in `model_calls`. Concurrent workers lock
   the lab row before checking the remaining budget.
@@ -171,14 +181,14 @@ backend/
 - Evaluation compares generated predictions with expected labels using the
   unchanged official scorer. Labels are not input to the checker itself.
 - Saved prediction files, call logs, and reports make each run reviewable.
-- See [evaluation commands](../eval/README.md) and
-  [Member 2 handoff](PA3/MEMBER2-HANDOFF.md) for detailed results and limitations.
+- See [evaluation commands](../../eval/README.md) and
+  [Member 2 handoff](../PA3/MEMBER2-HANDOFF.md) for detailed results and limitations.
 
 ## Database and deployment files
 
 | Location | Purpose |
 | --- | --- |
-| `backend/migrations/00001`–`00005` | Accounts, submissions, classes, tests, queue ownership, results, and model budget ledger |
+| `backend/migrations/00001`–`00007` | Accounts, submissions, classes, tests, queue ownership, results, model budget ledger, TA review/history and unsure reasons |
 | `compose.yaml` | Local PostgreSQL with a named persistent volume and host port 5433 |
 | `compose.pa3.yaml` | Database, migration, API, and web deployment services |
 | `deploy/` | API/web Dockerfiles, Caddy routing, and Linux worker service template |
@@ -202,13 +212,12 @@ backend/
 
 - Database tests need `TEST_DATABASE_URL`; Docker tests need `SANDBOX_TESTS=1`
   and the built sandbox image. Without those settings, relevant tests skip.
-- [Worker flow](PA3/backend-mechanism/WORKER-FLOW.md),
-  [hard-rule flow](PA3/backend-mechanism/HARD-RULE-FLOW.md),
-  [model flow](PA3/backend-mechanism/MODEL-CHECKER-FLOW.md), and
-  [sandbox attacks](PA3/backend-mechanism/SANDBOX-ATTACKS.md) explain the code in detail.
-- [Manual test](PA3/MANUAL-FLOW-TEST.md) provides accounts and UI steps.
-- [Member 1 handoff](PA3/MEMBER1-HANDOFF.md) tracks delivery and remaining work.
-- Real-model evidence is in [Member 2 handoff](PA3/MEMBER2-HANDOFF.md).
-  Semantic accuracy still needs improvement before PA4. TA review, publication,
-  and appeals remain pending.
-- See [Member 2 progress](PA3/MEMBER2-PROGRESS.md) for model configuration and limits.
+- [Worker flow](WORKER-FLOW.md),
+  [hard-rule flow](HARD-RULE-FLOW.md),
+  [model flow](MODEL-CHECKER-FLOW.md), and
+  [sandbox attacks](SANDBOX-ATTACKS.md) explain the code in detail.
+- [Manual test](../PA3/MANUAL-FLOW-TEST.md) provides accounts and UI steps.
+- [Member 1 handoff](../PA3/MEMBER1-HANDOFF.md) tracks delivery and remaining work.
+- The latest saved [real-model run](../../eval/runs/real-dev-numbered/report.txt) meets all three dev thresholds. Detailed metrics and historical limitations are in [model flow](MODEL-CHECKER-FLOW.md) and [Member 2 handoff](../PA3/MEMBER2-HANDOFF.md).
+- TA review is implemented. Random pass sampling and API-enforced Publish remain PA4 work; appeals follow in PA5. See [review and publication flow](REVIEW-PUBLISH-FLOW.md).
+- See [Member 2 progress](../PA3/MEMBER2-PROGRESS.md) for model configuration and limits.

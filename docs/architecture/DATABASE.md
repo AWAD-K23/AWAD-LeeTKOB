@@ -1,7 +1,7 @@
 ﻿# Current database structure
 
 - **Database:** PostgreSQL 17, accessed from Go through `pgx`.
-- **Schema source:** `backend/migrations/00001` through `00005`.
+- **Schema source:** `backend/migrations/00001` through `00007`, reviewed November 25, 2026.
 - **Local port:** `5433`. Migrations preserve the existing local data.
 - **Storage:** Named Docker volume `postgres_data` in Compose; survives normal container restarts. `docker compose down -v` deletes it.
 - **Backend guide:** See [BACKEND.md](BACKEND.md) for commands, files, and routes.
@@ -27,6 +27,10 @@ erDiagram
     submissions ||--o{ model_calls : checks
     labs ||--o{ model_calls : budgets
     lab_constraints ||--o{ constraint_verdicts : checks
+    constraint_verdicts ||--o| constraint_reviews : reviewed
+    constraint_verdicts ||--o{ constraint_review_history : records
+    users ||--o{ constraint_reviews : decides
+    users ||--o{ constraint_review_history : authored
     users ||--o{ idempotency_keys : retries
     labs ||--o{ idempotency_keys : scopes
 ```
@@ -52,10 +56,12 @@ erDiagram
 | `submissions` | `id`, `lab_id`, `student_id`, `source`, `created_at` | UUID PK; source is `bytea` so submitted bytes, including NUL, are preserved. |
 | `jobs` | `id`, `submission_id`, `status`, `created_at`, `lease_token`, `leased_until`, `attempts` | UUID PK; submission FK is unique. Tracks durable judging work and recovery after a worker crash. Index on status and creation time supports job claims. |
 | `judge_results` | `submission_id`, `verdict`, `detail`, `judged_at` | Submission FK is also the PK: at most one result per submission. Stores Accepted, Wrong Answer, resource errors, or Judge Error. |
-| `constraint_verdicts` | `submission_id`, `constraint_id`, `verdict`, `evidence`, `source` | Combined PK: at most one verdict per submission/constraint. Verdict is `pass`, `violation`, or `unsure`. Evidence is JSONB. No deduction or published mark is stored here. |
+| `constraint_verdicts` | `submission_id`, `constraint_id`, `verdict`, `evidence`, `source`, `reason` | Combined PK: at most one verdict per submission/constraint. Verdict is `pass`, `violation`, or `unsure`. Evidence is JSONB. Locally generated unsure reason added by migration 00007. No deduction or published mark is stored here. |
+| `constraint_reviews` | `submission_id`, `constraint_id`, `ta_id`, `decision`, `applied_deduction`, `evidence`, `reviewed_at` | Combined PK and composite FK to the finding; TA FK to users. Current separate TA decision, upserted on review. Decision is pass or violation; deduction is zero or the configured constraint amount. Added by migration 00006. |
+| `constraint_review_history` | `id`, `submission_id`, `constraint_id`, `ta_id`, `decision`, `applied_deduction`, `evidence`, `reviewed_at` | UUID PK, composite finding FK and TA FK; the API inserts a history row in the same transaction as each current-review upsert. Application writes append history; the schema does not independently prohibit updates/deletes. Added by migration 00006. |
 | `model_calls` | `id`, `lab_id`, `submission_id`, `charged_micro_usd`, `status`, `call_log`, `created_at` | Persistent model budget reservations and protected JSONB audit records. `reserved` retains the maximum estimated cost; `recorded` uses known usage or retains the reservation if usage is unknown. Added by migration 00005. |
 | `idempotency_keys` | `student_id`, `lab_id`, `key`, `fingerprint`, `response`, `created_at` | Combined PK on student/lab/key. Stores a SHA-256 request fingerprint and original response so retries do not create duplicate submissions. |
-| `goose_db_version` | `id`, `version_id`, `is_applied`, `tstamp` | Migration tool's version history, created by Goose when migrations run; not an application table defined in migrations 00001–00005. |
+| `goose_db_version` | `id`, `version_id`, `is_applied`, `tstamp` | Migration tool's version history, created by Goose when migrations run; not an application table defined in migrations 00001–00007. |
 
 - User foreign keys verify that an account exists; API checks enforce TA/student roles.
 - Cascades on test/rule lab links do not mean every lab can be deleted: other foreign
@@ -91,7 +97,10 @@ erDiagram
 5. The sandbox compiles and runs the code. If every test output matches, the worker proceeds to constraint checking; the judge result will be **Accepted** regardless of separate constraint findings.
 6. Hard rules check ban lists. Semantic constraints stay `unsure` with `semantic_pending` when model calls are off; enabled calls use the lab budget ledger and validated Gemini responses.
 7. The worker stores the result and constraint verdicts, then marks the job completed in one transaction.
-8. An's status endpoint returns job status, judge result, saved source, and lab ID. Constraint verdicts and TA deductions stay separate for the TA review work.
+8. An's status endpoint returns job status, judge result, saved source, and lab ID. Constraint findings, reasons and TA decisions remain absent from student responses.
+9. Linh opens the TA queue. Only the latest submission per student counts, ordered by `(created_at, id)`; an Accepted older submission is excluded even if the replacement is still pending. Earlier submissions remain available read-only.
+10. Linh chooses pass or violation. The API locks the submission, validates latest/Accepted eligibility and exact violation evidence, upserts `constraint_reviews` and inserts `constraint_review_history` atomically. It reads the configured deduction from the database rather than accepting one from the request.
+11. This review does not publish a mark. Persisted random samples and publication state are future PA4 schema work.
 
 ## Model budget and call records
 
@@ -125,8 +134,10 @@ erDiagram
 | Class details | Admin/assigned TA can read member accounts; students receive no roster |
 | Admin account search | Up to 200 matching account IDs/emails/roles; no password hashes |
 | Model call audits | No public/student endpoint; protected backend records |
+| TA review queue | Assigned class TA only; latest Accepted submissions, source, findings/reasons, configured deduction, current decision/evidence and applied deduction |
+| Earlier submissions | Assigned class TA only; replaced submissions and findings, read-only |
 
-- The frontend redesign added these reads without new schema migrations.
+- Class/lab/submission browsing did not need new schema migrations. TA review/history and unsure reasons were added by migrations 00006 and 00007.
 - An Accepted judge result can coexist with a `violation` in `constraint_verdicts`.
 - TA-configured deductions are not automatically applied or published.
 
@@ -152,12 +163,11 @@ erDiagram
 | Call status | Recorded, with a provider request ID and known token usage |
 
 - Execution results, constraint findings, and provider audits are stored separately.
-- See [Member 2 handoff](PA3/MEMBER2-HANDOFF.md) for the saved local example.
+- See [Member 2 handoff](../PA3/MEMBER2-HANDOFF.md) for the saved local example.
 
 ## Remaining work
 
-- Real-model checking and evaluation evidence are delivered; semantic accuracy
-  still needs improvement before PA4. See [Member 2 handoff](PA3/MEMBER2-HANDOFF.md).
-- There are no TA-review decisions, published marks, or appeals tables yet.
+- Real-model checking and TA decisions/history are delivered. The [latest saved dev evaluation](../../eval/runs/real-dev-numbered/report.txt) passes; repeated/live CI and held-out evidence remain PA4 work.
+- There are no persisted pass-sample, publication or appeals tables yet. See the proposed [review and Publish design](REVIEW-PUBLISH-FLOW.md); do not treat its planned records as existing schema.
 - The API enforces roles and ownership; user foreign keys alone do not enforce a role.
-- See [Member 1 handoff](PA3/MEMBER1-HANDOFF.md) for API interfaces, verification commands, and deployment steps.
+- See [Member 1 handoff](../PA3/MEMBER1-HANDOFF.md) for API interfaces, verification commands, and deployment steps.
