@@ -1,5 +1,13 @@
 # AI log
 
+## 2026-11-27 — PA4 Member 2 own cases before checker changes
+
+- **Tool:** Codex.
+- **Asked for:** Move to Member 2's PA4 tasks.
+- **Changed:** Added five separate own Accepted C++ solutions and ten new labels covering comment/raw-string injection, a macro-hidden loop, an unused-recursion decoy and valid accumulator recursion. Documented label rationale. The original five cases and labels are unchanged; no official files were edited.
+- **Verified:** All ten own solutions compiled with C++17/O2 and passed all problem tests in the restricted Docker checker. Unchanged fixtures came from a temporary Git export with CRLF conversion disabled. The official 128-file manifest passed. Re-scoring the saved numbered-line predictions without model calls reproduced 0 wrongful, 35/37 recall and 2/102 unsure.
+- **Limits:** These are new cases committed before subsequent checker changes, not evidence of new real-model performance. Original PA3 mixed/case history is retained, not reconstructed. Live runs and the target repository choice are awaiting the user's response.
+
 ## 2026-11-27 — PA4 Member 1 handoff and check evidence
 
 - **Tool:** Codex.
