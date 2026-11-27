@@ -13,5 +13,19 @@ frontend/test-results/
 backend/bin/
 bin/
 backend/coverage.out
-eval/runs/local*/
+# New run output stays local; allow only curated evidence folders.
+eval/runs/*
+!eval/runs/offline/
+!eval/runs/pa4-ci-baseline/
+!eval/runs/pa4-ci-confirmation/
+!eval/runs/pa4-ci-schema/
+!eval/runs/pa4-dev-1/
+!eval/runs/pa4-dev-2/
+!eval/runs/pa4-dev-3/
+!eval/runs/pa4-fixed-dev-1/
+!eval/runs/pa4-fixed-dev-2/
+!eval/runs/pa4-fixed-dev-3/
+!eval/runs/real-dev/
+!eval/runs/real-dev-numbered/
+!eval/runs/real-worker/
 .DS_Store

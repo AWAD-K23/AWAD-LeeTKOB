@@ -1,337 +1,54 @@
 # AI log
 
-## 2026-11-27 — Passing schema-fix live CI and final evidence
-
-- **Tool / task:** Codex; complete the single schema follow-up authorized by “continue.”
-- **Verified:** Run 46009732306 passed all five jobs. Official: 0 wrongful, 36/37 recall (97.3%), 1/102 unsure (1.0%). Own: 0 wrongful, 9/9 recall, 0/20 unsure. All 77 successful calls have provider IDs and known usage: 49 primary plus 28 confirmation, with no provider errors, unknown reservations or retries. Estimated cost US$0.045214 (official 0.038785, own 0.006429). Tested PR head 07d14e0 includes schema fix e592bf7; Actions merge SHA is preserved in metadata.
-- **Changed:** Downloaded the complete passing artifact, saved check/review snapshots and computed cost/call summary, updated PA4.md and the Member 2 handoff, and retained all earlier failures. No cases, labels, thresholds or required checks changed to obtain the passing result.
-- **Limits:** One passing combined run is not proof of latest-code three-run stability or held-out performance. The two older same-commit studies remain disclosed with their failures. PR #27 is still draft and requires human review; no merge or deployment occurred. Final evidence is committed locally without pushing another commit that would start an unapproved paid CI run. No further model calls were made after this follow-up.
-
-## 2026-11-27 — Single provider-schema follow-up after “continue”
-
-- **Tool / task:** Codex; continue after disclosing that the four-run batch was exhausted and the schema fix was local.
-- **Authorization / scope:** Interpreted the user's “continue” in that context as approval for one further CI evaluation (estimated about US$0.04), stated that bound before proceeding, and will stop after that run. Provider/project spending limits are unchanged.
-- **Changed:** Preserved confirmation CI's complete artifacts, blocked-PR state and computed call/cost summary. Updated the handoff, report and tracker with the failed own-case recall and the locally tested schema correction. No cases, labels, thresholds or guardrails were loosened.
-- **Verified:** Seven mutation baselines passed and each removed guard failed. Go format/vet and the full PostgreSQL-backed suite passed with module downloads disabled after dependency installation; all five Node tooling tests pass. All 128 official hashes remain unchanged. The new test-only JSON Schema dependency is pinned; the schema correction has not yet had real-provider validation.
-- **Limits:** The pending follow-up is one evaluation, not unlimited reruns. The prior new four-run batch cost US$0.109932, including confirmation CI at US$0.041354; all 75 calls in that CI had known usage and provider IDs, with no unknown reservations/retries.
-
-## 2026-11-27 — Final authorized CI result and provider-schema mismatch
-
-- **Tool / task:** Codex; finish the four newly authorized evaluations and preserve the actual outcome.
-- **Observed:** Confirmation CI run 45987925317 passed the official set (0 wrongful, 35/37 recall, 5/102 unsure) but failed own cases (0 wrongful, 8/9 recall, 1/20 unsure). The missed own finding was a model violation with an empty evidence array; local validation correctly converted it to unsure before confirmation. All 75 calls had provider IDs/known usage, with zero unknown reservations, costing US$0.041354. The new four-run batch totals US$0.109932. The required check remains red and PR #27 blocked; all other jobs passed.
-- **Changed:** Found that the provider schema allowed empty evidence for decisive verdicts even though local validation forbids it. Added conditional `anyOf` branches requiring `minItems: 1` for pass/violation while still allowing unsure with empty evidence. This tightens provider output without relaxing local G1/G2. Added a test-only pinned JSON Schema validator (v6.0.3) to check the actual transmitted schema against valid/invalid counterexamples, rather than duplicating its implementation. The regression failed before the correction and passes after it. Added a bypass mutation for this schema bound.
-- **Verified / sources:** Targeted guardrail tests, Go vet and the backend unit suite passed offline. [Google's structured-output documentation](https://ai.google.dev/gemini-api/docs/structured-output) documents conditional anyOf schemas and enforced minItems; the validator API/version was checked against its official repository/package documentation. Cases, labels and evaluator thresholds remain unchanged.
-- **Limits:** The schema correction is local and has not been tested with the real provider. The four additional evaluations are fully used; no fifth evaluation, push-triggered rerun or paid retry was started. One further live CI evaluation would need new authorization. This is not a passing Member 2 handoff or held-out result.
-
-## 2026-11-27 — Preserve the confirmation candidate's pre-CI evidence
-
-- **Tool / task:** Codex; prepare the last authorized combined evaluation for Member 2.
-- **Changed:** Saved all three `61d9c89` dev runs and their two-changed-pair comparison, the original failed CI artifact/blocked-PR proof, and the fixed-image model-off command rehearsal. Updated README's old 80-submission estimate to describe its historical one-pass/80-call basis; confirmation now adds calls. Documented the residual wrongful result rather than presenting two passing runs as reliability proof. Excluded private marking.env from Git and Docker contexts.
-- **Verified:** On `cd3374d`, all G1–G5 mutation baselines passed and their bypasses failed; removing the new confirmation gate also failed its regression. Go format/vet, all PostgreSQL tests, the full Docker sandbox suite and five Node tooling tests passed. Official integrity still reports 128 unchanged files. The image rehearsal on the earlier correction produced twenty valid pairs offline in 4.8 seconds; no semantic PASS was claimed for that model-off run.
-- **Limits:** Three repeated real runs of the confirmation guard are not available within the four-evaluation authorization. The final approved run will be CI on both datasets. Its actual results/cost must be recorded after completion; no predicted green result is claimed.
-
-## 2026-11-27 — Semantic violation confirmation after residual wrongful result
-
-- **Tool / task:** Codex; continue the approved live validation without hiding a remaining failure.
-- **Observed:** On frozen `61d9c89`, two dev runs passed (0 wrongful, 36/37 recall, 1/102 unsure), but the third still had one wrongful violation. All three had 97.3% recall; unsure ranged 0–1.0%, with two changed pairs. The prompt/isolation correction therefore did not establish reliable zero-wrongful behavior. All 117 calls had provider IDs and known usage, costing US$0.068578.
-- **Changed:** Added a fail-closed confirmation pass for semantic violations. A second bounded call attempts to disprove all proposed violations together; disagreement, malformed output, timeout or budget failure makes those candidates unsure. Passes and hard-rule verdicts do not incur confirmation calls. Confirmation input reconstructs sanitized evidence so original comments/known identities cannot leak back into a prompt. Both calls use the existing audit/budget/rate controls and the same strict output validation.
-- **Tests:** Added fake-model agreement/disagreement, malformed reply, budget/provider error, late success, pass-without-recheck and actual wire-framing tests. Existing boundary/worker fake-call assertions now require the intentional two calls; their verdict, evidence, identity and hard-rule isolation assertions are unchanged. The independent-finding fake now responds only for requested confirmation IDs; its original safety assertions remain unchanged. Added a mutation bypass for the new guard. Targeted guardrail tests and all five Node tooling tests pass offline.
-- **Limits:** The final approved combined CI evaluation will exercise this new guard; no extra evaluation beyond the authorized four is started. Confirmation adds provider calls within that evaluation and remains subject to the unchanged application/provider caps. It is a conservative check, not proof that two calls cannot share a model error. Cases, labels, official files and thresholds remain unchanged.
-
-## 2026-11-27 — PA4 fixed-checker live validation approved
-
-- **Tool / task:** Codex; resume Member 2 after the user approved live testing following the explanation of up to four extra runs.
-- **Changed:** Downloaded the original failed CI artifact, saved exact blocked-PR state and measured full CI cost. Added `marking.env` to Git exclusions so future private marking credentials cannot be accidentally staged. Started fixed-commit validation sequentially; no new provider/project spending limit was changed.
-- **Verified:** Baseline CI run 45968971182 passed the official set but failed own-case recall at 8/9 (88.9%), blocking required live-eval on PR #27. Its 49 successful calls have provider IDs/known usage, no unknown reservations or retries, and estimated cost US$0.023860. All four ordinary CI jobs passed. The first new dev run uses clean frozen commit `61d9c89` and a fresh folder.
-- **Limits:** The extra authorization is up to four evaluations, not unlimited retries. No passing result for the candidate is claimed until the runs finish. Dedicated marking credentials and actual marking-proxy verification remain separate pending work.
-
-## 2026-11-27 — PA4 Member 2 candidate handoff
-
-- **Tool / task:** Codex; prepare the reviewable Member 2 handoff while paid revalidation is on hold.
-- **Changed:** Added the candidate handoff, updated completed/remaining checklist items honestly, documented local fix `60bfe73`, and added the optional budget variable name (blank) to `.env.example`. Saved a second mutation audit for the candidate; all five guards still fail their tests when bypassed.
-- **Verified:** Format, official integrity, five Node tooling tests and Git whitespace checks passed. Go vet/full PostgreSQL tests passed on the candidate. The approved baseline draft PR is #27, run 45968971182: gates, secret-history, e2e and sandbox passed while the original-budget live evaluation was still running. No extra model run or fix push was started after the user's clarification request.
-- **Limits:** Passing fixed-commit live results, the combined CI cost/result, dedicated marking credentials and Member 3 deployment/acceptance remain pending. Local commits are ready for review; this documentation commit is not pushed to avoid triggering another paid run without approval.
-
-## 2026-11-27 — PA4 generic checker correction after failed real baseline
-
-- **Tool / task:** Codex; fix the checker after preserving three failing real runs.
-- **Changed:** Added generic model guidance to follow reachable computation, aliases/macros, independent rule scope and allocation lifetimes, instead of relying on names/declarations or unrelated rule failures. Isolated invalid evidence per finding so another constraint's independently valid evidence is retained. Overall malformed JSON/schema, missing/duplicate IDs and unknown fields remain rejected; every individual invalid finding stays unsure with empty evidence and a local reason.
-- **Verified:** New `TestIndependentFindingEvidenceFailures` failed on the prior implementation for both missing and invented evidence. It passes with the correction. Existing G1/G2/G3/G5, invalid-response, boundary and reason tests were unchanged and pass; Go vet and the full PostgreSQL-backed suite pass. No source-evidence criterion, label, official file or threshold was relaxed. Production prompts contain no dev problem/solution IDs or quoted dev code.
-- **Limits:** This is an offline-tested candidate, not a claim that the wrongful verdicts are fixed in real-model evaluation. The original-budget fourth evaluation is running on the preserved baseline in draft PR #27; extra fixed-commit live evaluations remain unapproved. This fix is committed locally without pushing a further paid CI run.
-
-## 2026-11-27 — PA4 frozen baseline and repository protection evidence
-
-- **Tool / task:** Codex; Member 2 repeated runs, integrity and CI setup.
-- **Changed:** Saved three fresh dev evaluations of `77ef5b0` in new folders, their comparison and diagnostic findings. With explicit approval, added required live-eval/one approval/CODEOWNERS review to the team's existing ruleset and copied the local key into its Actions secret without printing it. Preserved before/after protection snapshots. Added runner tests for explicit live mode and output preservation.
-- **Verified:** Every baseline run had 39 known-usage provider responses with request IDs. All three failed with one wrongful violation each; recall 89.2–94.6%, unsure 0–2.9%, seven changed pairs, US$0.062328 total estimated usage. No results were overwritten. Five Node tooling tests, full Go/Docker/PostgreSQL tests and the complete frontend check passed. A fresh pinned upstream archive matched all 128 official hashes. The model-off checker image produced twenty valid own-case pairs at an arbitrary path in 2.8 seconds; evaluator exit 1 was preserved as expected.
-- **Rejected by automatic approval review:** Initial ruleset and secret-transfer attempts were blocked for insufficiently explicit external authorization. No workaround was used; the user then explicitly approved each exact operation before it was retried successfully.
-- **Limits:** These are failing baseline observations, not a held-out or final passing claim. The user asked for a simpler explanation of the additional-run request; no extra evaluations beyond the original authorization have started. Dedicated private marking credentials and deployed UI evidence remain pending.
-
-## 2026-11-27 — PA4 live evaluation tooling and mutation evidence
-
-- **Tool / task:** Codex; Member 2 CI/evaluation integration.
-- **Changed:** Added a live runner that builds the current checker, generates fresh predictions for official and own datasets, preserves provider/cost evidence and propagates every nonzero evaluator exit. Added same-commit three-run comparison with tests, a disposable-copy guardrail mutation audit, live PR/main/pa4 CI, an explicit failing fork policy, CODEOWNERS, model-host/marking instructions and a PA4 draft. Keys stay with the trusted checker; its separate Docker scanners get no credentials, network or mounts.
-- **Verified:** All five guardrail baselines passed and their targeted mutations failed with assertion failures; saved exact evidence on `55b7c85`. Go format/vet/full PostgreSQL-backed tests passed. Three synthetic comparison tests passed, including commit/population mismatch rejection. The metadata-mismatch test initially exposed an unchecked missing datasets field; the implementation was corrected instead of weakening the assertion. Official integrity still reports all 128 files unchanged.
-- **Changed after checks:** Prettier's earlier CSS failure was Windows line endings, not content changes. Normalized the working stylesheet and specified LF for CSS and our own fixtures; Git shows no stylesheet content diff. This supersedes the earlier formatting blocker without changing cases, labels or check thresholds.
-- **Limits:** The classic main-protection endpoint returned 404, but subsequent inspection found active ruleset `26947349`; it already requires gates/secret-history/e2e. No protection was removed. Fresh live results, CI evidence and settings updates follow separately. The user chose the team repository and approved three dev runs plus one combined evaluation after confirming the provider cap.
-
-## 2026-11-27 — PA4 G5 model deductions audit
-
-- **Tool / task:** Codex; audit G5 for Member 2.
-- **Changed:** Added decisive fake-model responses containing forged deductions, marks and mark-writing instructions; each must become unsure. The test verifies the provider request contains no grading values. Extended the direct publication API test to reject a forged review deduction while preserving the configured deduction in the published total.
-- **Verified:** `go -C backend test ./internal/semantic ./internal/api -run 'TestG5|TestPublicationGate' -count=1` passed, including PostgreSQL-backed student result visibility. No production deduction rule was changed; the existing strict schema and server-selected deduction remain the guard.
-- **Limits:** Deployed UI injection evidence remains Member 3 integration work.
-
-## 2026-11-27 — PA4 G4 persistent cap audit
-
-- **Tool / task:** Codex; audit G4 for Member 2.
-- **Changed:** Added an unexported provider factory seam behind the real worker reservation gate. The regression persists a charge, constructs a fresh budgeted model with a fake provider and checks that exhausted budget yields zero provider calls, unchanged ledger balance and local budget reasons for all pending constraints.
-- **Verified:** PostgreSQL-backed `go -C backend test ./internal/worker -run 'TestDurableWorker/G4' -count=1` passed with no provider/network calls. Production still constructs the same Gemini provider when the test seam is absent. Existing concurrent reservation/unknown-usage tests remain unchanged.
-- **Limits:** No budget limit or paid-service setting was changed. The user confirmed the provider cap and authorized the upcoming three dev runs and one combined evaluation; those runs are not yet claimed.
-
-## 2026-11-27 — PA4 G3 timeout regression audit
-
-- **Tool / task:** Codex; audit G3 for Member 2.
-- **Changed:** Added a cancelling fake model that returns valid decisive JSON after its deadline. The checker must discard that late success, finish within a bounded time and provide the local timeout reason.
-- **Verified:** `go -C backend test ./internal/semantic -run TestG3 -count=1` passed offline. The production timeout logic needed no change.
-
-## 2026-11-27 — PA4 G2 evidence regression audit
-
-- **Tool / task:** Codex; audit G2 for Member 2.
-- **Changed:** Added fake-model tests for invented text/lines, correct text at the wrong line, stripped-comment-only evidence and blank evidence. Added a positive control proving cleaned evidence maps back to the exact original line and trailing comment.
-- **Verified:** `go -C backend test ./internal/semantic -run TestG2 -count=1` passed offline. No evidence matching rule or existing label was relaxed; production checks already enforce this boundary.
-
-## 2026-11-27 — PA4 G1 schema regression audit
-
-- **Tool / task:** Codex; audit G1 for Member 2.
-- **Changed:** Added fake-model tests for fenced/prose/invalid JSON, unknown verdicts, missing constraints and duplicate IDs at otherwise correct cardinality. Decisive response fixtures include valid exact evidence so an unrelated missing-evidence rejection cannot hide a broken schema guard.
-- **Verified:** `go -C backend test ./internal/semantic -run TestG1 -count=1` passed without network. Existing production schema checks needed no change. Mutation evidence is recorded in the Member 2 handoff after the audit.
-- **Limits:** Existing PA3 guardrail history is unchanged; this commit adds G1-specific regression coverage, not a claim that the original guard was introduced separately.
-
-## 2026-11-27 — PA4 Member 2 own cases before checker changes
-
-- **Tool:** Codex.
-- **Asked for:** Move to Member 2's PA4 tasks.
-- **Changed:** Added five separate own Accepted C++ solutions and ten new labels covering comment/raw-string injection, a macro-hidden loop, an unused-recursion decoy and valid accumulator recursion. Documented label rationale. The original five cases and labels are unchanged; no official files were edited.
-- **Verified:** All ten own solutions compiled with C++17/O2 and passed all problem tests in the restricted Docker checker. Unchanged fixtures came from a temporary Git export with CRLF conversion disabled. The official 128-file manifest passed. Re-scoring the saved numbered-line predictions without model calls reproduced 0 wrongful, 35/37 recall and 2/102 unsure.
-- **Limits:** These are new cases committed before subsequent checker changes, not evidence of new real-model performance. Original PA3 mixed/case history is retained, not reconstructed. Live runs and the target repository choice are awaiting the user's response.
-
-## 2026-11-27 — PA4 Member 1 handoff and check evidence
-
-- **Tool:** Codex.
-- **Asked for:** Finish Member 1's handoff and break down the AI log and commits into focused groups.
-- **Changed:** Added `docs/PA4/MEMBER1-HANDOFF.md` with migration steps, API examples, state transitions, integration instructions and verification evidence. Updated README, the Member 1 checklist, project progress and the review/Publish architecture guide. Split the original combined AI-log entry into contract, backend/tests and handoff entries; retained older history. Contract: `6b40ca2`; implementation and tests: `f287fec`.
-- **Verified:** Frontend dependencies installed; lint passed with two existing Fast Refresh warnings, and separate type-checking and production build passed. All 128 official file hashes verified. Extra-case verification passed all five unchanged cases in a temporary Git export with CRLF conversion disabled. Git whitespace checks passed before committing.
-- **Limits:** The combined frontend check stops at pre-existing formatting in untouched `frontend/src/style.css`. Direct extra-case verification fails on Windows CRLF working-tree outputs; neither fixtures nor the verifier were changed. Member 3 acceptance, UI integration, deployment, live evaluation and release evidence remain pending. These are local commits; no push was performed.
-
-## 2026-11-27 — PA4 Member 1 backend and regression tests
-
-- **Tool:** Codex.
-- **Asked for:** Implement Member 1's server sampling, required reviews and Publish gate; group implementation and tests in one commit.
-- **Changed:** Added migration 00008, persisted random pass samples, review progress and revision invalidation. Added atomic TA/class-authorized Publish and owning-student published-result access. Reused separate TA decisions, configured deductions, reviewer attribution and append-only API history. Added fixed-seed sampling and direct PostgreSQL API tests alongside the implementation; updated the existing API fixture to load the new migration without changing its assertions.
-- **Design decision:** Replaced submission-only locking with a shared lab-row lock and database triggers so worker writes, rejudging, constraint edits and new submissions participate in the same publication boundary. A decision edit hides the publication until Publish is repeated. No user-rejected suggestion is claimed.
-- **Verified:** Go format, vet and the full backend suite passed against an isolated PostgreSQL 17 Docker database. Publication tests passed three additional consecutive runs. Coverage includes edge sample counts, restart persistence, pending/sample/role/class denials, strict mark-field rejection, configured deductions, student visibility, stale reviews, incomplete findings and a concurrent mutation that blocks Publish before producing a stale-revision denial. The real Goose migration command applied through version 8.
-- **Limits:** No real model call, public deployment or UI integration was performed. The temporary database was isolated from project data and its container was stopped after verification. Tests and implementation are committed together; no earlier test-first history is claimed.
-
-## 2026-11-27 — PA4 Member 1 publication contract
-
-- **Tool:** Codex.
-- **Asked for:** Read PROJECT-PROGRESS.md, implement Member 1 in PA4-PLAN.md, then break down the AI log and commits.
-- **Changed:** Wrote `docs/contract/publication.md` before implementation. Defined counted submissions, persisted random pass sampling, mandatory reviews, revision invalidation, authorized Publish and student result visibility. Specified request/response shapes and errors for Member 3's UI integration.
-- **Design decision:** Population changes invalidate the whole lab's reviews and publication conservatively. Student status/history responses keep their existing shape; a separate protected route exposes published deductions.
-- **Verified:** Compared the contract with the existing PA3 review routes and the completed backend implementation.
-- **Limits:** Member 3 acceptance and UI integration are pending. These commits group work already completed in the workspace; no test-first commit history is claimed or reconstructed. Backend implementation/tests and handoff evidence follow in separate commits.
-
-> This is a dated history of assistant-supported work, not a live completion tracker. Later entries may supersede earlier status statements. For current PA status, use [the project tracker](docs/PROJECT-PROGRESS.md) and [the PA3 plan](docs/PA3/PA3-PLAN.md); verify each completion claim against its cited commit, test run, or saved evidence.
-
-
-## 2026-11-24 — TA review queue implementation
-
-- **Tool:** Codex.
-- **Asked for:** Finish the PA3 TA review queue, show constraint verdicts and evidence with the deduction chosen through TA review, enforce class ownership, and verify model findings cannot become student deductions or published marks without TA review.
-- **Kept:** Model findings separate from TA decisions and student-facing submission results. A TA decision is either pass (zero deduction) or violation (the configured constraint deduction); violation evidence must exactly match submitted source lines. Class access is checked from server-side TA membership.
-- **Changed:** Added a latest-counted-submission review queue, TA review records and decision history, a review UI with checker evidence and the TA-confirmed evidence text, and project-plan status plus verification notes. The queue applies a deduction only after a TA decision. Cited FAQ-02, FAQ-08, FAQ-09, FAQ-10, and FAQ-12 in the verification note.
-- **Verified:** The user ran the PostgreSQL-backed `TestSubmissionContract/TA_review_is_class_scoped_and_cannot_leak_into_student_marks` test in Ubuntu WSL using Docker; it passed with exit status 0. This verifies the focused API contract, not the deployed end-to-end flow or frontend build. The current backend has no Publish or marks endpoint; no future publish gate is claimed.
-- **By hand:** The user supplied the Docker run output. The assistant edited the queue implementation and UI based on the repository rubric and FAQ requirements.
-
-
-## 2026-11-25 — Centralized architecture and mechanism documentation
-
-- **Tool:** Codex.
-- **Asked for:** Consolidate architecture/mechanism guides into one folder and update them for the completed PA3 baseline and upcoming PA4.
-- **Changed:** Moved seven guides into `docs/architecture/`, added an index and review/Publish mechanism guide, rebased links, documented review schema through migration 00007, current TA routes/history/reasons, worker environment loading, numbered model input and the newer passing evaluation. Linked the central folder from README.
-- **Rejected:** Treating the planned PA4 sampling or Publish design as implemented, duplicating current guides per milestone, or rewriting historical handoff evidence as fresh verification.
-- **Verified:** Compared documentation with current Go routes, worker/checker source, migrations and saved evaluation artifacts. Architecture/README/progress/PA4 local links and code fences passed, and Git whitespace checks passed. A wider scan found 16 existing broken links in historical PA2 documents, outside this consolidation. No application code, schema, provider calls or deployment was changed.
-- **Evidence:** [Architecture index](docs/architecture/README.md), [review/Publish flow](docs/architecture/REVIEW-PUBLISH-FLOW.md). Older entries below may use the guides' former paths; the index records the consolidation.
-
-## 2026-11-22 — Project overview and reference documentation refresh
-
-- **Tool:** Codex.
-- **Asked for:** Check BACKEND.md and DATABASE.md against the current implementation, update outdated details, and rewrite README.md to describe the project as a whole.
-- **Kept:** Simple tables and short explanations; separate judge results, constraint findings, and future TA review; general control flow with detailed results retained in evaluation and handoff documents.
-- **Changed:** Reorganized README around roles, architecture, setup, judging, evaluation, checks, and documentation. Updated backend environment/CLI/model controls and moved mechanism links. Expanded database budget/audit states. Following the user's correction, removed model scores, measured usage/costs, and quota figures from these overview documents; kept the logic and links to detailed evidence.
-- **Rejected:** Keeping SQL-only lab creation instructions, an incomplete backend tree, outdated quota claims, or presenting retained cost reservations as provider bills.
-- **By hand:** The user requested the documentation refresh, then clarified that the guides should describe general logic rather than evaluation figures and requested a commit amend. Their separately staged `.env.example` change is outside this documentation task.
-- **Verified:** Reviewed command entry points, frontend scripts/proxy, deployment Dockerfile, migration 00005, and saved model evidence. All 29 revised local links resolved; overview evaluation figures were removed; Compose option and Git whitespace checks passed. Documentation-only changes; no model calls or database writes were needed.
-- **Evidence:** `README.md`, `docs/BACKEND.md`, and `docs/DATABASE.md`.
-
-## 2026-11-22 — Member 2 flow explanation
-
-- **Tool:** Codex.
-- **Asked for:** Explain Member 2 as a visual flow matching the backend-mechanism documents, using Mermaid diagrams, tables, simple examples, and exact code excerpts.
-- **Kept:** The distinction between normal judging, hard rules, model findings, and TA review; actual saved smoke/evaluation data rather than invented successful results.
-- **Changed:** Added `MODEL-CHECKER-FLOW.md` with the runtime and evaluation paths, source links, budget/rate controls, failure behavior, and step-by-step snippets. Linked it from the existing backend connections guide and clarified that guide's Member 1 scope.
-- **Rejected:** Showing TA review as already implemented, treating model findings as deductions, or suggesting that the checker reads labels.
-- **By hand:** The user requested a visual explanation similar to the existing mechanism documents.
-- **Verified:** All local links resolved; all 16 Go excerpts matched current source after whitespace normalization. The saved worker result confirmed the example's model evidence at line 8. Git whitespace checks passed. Documentation-only change; no model calls or code changes were required.
-- **Evidence:** `docs/PA3/backend-mechanism/MODEL-CHECKER-FLOW.md` and `BACKEND-CONNECTIONS.md`.
-
-## 2026-11-22 — Real checker smoke test
-
-- **Tool:** Codex.
-- **Asked for:** Verify the configured real model with one smoke request before running the dev set, while respecting the reported 15 RPM limit.
-- **Kept:** One sequential request, strict response/evidence validation, and no automatic retries.
-- **Changed:** Saved the prediction, provider audit, and usage summary for an Accepted extra solution.
-- **Rejected:** Starting the full evaluation before verifying that the configured provider returned a usable result.
-- **By hand:** The user entered the API key locally, enabled `MODEL_OFF=0`, and reported the account quota. The assistant did not change provider settings.
-- **Verified:** The semantic constraint returned pass with exact evidence and a provider request ID. The estimated cost was US$0.000220.
-- **Evidence:** `eval/runs/real-smoke/`.
-
-## 2026-11-22 — Real dev-set evaluation
-
-- **Tool:** Codex.
-- **Asked for:** Run the real model on the official dev set within the 15 RPM limit and preserve predictions, call logs, and the unchanged evaluator's report.
-- **Kept:** Sequential calls, strict evidence checks, no automatic retries, and retained reservations for unknown usage.
-- **Changed:** Saved all 102 predictions and the original evaluation output in `eval/runs/real-dev/`.
-- **Rejected:** Retrying 503s to hide failures, replacing predictions with hand-written answers, or modifying labels, evaluator rules, or guardrail tests to improve scores.
-- **By hand:** The user authorized continued real calls and supplied the account limit; no provider quota or spending setting was changed.
-- **Verified:** The evaluator returned 1: 0 wrongful deductions, 56.8% recall (21/37), and 30.4% unsure (31/102). Of 34 requests, 29 succeeded with provider IDs and known usage; five returned HTTP 503 without IDs or usage. Later budget blocks remained unsure. Peak request rate was 12 per rolling minute.
-- **Evidence:** `eval/runs/real-dev/predictions.jsonl`, `calls.jsonl`, `report.txt`, and `summary.json`. The original FAIL report is preserved.
-
-## 2026-11-22 — Model usage and cost accounting
-
-- **Tool:** Codex.
-- **Asked for:** Record measured model usage and calculate the estimated cost of 80 comparable submissions in README and AI-LOG.
-- **Kept:** Known token usage and unknown error usage are reported separately; retained reservations are not presented as provider bills.
-- **Changed:** Added `scripts/summarize-model-run.mjs` and saved reproducible usage summaries.
-- **Rejected:** Treating failed calls with missing usage as free or claiming the estimate is a measured bill for all requests.
-- **By hand:** No provider billing setting was changed; the user supplied the model configuration.
-- **Verified:** The 29 known-usage dev calls used 22,841 input and 2,536 output tokens, with zero reported thinking tokens. At US$0.30/US$2.50 per million respectively, rounded per-call estimates total US$0.013204. For 80 comparable calls, assuming one per submission: `0.013204 / 29 × 80 = US$0.036425`. Unknown usage on five 503 calls is excluded; its US$2.392065 retained reservation is a conservative budget charge. Across all 36 real requests, including both smoke tests, peak usage remained 12 per rolling minute.
-- **Evidence:** `scripts/summarize-model-run.mjs`, `eval/runs/real-dev/usage-summary.json`, and README's model/cost section.
-
-## 2026-11-22 — Real worker integration and identity removal
-
-- **Tool:** Codex.
-- **Asked for:** Demonstrate real semantic checking on an Accepted submission through the worker and verify that known student identity is removed before provider access.
-- **Kept:** Real sandbox execution, existing lease-checked result storage, and separate judge and constraint verdicts.
-- **Changed:** Added bounded `worker --once` operation and queued one labelled local smoke fixture for the enrolled manual-test student. Saved a read-only query and its result.
-- **Rejected:** Leaving a worker polling after the smoke test or treating model findings as published deductions.
-- **By hand:** No separate user edits were recorded for this step; the assistant prepared and processed the local fixture within the authorized verification work.
-- **Verified:** The worker stored Accepted, a hard-rule pass, and a model pass with exact comparison evidence. The provider prompt removed known identity text from both a comment and a literal. Estimated call cost was US$0.000444. No marks were published.
-- **Evidence:** `backend/cmd/worker/main.go` and `eval/runs/real-worker/`.
-
-## 2026-11-22 — Member 2 documentation and local handoff
-
-- **Tool:** Codex.
-- **Asked for:** Document the completed Member 2 work, maintain honest limitations, and check finished tasks in PA3-PLAN.
-- **Kept:** Actual metrics and failure evidence, with PA4 accuracy targets distinct from PA3 delivery requirements.
-- **Changed:** Added `MEMBER2-HANDOFF.md`; updated README, backend/progress documentation, and the remaining Member 2 checklist items.
-- **Rejected:** Claiming PA4-level accuracy, Member 3 acceptance, final public cap verification, or remote CI results from local checks.
-- **By hand:** The user requested regular commits and completed-task updates. No teammate acceptance was supplied.
-- **Verified:** Final Go format/vet, PostgreSQL-backed tests with fake models, official file hashes, and credential checks passed. No configured API key was found in saved evidence. Sandbox attacks passed in the preceding delivery and were not repeated for the pacing/CLI change.
-- **Evidence:** `docs/PA3/MEMBER2-HANDOFF.md`, `docs/PA3/PA3-PLAN.md`, `docs/PA3/MEMBER2-PROGRESS.md`, and README.
-
-## 2026-11-22 — Model request pacing
-
-- **Tool:** Codex.
-- **Asked for:** Continue real-model verification after the user enabled `MODEL_OFF=0`, while respecting the account's 15 requests-per-minute limit.
-- **Kept:** Sequential calls and no automatic retries. Provider requests in each process are spaced at least five seconds apart, below 15 RPM.
-- **Changed:** Added a shared cancellable limiter across Gemini instances and tests for spacing and cancellation. Audit start times now refer to the provider request after any rate wait.
-- **Rejected:** Launching parallel real-model tests or assuming the local limiter controls other applications using the same API key.
-- **By hand:** The user enabled model calls and reported the provider quota. No quota or provider setting was changed by the assistant.
-- **Verified:** Semantic package tests passed, including fake-transport provider tests, rate spacing, cancellation, schema validation, and timeout behavior. No real call had been made at this commit.
-- **Evidence:** `backend/internal/semantic/rate.go`, `rate_test.go`, and real-run evidence to follow.
-
-## 2026-11-22 — Generic checker command and model-off image
-
-- **Tool:** Codex.
-- **Asked for:** Implement the next Member 2 checker and evaluation tasks sequentially, keep regular commits, and check finished tasks in `docs/PA3/PA3-PLAN.md`.
-- **Kept:** Generic discovery from statement, constraint, and source files; labels are never checker input. The offline image has no network, database, Docker socket, host mounts, or credentials. Student source is analyzed, not executed.
-- **Changed:** Added `cmd/checker`, dataset and scanner packages, an isolated checker Dockerfile, offline scripts, saved predictions/reports, and CI steps in the existing jobs. Added a separate online audit-file path and per-problem evaluation-run cap; the production worker retains its durable database cap. Checked handoff acceptance, guardrails, logging implementation, checker, and dataset tasks; real-call and final handoff tasks remain open.
-- **Rejected:** Counting model-off scores as real-model results, reading labels to produce predictions, hiding the original evaluator's FAIL, or passing CI when bans are missed or cause wrongful deductions.
-- **By hand:** Provider-cap verification remains pending; no real model call was made. The user confirmed Member 1 checks were already run.
-- **Verified:** The offline Docker image generated 102 official predictions with 0 wrongful deductions, 40.5% recall (15/37), and 46.1% unsure (47/102). All 55 ban pairs were decided; every missed violation was semantic and unsure. The unchanged scorer returned 1. The five extra cases produced 10 predictions, 0 wrongful, 40.0% recall, and 50.0% unsure, also exit 1. Final Go format/vet, PostgreSQL-backed tests, all nine sandbox attacks, syntax tests, checker tests, and official hashes passed. The final image and stricter offline verifier passed on both datasets; remote CI was not run. An initial harness attempt lost tmpfs output after container exit; stdout capture fixed it. A tar buffer limit was then corrected without changing data or labels.
-- **Evidence:** `backend/cmd/checker/`, `backend/internal/checker/`, `deploy/Dockerfile.checker`, `eval/runs/`, and `scripts/run-offline-eval.mjs`.
-
-## 2026-11-22 — Pinned official evaluation data and independent cases
-
-- **Tool:** Codex.
-- **Asked for:** Continue Member 2 using the lecturer's published dataset, preserve its files unchanged, add independent labelled cases, and update completed PA3 checklist items.
-- **Kept:** All 128 upstream files at revision `552c811db2d35a23d641bc4fdffc1ac120be1a28`, including the original labels and evaluator.
-- **Changed:** Imported `eval/official`, recorded SHA-256 hashes and Git byte-preservation attributes, and added five separately labelled/tagged recursive-total solutions with test inputs. Cases include compliant recursion, a loop violation, a formula, a text trap, and prompt injection.
-- **Rejected:** Modifying official labels, using labels as checker input, or assuming extra cases are Accepted without executing them.
-- **By hand:** The user found the official source and requested completed tasks be checked in PA3-PLAN.
-- **Verified:** All 128 imported files matched the temporary upstream checkout byte for byte. All five additional solutions compiled with `g++ -std=c++17 -O2` and passed their three input/output cases in a restricted network-free container with no host mounts or credentials.
-- **Evidence:** `eval/official-sha256.json`, `scripts/verify-eval.mjs`, and `eval/extra/`.
-
-## 2026-11-22 — Generic statement and type ban coverage
-
-- **Tool:** Codex.
-- **Asked for:** Continue Member 2 against the official dev set, address scanner coverage gaps, and check completed PA3 plan tasks only after verification.
-- **Kept:** Syntax-based checks with no model calls for ban lists and exact source evidence.
-- **Changed:** Added statement cursors for loops and goto, type/template references, and canonical declaration types for aliases and inferred containers. The scanner accepts its actual source path for standalone use.
-- **Rejected:** Searching source text for keywords or treating included headers as student use of a banned facility. No problem IDs or solution text were added to production rules.
-- **By hand:** The user supplied the official repository URL and requested continued work and checklist updates.
-- **Verified:** Rebuilt the sandbox image; all seven original syntax cases and ten new statement/type cases passed using real libclang in restricted Docker containers. No labels or evaluator files were modified.
-- **Evidence:** `sandbox/scan.cpp` and `backend/internal/hardrules/check_test.go`.
-
-## 2026-11-22 — Official evaluation source inspection
-
-- **Tool:** Codex.
-- **Asked for:** Verify the user-supplied evaluation repository and compare its dataset and evaluator interface with the Member 2 implementation.
-- **Kept:** The lecturer's unchanged dataset and evaluator as the required evaluation source; no substitute labels or scorer were created.
-- **Changed:** Documented the upstream URL, inspected revision, file layout, JSONL prediction contract, and evaluator exit codes in the Member 2 progress record.
-- **Rejected:** Claiming complete ban-list coverage from call-reference scanning alone: the official data also includes loop-statement and container-type bans.
-- **By hand:** The user found and supplied the official GitHub URL.
-- **Verified:** Inspected upstream README, evaluator source, all six constraint files, and the local scanner. Downloaded a temporary checkout at `552c811db2d35a23d641bc4fdffc1ac120be1a28`. No dataset files were modified, no evaluation was run, and no real model calls were made.
-- **Evidence:** https://github.com/fithcmus/awad-leetkob-eval and `docs/PA3/MEMBER2-PROGRESS.md`.
-
-## 2026-11-22 — PA3 Member 2 worker integration and durable limits
-
-- **Tool:** Codex.
-- **Asked for:** Continue Member 2 tasks sequentially after local key configuration, integrate semantic checking with the durable worker, and maintain tested commits and formal implementation records.
-- **Kept:** Model calls off by default; a US$1 local cap per lab; conservative reservations before network access; existing job lease fencing and result transactions. Verdicts never select deductions.
-- **Changed:** Added migration 00005 and a lab-locked model-call ledger. Known usage replaces reserved cost; unknown usage and crashes retain the reservation. Added worker integration, known-identity redaction, shared automatic environment loading, stricter JSON validation, and concurrency/accounting tests. Removed model credentials from the API container configuration.
-- **Rejected:** In-memory-only spending counters, resetting budgets on worker restart, giving the sandbox credentials, and treating a saved key as proof of final provider-cap verification.
-- **By hand:** The user supplied local provider settings. No provider console setting was changed, and no real model call was made. The assistant started the existing local PostgreSQL service and applied additive migration 00005; Goose reported schema version 5.
-- **Verified:** Final Go format, vet, and PostgreSQL-backed tests passed, including fake-model worker integration, concurrent budget admission, retained unknown usage, audit replay refusal, duplicate JSON-key rejection, and comment-cleaning cases. Database tests used temporary schemas. Docker attack tests were not rerun. No real provider calls were made.
-- **Cost estimate:** For `gemini-3.5-flash-lite`, 80 calls with 2,000 input and 500 output tokens including thinking cost `80 × (2000 × 0.30 + 500 × 2.50) / 1000000 = US$0.148`. This is an illustrative standard-price estimate, not measured evaluation usage. The real dev-set run remains pending.
-- **Evidence:** `backend/internal/worker/model.go`, worker and semantic tests, migration `00005_model_calls.sql`, and `docs/PA3/MEMBER2-PROGRESS.md`.
-
-## 2026-11-22 — PA3 Member 2 Gemini adapter
-
-- **Tool:** Codex.
-- **Asked for:** Continue the Member 2 implementation after local model settings were supplied, maintain formal task records, and commit each tested part separately.
-- **Kept:** The configured `gemini-3.5-flash-lite` model and `MODEL_OFF=1`. A fixed Google HTTPS endpoint, header authentication, one bounded request, provider-side JSON schema, and mandatory local validation.
-- **Changed:** Added the Gemini REST adapter and fake-transport tests. Audit records include the sanitized prompt, response ID, model version, token counts, duration, and standard-price estimated cost including thinking tokens. Provider error bodies and authentication headers are excluded.
-- **Rejected:** Real provider calls in tests, automatic retries without another cost reservation, and unaudited model names with unknown rates.
-- **By hand:** The user entered local model settings; the key was not displayed. Final provider spending-cap verification is not inferred from the presence of a key.
-- **Verified:** Semantic package tests and vet passed. Provider tests use a fake HTTP transport, including successful usage accounting, rejected output, oversized responses, cancellation, and audit failure. No real model call has been made.
-- **Sources:** Google [generateContent reference](https://ai.google.dev/api/generate-content) and [standard pricing](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash-lite), checked November 22, 2026. Text input is $0.30 and output including thinking is $2.50 per million tokens.
-- **Evidence:** `backend/internal/semantic/gemini.go` and `gemini_test.go`.
-
-## 2026-11-22 — PA3 Member 2 semantic-checker foundation
-
-- **Tool:** Codex.
-- **Asked for:** Implement the Member 2 tasks sequentially, reuse the handoff checks already performed by the user, and pause with local configuration instructions when an API key or other manual provider setup is required. Maintain this log during implementation and commit tested parts separately.
-- **Kept:** A provider-independent checker, disabled by default, that preserves hard-rule findings and requests only pending semantic constraints. Model findings remain separate from TA deductions.
-- **Changed:** Added response and evidence validation, a context timeout, comment removal with source-line preservation, and fake-model tests. Added `docs/PA3/MEMBER2-PROGRESS.md` to distinguish the tested foundation from pending provider, worker, dataset, and evaluation work.
-- **Rejected:** Real model calls in unit tests and marking the entire Member 2 integration complete before provider and evaluation evidence exist.
-- **By hand:** The user confirmed Member 1 checks had already run and requested regular commits. No provider setup or key entry is claimed.
-- **Verified:** Go formatting, full Go vet, and `go -C backend test ./... -count=1` passed. The semantic tests use fakes and no network. PostgreSQL/Docker integration cases require their opt-in settings and were not rerun; the user supplied Member 1 acceptance. The first vet attempt hit a local cache permission denial; running the checks with cache access succeeded.
-- **Evidence:** `backend/internal/semantic/check.go`, `source.go`, `check_test.go`, and `docs/PA3/MEMBER2-PROGRESS.md`.
-
-Tool used: Codex, for planning and initial project setup.
+## 2026-11-27 - PA4 Member 1: review sampling and Publish
+
+- **Tool / task:** Codex; implement Member 1 with a publication contract and tested handoff.
+- **Changed:** Migration 00008, persisted random pass samples, mandatory reviews, revision invalidation, atomic authorized Publish and an owning-student published-result endpoint. Only TA decisions and configured deductions determine marks. Shared lab-row locks and database triggers serialize Publish with workers, new submissions, rejudging and constraint edits. Population changes invalidate reviews/publication; decision edits hide publication until Publish is repeated.
+- **Verified:** Go format/vet and full PostgreSQL suite passed; publication tests passed three additional times. Coverage includes sample persistence/counts, ownership/roles, pending reviews, forged marks, student visibility, stale revisions and concurrent mutation. Goose applied through version 8. Frontend lint/types/build, all 128 official hashes and original own cases passed. Initial CSS/fixture CRLF blockers were later resolved by LF normalization/Git export without changing cases or assertions.
+- **Commits / limits:** [Contract](docs/contract/publication.md) `6b40ca2`; implementation/tests `f287fec`; [handoff](docs/PA4/MEMBER1-HANDOFF.md) `0f7270e`. Work was grouped after implementation; no reconstructed test-first history is claimed. Member 3 UI/deployment acceptance remains separate.
+
+## 2026-11-27 - PA4 Member 2: cases, guardrails and CI
+
+- **Tool / task:** Codex; extend own cases, audit G1-G5 and automate live evaluation.
+- **Changed:** Added five Accepted cases before checker fixes (`f1510fa`), bringing `eval/extra` to ten solutions / twenty labelled pairs. New cases cover comment/raw-string injection, macro loops, unused recursion and accumulator recursion. All ten compiled and passed their problem tests in restricted Docker; original cases/labels and 128 official files remain unchanged.
+- **Guardrail commits:** G1 strict schema `ed609fe`; G2 exact evidence `4f85bdf`; G3 late-success timeout `3305f2a`; G4 persisted budget refusal with zero provider calls `a4f7d10`; G5 forged deductions/marks and publication API `55b7c85`. G4 adds an unexported fake-provider seam; production admission remains unchanged. These are focused fake-model regressions, not reconstructed origins of the existing PA3 guards.
+- **CI / tests:** [Live job](.github/workflows/gates.yml) generates fresh official/own predictions, runs the unchanged evaluator, preserves artifacts and propagates failures; secretless forks fail explicitly. Trusted checker holds the key; isolated Docker scanners have no credentials/network/mounts. All seven final mutation baselines passed and every bypass failed; see [mutation evidence](docs/PA4/evidence/provider-schema-guard-mutations.json). Go/PostgreSQL/Docker, frontend and five Node tooling checks passed. A runner metadata-mismatch bug was fixed instead of weakening its test. Model-off image rehearsals produced valid pairs but correctly failed semantic thresholds; they are not live/proxy proof.
+- **Human authorization:** User selected the team repository, verified the provider cap and explicitly approved key transfer, branch push/draft PR and exact ruleset changes. Existing checks/restrictions were preserved; live-eval, one approval and CODEOWNERS review were added. Initial automatic review rejected ruleset/secret operations for insufficient explicit authorization; no workaround was used, and retry followed exact approval. Key was neither printed nor committed; spending limits were unchanged.
+- **Limits / evidence:** Dedicated private marking credentials, actual marking-proxy verification and Member 3 deployed UI/injection acceptance remain pending. See [Member 2 handoff](docs/PA4/MEMBER2-HANDOFF.md).
+
+## 2026-11-27 - PA4 real failures, checker corrections and passing CI
+
+- **Tool / task:** Codex; retain failures and validate generic fixes within authorized runs. All successful calls below have provider IDs and known usage, with no automatic retries or unknown-usage reservations. Costs are estimates, not provider bills.
+
+| Frozen code / run | Actual result | Estimated US$ | Evidence |
+| --- | --- | ---: | --- |
+| `77ef5b0`, three dev runs | Each had 1 wrongful finding; recall 89.2-94.6%, unsure 0-2.9%; 7 changed pairs, 117 calls | 0.062328 | [Comparison](docs/PA4/evidence/baseline-variability.json) |
+| Baseline CI 45968971182 | Official passed: 0 wrongful, 35/37 recall, 2/102 unsure. Own failed: 8/9 recall; 49 calls | 0.023860 | [Artifacts](eval/runs/pa4-ci-baseline/) |
+| `61d9c89`, three first-fix dev runs | Two passed; third had 1 wrongful finding. All had 36/37 recall; 2 changed pairs, 117 calls | 0.068578 | [Comparison](docs/PA4/evidence/fixed-variability.json) |
+| Confirmation CI 45987925317 | Official passed: 0 wrongful, 35/37 recall, 5/102 unsure. Own failed: 8/9 recall, 1/20 unsure; 75 calls | 0.041354 | [Summary](docs/PA4/evidence/confirmation-ci-summary.json) |
+| Schema-fix CI 46009732306, head `07d14e0` | All five jobs passed. Official: 0 wrongful, 36/37 recall, 1/102 unsure. Own: 0 wrongful, 9/9 recall, 0/20 unsure; 77 calls | 0.045214 | [Summary](docs/PA4/evidence/schema-ci-summary.json), [CI](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/46009732306) |
+
+- **First correction:** `60bfe73` added generic reachable-computation/macro/alias guidance and isolated invalid evidence per finding; malformed overall schema still fails closed. New independent-finding regression failed before/pass after. The residual wrongful result led to `cd3374d`: a bounded second call tries to disprove semantic violations; disagreement/error/timeout/budget refusal yields unsure. Passes/hard rules need no confirmation. Sanitized evidence reconstruction prevents identity/comment leakage. Fake tests cover agreement/disagreement, malformed output, deadlines, errors and wire framing. Existing evidence/verdict assertions remain; intentional call-count assertions became two.
+- **Final correction:** Confirmation CI exposed a violation with empty evidence: local validation correctly rejected it, but the provider schema had allowed it. `e592bf7` requires nonempty evidence for decisive verdicts using conditional anyOf/minItems. A pinned test-only JSON Schema validator checks the actual wire schema with counterexamples; regression failed before/pass after. G1/G2 were not relaxed. Source: [Google structured-output documentation](https://ai.google.dev/gemini-api/docs/structured-output). Cases, labels, official files, thresholds and required checks were never loosened.
+- **Authorization:** Initial approval covered three dev runs plus one combined evaluation. User then approved up to four further evaluations: three first-fix runs plus confirmation CI, US$0.109932. After that batch was exhausted and the local schema fix explained, "continue" was explicitly scoped to one further combined CI run. No further paid run followed.
+- **Final limits:** [PR #27](https://github.com/AWAD-K23/AWAD-LeeTKOB/pull/27) remains draft and requires human review; no merge/deployment. Evidence commit `1b8fdb3` remains local to avoid another paid CI run. One green combined run does not prove latest-method three-run stability or held-out performance; older failures remain disclosed in [PA4 report](PA4.md).
+
+## 2026-11-22 to 25 - PA3 review queue and documentation
+
+- **Tool / task:** Codex; implement TA review, explain system flows and reconcile handoffs.
+- **Changed / verified:** Added latest-counted review queue/history/UI with server-side class ownership, exact evidence and TA-selected deductions. User ran the focused PostgreSQL API contract successfully in Ubuntu WSL/Docker; this was not deployed UI proof. Publish was added later in PA4.
+- **Human direction / documentation:** User requested general architecture explanations and removal of evaluation scores/costs from overview guides. Consolidated seven guides into [architecture](docs/architecture/README.md), updated README/database references and checked links/source excerpts without presenting planned Publish/sampling as implemented. Sixteen pre-existing historical PA2 broken links were outside that cleanup. No model calls/deployment were needed.
+
+## 2026-11-22 - PA3 Member 2 foundation and evaluation
+
+- **Tool / task:** Codex; checker, Gemini adapter, durable worker accounting, syntax coverage and generic online/offline evaluator.
+- **Changed:** Strict schema/exact evidence checks, line-preserving comment removal, identity redaction, bounded requests and sanitized audit records; model off by default. Migration 00005 adds lab-locked reservations before calls, replacing them with known cost or retaining unknown/crashed reservations across restarts. API/sandbox get no key. Five-second cancellable pacing respects the reported 15 RPM quota within this process, not other key users.
+- **Rejected / human role:** User entered settings privately and authorized real verification; assistant changed no provider limits. Rejected real unit-test calls, in-memory-only budgets, unreserved retries, treating unknown usage as free, and inferring cap verification from a saved key. The lab ledger tracks this application, not provider-console spending or other applications.
+- **Datasets / offline checks:** Pinned 128 lecturer files to `552c811db2d35a23d641bc4fdffc1ac120be1a28`, recorded hashes, and added five independently labelled Accepted cases. Expanded libclang statement/type/macro/alias bans without dev-specific rules. Labels never enter the checker. Model-off official result: 0 wrongful, 15/37 recall, 47/102 unsure; own: 0 wrongful, 40% recall, 50% unsure. Both scorer exits were 1. Fixed tmpfs-output capture/archive buffering without changing data. Go format/vet, fake-provider, PostgreSQL accounting/lease, Docker attacks/syntax and hash checks passed.
+- **Real smoke:** Checker smoke (original files retained in Git history through `1b8fdb3`) returned exact evidence/provider ID (US$0.000220); [worker smoke](eval/runs/real-worker/) stored Accepted and separate hard-rule/model passes, removed identity from comment/literal (US$0.000444). Added worker --once; no marks published or worker left polling.
+- **Original real failure:** [Dev run](eval/runs/real-dev/) produced 102 predictions: 0 wrongful, 21/37 recall (56.8%), 31/102 unsure (30.4%), scorer exit 1. Of 34 calls, 29 had IDs/known usage and five HTTP 503s had neither. Later budget blocks stayed unsure; peak rate 12/minute. Failures were preserved without retries or label/scorer changes.
+- **Costs:** [Summarizer](scripts/summarize-model-run.mjs) records 22,841 input / 2,536 output tokens for 29 known calls: US$0.013204; extrapolating one call per submission to 80 was US$0.036425. Unknown 503 usage is excluded; US$2.392065 retained reservation is a conservative local charge, not a bill. Later numbered-line run: 0 wrongful, 35/37 recall, 2/102 unsure, 39 known-ID calls, US$0.020851 (deployment fix attributed below). PA4 confirmation changes the old one-call estimate. Historical pricing was checked against [Google pricing](https://ai.google.dev/gemini-api/docs/pricing#gemini-3.5-flash-lite) on 22 November.
+- **Evidence / limits:** [Progress](docs/PA3/MEMBER2-PROGRESS.md), [handoff](docs/PA3/MEMBER2-HANDOFF.md), [checker](backend/cmd/checker/), [worker accounting](backend/internal/worker/model.go). Local completion did not establish public deployment, Member 3 acceptance or held-out performance.
 
 ## 1. Local PostgreSQL port
 
@@ -418,105 +135,13 @@ Tool: Codex, following read-only review of the PA#2 evidence changes.
 Changed: separated the Playwright test command from browser installation in README and clarified that Windows/macOS and Linux CI need different browser setup flags, while both run the same `npm run e2e --prefix frontend` check.
 Kept: the existing local test result and the CI workflow command; no application or test files changed.
 
-## 2026-11-21 — PA3 lab creation backend
+## 2026-11-21 - PA3 Member 1 backend, UI, sandbox and handoff
 
-- **Tool:** Codex.
-- **Asked for:** Implement the Member 1 lab creation backend so a TA can create a lab in their assigned class, including the statement, test cases, constraints, and TA-selected deductions.
-- **Kept:** A versioned migration for classes, TA membership, lab statements, test cases, and constraints; a class-scoped lab creation endpoint; server-side TA membership checks; and one transaction for the lab and its related rows.
-- **Changed:** Extended the existing lab structure while preserving local data and the existing submission contract. Added PostgreSQL tests for student refusal, another class's refusal, invalid input, and saved tests and constraints.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** `go -C backend test ./... -count=1` passed with `TEST_DATABASE_URL` pointing to local PostgreSQL on port 5433. The suite ran in an isolated temporary schema, including the new lab creation test.
-- **Evidence:** `backend/migrations/00003_labs_and_classes.sql`, `backend/internal/api/lab.go`, `backend/internal/api/server.go`, and `backend/internal/api/api_test.go`.
-
-## 2026-11-21 — PA3 class setup and submission status
-
-- **Tool:** Codex.
-- **Asked for:** Implement the Member 1 class and submission backend, including class assignment, student enrollment, and protected judging-status access.
-- **Kept:** Admin-only class creation, server-side class membership, automatic enrollment in newly created labs, class/lab lists, session identity lookup, and student-owned submission status. The status endpoint exposes judging results without constraint deductions.
-- **Changed:** Added class-student membership, persistent judging result storage, job lease fields, and a separate constraint-verdict table for the worker handoff.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** The complete Go test suite passed against local PostgreSQL with an isolated temporary schema, including class setup, automatic enrollment, status ownership, class-list privacy, and the existing submission contract.
-- **Evidence:** `backend/internal/api/workspace.go`, `backend/internal/api/api_test.go`, and `backend/migrations/00004_judging.sql`.
-
-## 2026-11-21 — PA3 shadcn/ui and Tailwind screens
-
-- **Tool:** Codex and the official shadcn CLI.
-- **Asked for:** Build the Member 1 frontend screens using shadcn/ui and Tailwind CSS while retaining the Go backend integration.
-- **Kept:** Generated shadcn components, Tailwind's Vite integration, a dark theme, role-based class and lab forms, editable test cases and constraints, student C++ submission, and protected status polling.
-- **Changed:** Replaced the placeholder page and temporary JSON forms with the connected application screens. Added the Vite API proxy paths needed by class lists and submission polling.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** Frontend lint, formatting, TypeScript checks, production build, and the Playwright login-screen check passed. Lint reported two non-blocking Fast Refresh warnings in generated shadcn component exports.
-- **Evidence:** `frontend/src/App.tsx`, `frontend/src/components/ui/`, `frontend/src/style.css`, `frontend/components.json`, and `frontend/e2e/app-shell.spec.ts`.
-
-## 2026-11-21 — PA3 isolated C++ sandbox
-
-- **Tool:** Codex.
-- **Asked for:** Implement and verify a sandbox that compiles and executes C++ submissions while enforcing all nine PA3 isolation and resource requirements.
-- **Kept:** A non-root, read-only Docker container with no network, host mounts, Docker socket, or application secrets; explicit CPU, memory/swap, process, wall-time, and output limits; streamed source input; and forced whole-container cleanup.
-- **Changed:** Added a dedicated runner image and nine real C++ attack submissions. Compilation and syntax analysis also run inside the restricted container.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** All nine Docker attack tests passed. A further wall-time check confirmed the timed-out container is removed; the memory test writes and reads its allocation, and output capture is bounded to 64 KiB.
-- **Evidence:** `sandbox/Dockerfile`, `backend/internal/sandbox/runner.go`, and `backend/internal/sandbox/testdata/`.
-
-## 2026-11-21 — PA3 syntax-aware hard rules
-
-- **Tool:** Codex.
-- **Asked for:** Implement syntax-aware ban-list decisions before semantic model checking, with tests for compliant traps and evidence lines.
-- **Kept:** A libclang-based scanner running in the sandbox, generic backtick ban-list parsing, resolved call targets, and exact source-line evidence. Semantic constraints return `unsure` with `semantic_pending`; this package has no model dependency.
-- **Changed:** Added a reusable Go checker interface for the worker and Member 2. The checker analyzes all ban-list constraints together and separates their decisions from semantic work.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** Real Docker syntax tests passed for actual calls, comments, strings, a student's namespace, an include used only for `std::swap`, using declarations, and macros. Ban-list format tests also passed.
-- **Evidence:** `backend/internal/hardrules/check.go`, `backend/internal/hardrules/check_test.go`, and `sandbox/scan.cpp`.
-
-## 2026-11-21 — PA3 persistent queue worker
-
-- **Tool:** Codex.
-- **Asked for:** Add a separate judging worker that recovers queued submissions after restart and stores exactly one result set.
-- **Kept:** PostgreSQL row-lock claims, renewable leases, fencing tokens, bounded infrastructure retries, sandbox judging, and hard-rule checks only after Accepted. Semantic work remains explicitly pending for Member 2.
-- **Changed:** Added `cmd/worker` and a worker package. Results and constraint verdicts are stored in a transaction guarded by the current lease token and database unique keys.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** PostgreSQL/Docker integration tests passed for queued work with no worker, a new worker processing real C++ to Accepted, one stored result set, no second claim of a live lease, recovery of an expired lease, and refusal of stale or duplicate completion.
-- **Evidence:** `backend/cmd/worker/main.go`, `backend/internal/worker/worker.go`, and `backend/internal/worker/worker_test.go`.
-
-## 2026-11-21 — PA3 form accessibility and browser flows
-
-- **Tool:** Codex.
-- **Asked for:** Verify the Member 1 shadcn forms and student result flow in the browser.
-- **Kept:** Explicit, unique label/control IDs, including repeated test-case and constraint fields, and separate labels so select options do not become label text.
-- **Changed:** Added browser tests that verify the TA's submitted tests and deductions, the student's retry key, and the polled Accepted result.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** Frontend lint, formatting, types, production build, and all three Playwright tests passed. Generated-component Fast Refresh warnings remain non-blocking.
-- **Evidence:** `frontend/src/App.tsx` and `frontend/e2e/member-one.spec.ts`.
-
-## 2026-11-21 — PA3 CI and full pipeline checks
-
-- **Tool:** Codex.
-- **Asked for:** Run the Member 1 checks together and configure sandbox and worker checks for the `pa3` tag.
-- **Kept:** The existing required jobs, with a separate Docker/PostgreSQL sandbox job and no ignored failures. PRs, main, and `pa3` run the checks.
-- **Changed:** Extended the API test to submit real code through HTTP and process it through the worker when Docker tests are enabled. Kept failed hard-rule analysis as `unsure` without routing bans to a model.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** Local Go format/vet and the full PostgreSQL/Docker suite passed, including all nine attacks, syntax traps, worker recovery, and API-to-worker judging. The follow-up failure-handling test also passed. Remote tag CI is configured; no remote run is claimed here.
-- **Evidence:** `.github/workflows/gates.yml`, `backend/internal/api/api_test.go`, and `backend/internal/worker/worker_test.go`.
-
-## 2026-11-21 — PA3 deployment environment and handoff
-
-- **Tool:** Codex.
-- **Asked for:** Prepare and verify the Member 1 deployment environment and document the worker, sandbox, and next-member interfaces.
-- **Kept:** Separate web/API/migration images, PostgreSQL on host port 5433, Caddy routing, a host-worker service template, ignored secret configuration, and model calls off by default. Retained the provider project cap already documented in README.
-- **Changed:** Added deployment Compose and Docker files, the full-check PowerShell script, server-only model configuration names, and the Member 1 handoff guide. Documented the custom sandbox choice and how the next members consume verdicts.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** Deployment images built and the local stack started successfully. The frontend returned HTTP 200 and the protected identity endpoint returned HTTP 401 without a session. The standalone worker built. The documented backend script passed Go format/vet, PostgreSQL checks, all nine Docker attacks, syntax traps, and worker tests.
-- **Evidence:** `compose.pa3.yaml`, `deploy/`, `scripts/test-pa3.ps1`, and `docs/PA3/MEMBER1-HANDOFF.md`. This verifies local setup; no public-host provisioning or remote tag CI run is claimed.
-
-## 2026-11-21 — PA3 database reference and completed Member 1 checklist
-
-- **Tool:** Codex.
-- **Asked for:** Update the current database reference and check the completed Member 1 plan items against the implemented work and passing checks.
-- **Kept:** A schema reference covering all four migrations, separate judge results and constraint verdicts, and a step-by-step submission/lease flow.
-- **Changed:** Updated `DATABASE.md` and checked the eleven Member 1 implementation/handoff items with linked evidence. Clarified that publishing the fixed interfaces belongs to Member 1, while receiving-member acceptance remains in Members 2 and 3's own tasks.
-- **Rejected:** None recorded for this completed part.
-- **Verified:** Reviewed the documented tables and fields against migrations `00001`–`00004`, and linked the completed checklist to passing backend, Docker, browser, and local deployment checks. Public hosting and the remote `pa3` CI run are explicitly not claimed.
-- **Evidence:** `docs/DATABASE.md`, `docs/PA3/PA3-PLAN.md`, and `docs/PA3/MEMBER1-HANDOFF.md`.
+- **Tool / task:** Codex and official shadcn CLI; class/lab setup, student submission/status, persistent worker, syntax rules and connected React screens.
+- **Changed:** Migrations 00003-00004; admin/TA/class/student ownership; transactional lab/test/constraint creation; lease/fencing worker with restart recovery and one atomic result set. Hard rules run after Accepted; semantic checks were then pending. UI includes role forms, accessible repeated fields, idempotent retry and status polling; student status exposes no deductions.
+- **Sandbox:** Non-root/read-only Docker, no network/secrets/socket/mounts; CPU/memory/swap/process/time/output limits and whole-container cleanup. Nine real C++ attacks passed; memory test writes and reads allocation, output bounded to 64 KiB. libclang tests cover calls, comments/strings, namespaces, includes, using declarations and macros. Failed analysis stays unsure without model fallback.
+- **Verified:** Local Go format/vet/PostgreSQL/Docker tests passed, including API-to-worker C++, queue restart, stale/duplicate lease refusal and single results. Frontend lint/format/types/build and three Playwright flows passed (two generated-component Fast Refresh warnings). Deployment images/local stack built: frontend HTTP 200, unauthenticated identity HTTP 401. Added CI Docker/PostgreSQL and pa3 triggers with no ignored failures; no remote run/public deployment was claimed then.
+- **Evidence / limits:** [Handoff](docs/PA3/MEMBER1-HANDOFF.md), [plan](docs/PA3/PA3-PLAN.md), [check script](scripts/test-pa3.ps1), [deployment](deploy/), [sandbox attacks](backend/internal/sandbox/testdata/). PostgreSQL host port 5433; model off by default. Completed implementation checklist did not imply receiving-member acceptance.
 
 ## 2026-11-23 — Repair secret-history license failure
 

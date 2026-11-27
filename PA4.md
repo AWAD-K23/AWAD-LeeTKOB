@@ -203,7 +203,7 @@ to the checker process; its scanner uses a cleared environment. No Docker socket
 host mount or secrets belong in a student execution sandbox. Go honors proxy
 environment variables, and redirects never forward authentication.
 
-[Offline image rehearsal](eval/runs/pa4-marking-model-off/rehearsal.json) used
+[Offline image rehearsal](docs/PA4/evidence/checker-image-rehearsals.json) used
 an arbitrary dataset path, no network/credentials and all twenty own pairs. It
 completed in 2.8 seconds with valid output and evaluator exit 1 (expected offline
 semantic threshold failure). It proves command validity, not live proxy access

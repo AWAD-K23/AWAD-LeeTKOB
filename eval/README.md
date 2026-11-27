@@ -60,7 +60,7 @@ go -C backend run ./cmd/checker --data ../eval/extra --predictions ../eval/runs/
 | Dataset | Wrongful deductions | Recall | Unsure rate | Evaluator exit |
 |---|---:|---:|---:|---:|
 | `runs/offline/` | 0 | 40.5% (15/37) | 46.1% (47/102) | 1 |
-| `runs/extra-offline/` | 0 | 40.0% (2/5) | 50.0% (5/10) | 1 |
+| Extra cases (historical; full run removed) | 0 | 40.0% (2/5) | 50.0% (5/10) | 1 |
 
 - All 55 official ban-list pairs were decided. All 47 semantic pairs stayed unsure.
 - These are actual offline results, not real-model evaluation evidence.
@@ -78,7 +78,7 @@ go -C backend run ./cmd/checker --data ../eval/extra --predictions ../eval/runs/
   unchanged evaluator exit 0 (PASS). 39 calls, all answered, US$0.021 estimated.
 - `runs/real-dev/` (2026-11-22, before that change): 102 predictions; 0 wrongful
   deductions, 56.8% recall, 30.4% unsure; unchanged evaluator exit 1.
-- `runs/real-smoke/`: one successful real call on an Accepted extra solution.
+- Historical smoke: one successful real call on an Accepted extra solution; its redundant run folder was removed. Original evidence remains in Git history through `1b8fdb3`.
 - `runs/real-worker/`: database proof of Accepted judging and a real model pass.
 - The dev run made 34 sequential requests; five returned HTTP 503 and were not
   retried. Budget blocks and failed evidence validation stayed unsure.
@@ -87,3 +87,9 @@ go -C backend run ./cmd/checker --data ../eval/extra --predictions ../eval/runs/
 - `node scripts/summarize-model-run.mjs eval/runs/real-dev` reproduces recorded
   usage totals and the observed request-rate check without making model calls.
 - See [Member 2 handoff](../docs/PA3/MEMBER2-HANDOFF.md) for measured cost arithmetic.
+
+## Which runs belong in Git
+
+Keep report-cited real dev comparisons, important failed/final live CI runs with provider/cost audits, the worker integration proof, and the official offline baseline. New run folders are ignored by default; use `local-` names for routine experiments. Add a new evidence folder deliberately only when a report needs it. CI uploads fresh output as Actions artifacts.
+
+Removed redundant `extra-offline`, `real-smoke` and both PA4 model-off rehearsal folders. Their original files remain in Git history through `1b8fdb3`; [compact rehearsal measurements](../docs/PA4/evidence/checker-image-rehearsals.json) retain command-validity evidence. Historical metrics above remain labelled as historical. No evaluation data, labels, predictions in retained runs or scoring rules were changed.
