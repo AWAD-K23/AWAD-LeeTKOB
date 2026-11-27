@@ -1,0 +1,145 @@
+{
+  "runUrl": "https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/46036066453",
+  "artifact": "pa4-live-eval-46036066453-1",
+  "summary": {
+    "commit": "57cd832e69425003fd8edb6551fb1235466af58a",
+    "finishedAt": "2026-11-27T16:51:29.507Z",
+    "results": [
+      {
+        "dataset": "official",
+        "evaluatorExit": 1,
+        "model": "gemini-3.5-flash-lite",
+        "reservedCalls": 61,
+        "recordedCalls": 61,
+        "knownUsageCalls": 61,
+        "unknownUsageCalls": 0,
+        "unfinishedReservations": 0,
+        "successfulResponses": 61,
+        "errors": [],
+        "providerRequestIds": 61,
+        "inputTokens": 72939,
+        "outputTokens": 6279,
+        "thinkingTokens": 0,
+        "knownEstimatedCostMicroUsd": 37608,
+        "unknownUsageReservedMicroUsd": 0,
+        "estimatedUsdFor80SimilarCalls": 0.04932196721311476,
+        "minimumStartGapMs": 5000,
+        "peakRequestsIn60Seconds": 12,
+        "predictionPairs": 102,
+        "verdictCounts": {
+          "pass": 63,
+          "violation": 37,
+          "unsure": 2
+        }
+      },
+      {
+        "dataset": "extra",
+        "evaluatorExit": 0,
+        "model": "gemini-3.5-flash-lite",
+        "reservedCalls": 16,
+        "recordedCalls": 16,
+        "knownUsageCalls": 16,
+        "unknownUsageCalls": 0,
+        "unfinishedReservations": 0,
+        "successfulResponses": 16,
+        "errors": [],
+        "providerRequestIds": 16,
+        "inputTokens": 10906,
+        "outputTokens": 1164,
+        "thinkingTokens": 0,
+        "knownEstimatedCostMicroUsd": 6189,
+        "unknownUsageReservedMicroUsd": 0,
+        "estimatedUsdFor80SimilarCalls": 0.030945,
+        "minimumStartGapMs": 5000,
+        "peakRequestsIn60Seconds": 12,
+        "predictionPairs": 20,
+        "verdictCounts": {
+          "pass": 11,
+          "violation": 9,
+          "unsure": 0
+        }
+      }
+    ],
+    "knownEstimatedCostMicroUsd": 43797,
+    "unknownUsageReservedMicroUsd": 0,
+    "exit": 1
+  },
+  "metrics": {
+    "official": {
+      "wrongful": 1,
+      "recall": "36/37",
+      "unsure": "2/102"
+    },
+    "extra": {
+      "wrongful": 0,
+      "recall": "9/9",
+      "unsure": "0/20"
+    }
+  },
+  "wrongful": {
+    "solution": "reverse-words/s02",
+    "constraint": "C2",
+    "calls": [
+      {
+        "providerRequestId": "R7QJa9-0IeDExdIP_ezI-Qo",
+        "proposedViolations": [],
+        "response": {
+          "verdicts": [
+            {
+              "constraintId": "C2",
+              "evidence": [
+                {
+                  "line": 14,
+                  "text": "    string tu;"
+                },
+                {
+                  "line": 16,
+                  "text": "    while (cin >> tu) {"
+                }
+              ],
+              "verdict": "violation"
+            }
+          ]
+        }
+      },
+      {
+        "providerRequestId": "TLQJa4a0IcKD1sgPkv_XsAI",
+        "proposedViolations": [
+          {
+            "constraintId": "C2",
+            "evidence": [
+              {
+                "line": 14,
+                "text": "    string tu;"
+              },
+              {
+                "line": 16,
+                "text": "    while (cin >> tu) {"
+              }
+            ]
+          }
+        ],
+        "response": {
+          "verdicts": [
+            {
+              "constraintId": "C2",
+              "evidence": [
+                {
+                  "line": 14,
+                  "text": "    string tu;"
+                },
+                {
+                  "line": 16,
+                  "text": "    while (cin >> tu) {"
+                }
+              ],
+              "verdict": "violation"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "diagnosis": "Both calls cite the same input declaration/read, not a prohibited second output buffer. Supplying the prior finding permits anchoring; independent confirmation is an unvalidated mitigation, not a proven accuracy fix.",
+  "rawArtifactLocalOnly": "eval/runs/local-ci-46036066453"
+}

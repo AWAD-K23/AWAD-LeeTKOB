@@ -213,8 +213,9 @@ func TestGeminiCancellationAndAuditFailure(t *testing.T) {
 	}
 }
 
-func TestGeminiSendsConfirmationCandidates(t *testing.T) {
-	model, err := NewGemini(SupportedModel, "fake-test-key", func(CallLog) error { return nil })
+func TestGeminiConfirmationDoesNotRevealPriorFinding(t *testing.T) {
+	var saved CallLog
+	model, err := NewGemini(SupportedModel, "fake-test-key", func(entry CallLog) error { saved = entry; return nil })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,8 +239,11 @@ func TestGeminiSendsConfirmationCandidates(t *testing.T) {
 		if err := json.Unmarshal([]byte(sent.Contents[0].Parts[0].Text), &prompt); err != nil {
 			t.Fatal(err)
 		}
-		if len(prompt.ProposedViolations) != 1 || prompt.ProposedViolations[0].ConstraintID != "a" || len(prompt.Code) != 1 || prompt.Code[0].Text != "int quantity = 1;" {
+		if len(prompt.Constraints) != 1 || prompt.Constraints[0].ID != "a" || len(prompt.Code) != 1 || prompt.Code[0].Text != "int quantity = 1;" {
 			t.Fatalf("confirmation data lost: %+v", prompt)
+		}
+		if strings.Contains(sent.Contents[0].Parts[0].Text, "proposedViolations") {
+			t.Fatal("confirmation is anchored by the primary finding")
 		}
 		return &http.Response{StatusCode: 200, Header: http.Header{}, Body: io.NopCloser(strings.NewReader(`{"responseId":"fake-confirmation-id","usageMetadata":{"promptTokenCount":1,"candidatesTokenCount":1},"candidates":[{"finishReason":"STOP","content":{"parts":[{"text":"{\"verdicts\":[{\"constraintId\":\"a\",\"verdict\":\"unsure\",\"evidence\":[]}]}"}]}}]}`))}, nil
 	})
@@ -247,5 +251,8 @@ func TestGeminiSendsConfirmationCandidates(t *testing.T) {
 		ProposedViolations: []ProposedViolation{{ConstraintID: "a", Evidence: []hardrules.Evidence{{Line: 1, Text: "int quantity = 1;"}}}}})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if len(saved.Prompt.ProposedViolations) != 0 {
+		t.Fatal("audit claims prior findings were sent during independent confirmation")
 	}
 }

@@ -227,3 +227,9 @@ The [Member 1 contract](docs/contract/publication.md) and
 Member 3 still owns deployed injection/UI checks, assigned-target red-team work,
 the rubric self-assessment, tag CI, ZIP and submission. Current backend handoff
 and checker checks do not establish those results.
+
+## Subsequent CI failure and local confirmation change
+
+[Run 46036066453](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/46036066453) later failed the official set with one wrongful finding, 36/37 recall and 2/102 unsure; own cases passed with 9/9 recall and no wrongful/unsure findings. All 77 calls have provider IDs and known usage, estimated US$0.043797; no provider errors or unknown reservations. [Compact audit](docs/PA4/evidence/confirmation-repeat-failure.json) preserves the result; the complete artifact was downloaded locally, without rerunning the model. This supersedes the earlier green run as current CI status.
+
+Both primary and confirmation responses cited input storage/read lines as proof of a prohibited buffer. The confirmation received the prior finding and repeated its evidence. The local candidate removes earlier conclusions/evidence from the provider request and its audit, retaining the selected constraints and sanitized numbered source for independent reassessment. The new wire/audit regression failed before the change and passes after; existing evidence/schema/budget/confirmation gates remain. This may reduce anchoring; correlated model errors are still possible. No paid rerun or push was performed, so live accuracy of this candidate remains unverified.

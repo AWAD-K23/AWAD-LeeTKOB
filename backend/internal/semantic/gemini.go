@@ -37,10 +37,10 @@ For resource rules, distinguish automatic/static storage from explicit dynamic
 allocation and trace every allocation's lifetime, including overwritten owners;
 one final release does not prove that every earlier allocation was released.
 Use the submitted constraint's exact requirements rather than adding assumptions.
-If proposedViolations is present, independently audit those candidates and try
-to disprove them against the code and the exact rule. Return violation only with
-source proof of a prohibited operation; return pass for compliant code and unsure
-when proof is insufficient. Do not confirm by repeating the proposed conclusion.
+Form an independent judgment from the code and the exact rule. Try to disprove
+each suspected violation before returning it. Return violation only with source
+proof of a prohibited operation; return pass for compliant code and unsure when
+proof is insufficient.
 An input object, normal temporary or storage declaration alone does not prove an
 algorithmic violation. Follow its actual use before deciding.
 For every constraint return pass, violation, or unsure and an evidence array.
@@ -58,12 +58,11 @@ type numberedLine struct {
 	Text string `json:"text"`
 }
 
-// wireRequest carries the same data as Request; only the code is framed.
+// wireRequest frames source lines and excludes internal confirmation proposals.
 type wireRequest struct {
-	Statement          string                 `json:"statement"`
-	Constraints        []hardrules.Constraint `json:"constraints"`
-	Code               []numberedLine         `json:"code"`
-	ProposedViolations []ProposedViolation    `json:"proposedViolations,omitempty"`
+	Statement   string                 `json:"statement"`
+	Constraints []hardrules.Constraint `json:"constraints"`
+	Code        []numberedLine         `json:"code"`
 }
 
 func numberLines(source string) []numberedLine {
@@ -122,6 +121,10 @@ func NewGemini(model, key string, record func(CallLog) error) (*Gemini, error) {
 
 // Generate makes one attempt. Retrying belongs to a new budget reservation.
 func (g *Gemini) Generate(ctx context.Context, request Request) (result []byte, err error) {
+	// Confirmation must not see the first call's conclusion or selected evidence.
+	// Keep the selected constraints and full sanitized source, and audit exactly
+	// the data sent. The checker retains its internal proposals for comparison.
+	request.ProposedViolations = nil
 	entry := CallLog{
 		Model: SupportedModel, StartedAt: time.Now().UTC(),
 		Prompt: request, Outcome: "request_failed",
@@ -142,8 +145,7 @@ func (g *Gemini) Generate(ctx context.Context, request Request) (result []byte, 
 	// The 64 KiB bound above applies to the data; the line framing is added after it.
 	data, err = json.Marshal(wireRequest{
 		Statement: request.Statement, Constraints: request.Constraints,
-		Code:               numberLines(request.Source),
-		ProposedViolations: request.ProposedViolations,
+		Code: numberLines(request.Source),
 	})
 	if err != nil {
 		return nil, errors.New("model request encoding failed")

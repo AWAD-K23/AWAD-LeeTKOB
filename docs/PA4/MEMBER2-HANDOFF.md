@@ -1,4 +1,6 @@
-# PA4 Member 2 handoff — CI verified; release acceptance pending
+# PA4 Member 2 handoff - subsequent live CI failure
+
+> Current update: CI run 46036066453 failed with one wrongful official finding. A local independent-confirmation candidate is offline-tested only; see the [latest report](../../PA4.md#subsequent-ci-failure-and-local-confirmation-change) and [compact audit](evidence/confirmation-repeat-failure.json). Earlier green evidence below is historical.
 
 November 27, 2026 (Asia/Saigon). The latest checker passes the required combined
 CI evaluation. Earlier failures remain preserved; latest-code repeated-run

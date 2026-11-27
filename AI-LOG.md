@@ -1,5 +1,11 @@
 # AI log
 
+## 2026-11-27 - Follow-up CI failure and independent confirmation
+
+- **Tool / task:** Codex; diagnose reported job 140631667610 without new paid calls. Existing run 46036066453 failed: official 1 wrongful, 36/37 recall, 2/102 unsure; own cases passed. All 77 calls have IDs/known usage, US$0.043797 estimated. Downloaded raw artifacts locally and retained a [compact audit](docs/PA4/evidence/confirmation-repeat-failure.json).
+- **Changed / verified:** Both responses repeated input-storage evidence rather than a prohibited operation. Removed the earlier finding from provider confirmation input/audit to reduce anchoring while keeping full sanitized source, constraints and strict validation. New fake-transport wire/audit regression failed before/pass after. No official data, cases, labels, thresholds or checks changed.
+- **Limits:** The new candidate is not live-validated and cannot guarantee independent model errors. The prior green run is historical, not current CI status. No rerun, paid call or push was made for this diagnosis.
+
 ## 2026-11-27 - PA4 Member 1: review sampling and Publish
 
 - **Tool / task:** Codex; implement Member 1 with a publication contract and tested handoff.
