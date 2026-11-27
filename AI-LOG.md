@@ -1,5 +1,12 @@
 # AI log
 
+## 2026-11-27 — PA4 G5 model deductions audit
+
+- **Tool / task:** Codex; audit G5 for Member 2.
+- **Changed:** Added decisive fake-model responses containing forged deductions, marks and mark-writing instructions; each must become unsure. The test verifies the provider request contains no grading values. Extended the direct publication API test to reject a forged review deduction while preserving the configured deduction in the published total.
+- **Verified:** `go -C backend test ./internal/semantic ./internal/api -run 'TestG5|TestPublicationGate' -count=1` passed, including PostgreSQL-backed student result visibility. No production deduction rule was changed; the existing strict schema and server-selected deduction remain the guard.
+- **Limits:** Deployed UI injection evidence remains Member 3 integration work.
+
 ## 2026-11-27 — PA4 G4 persistent cap audit
 
 - **Tool / task:** Codex; audit G4 for Member 2.

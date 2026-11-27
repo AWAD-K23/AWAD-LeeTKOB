@@ -228,6 +228,7 @@ func TestPublicationGate(t *testing.T) {
 			continue
 		}
 		if row.Required {
+			check(request("POST", decisionPath(row.Constraint), `{"decision":"violation","deduction":999,"evidence":[{"line":1,"text":"int main() {}"}]}`, ta), 400)
 			check(request("POST", decisionPath(row.Constraint), `{"decision":"violation","evidence":[{"line":1,"text":"int main() {}"}]}`, ta), 200)
 		}
 	}
