@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"leetkob/backend/internal/hardrules"
 	"leetkob/backend/internal/sandbox"
 	"leetkob/backend/internal/semantic"
 )
@@ -332,6 +333,47 @@ func TestDurableWorker(t *testing.T) {
 			"SELECT sum(charged_micro_usd)::bigint FROM model_calls WHERE lab_id=$1", lab,
 		).Scan(&charged); err != nil || charged != semantic.ReserveMicroUSD+7 {
 			t.Fatal(charged, err)
+		}
+	})
+
+	t.Run("G4 exhausted persistent cap stops provider and explains all pending constraints", func(t *testing.T) {
+		id := enqueue()
+		// Persist a reservation first; a fresh model instance must see the charge.
+		var charged int64
+		if err := db.QueryRow(ctx, `SELECT COALESCE(sum(charged_micro_usd),0)::bigint FROM model_calls WHERE lab_id=$1`, lab).Scan(&charged); err != nil {
+			t.Fatal(err)
+		}
+		if err := reserveCall(ctx, db, uuid.NewString(), lab, id, charged+semantic.ReserveMicroUSD); err != nil {
+			t.Fatal(err)
+		}
+		charged += semantic.ReserveMicroUSD
+		calls := 0
+		model := &budgetedModel{db: db, lab: lab, submission: id, config: ModelConfig{BudgetMicroUSD: charged},
+			newModel: func(func(semantic.CallLog) error) (semantic.Model, error) {
+				return fakeSemanticModel(func(_ context.Context, request semantic.Request) ([]byte, error) {
+					calls++
+					items := []any{}
+					for _, constraint := range request.Constraints {
+						items = append(items, map[string]any{"constraintId": constraint.ID, "verdict": "pass", "evidence": []hardrules.Evidence{{Line: 1, Text: "int value = 1;"}}})
+					}
+					return json.Marshal(map[string]any{"verdicts": items})
+				}), nil
+			},
+		}
+		constraints := []hardrules.Constraint{{ID: "a", Text: "Initialize value"}, {ID: "b", Text: "Use integers"}}
+		checks := []hardrules.Verdict{{ConstraintID: "a", Source: "semantic_pending"}, {ConstraintID: "b", Source: "semantic_pending"}}
+		out := (semantic.Checker{Enabled: true, Model: model}).Check(ctx, "Review", []byte("int value = 1;"), constraints, checks)
+		if calls != 0 {
+			t.Fatalf("exhausted cap made %d provider calls", calls)
+		}
+		for _, finding := range out {
+			if finding.Verdict != "unsure" || finding.Reason != "Lab model budget exhausted." || len(finding.Evidence) != 0 {
+				t.Fatal(out)
+			}
+		}
+		var after int64
+		if err := db.QueryRow(ctx, `SELECT COALESCE(sum(charged_micro_usd),0)::bigint FROM model_calls WHERE lab_id=$1`, lab).Scan(&after); err != nil || after != charged {
+			t.Fatalf("cap changed balance: %d -> %d: %v", charged, after, err)
 		}
 	})
 }

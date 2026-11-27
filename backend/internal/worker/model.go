@@ -33,12 +33,20 @@ type budgetedModel struct {
 	db              *pgxpool.Pool
 	config          ModelConfig
 	lab, submission string
+	// Tests inject an offline provider behind the actual persistent budget gate.
+	newModel func(func(semantic.CallLog) error) (semantic.Model, error)
 }
 
 func (m *budgetedModel) Generate(ctx context.Context, request semantic.Request) ([]byte, error) {
 	// Validate the provider configuration before reserving any budget.
 	callID := uuid.NewString()
-	model, err := semantic.NewGemini(m.config.Name, m.config.Key, func(entry semantic.CallLog) error {
+	factory := m.newModel
+	if factory == nil {
+		factory = func(record func(semantic.CallLog) error) (semantic.Model, error) {
+			return semantic.NewGemini(m.config.Name, m.config.Key, record)
+		}
+	}
+	model, err := factory(func(entry semantic.CallLog) error {
 		// Audit writes need their own short deadline after a provider timeout.
 		auditCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()

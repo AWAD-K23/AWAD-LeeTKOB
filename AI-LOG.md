@@ -1,5 +1,12 @@
 # AI log
 
+## 2026-11-27 — PA4 G4 persistent cap audit
+
+- **Tool / task:** Codex; audit G4 for Member 2.
+- **Changed:** Added an unexported provider factory seam behind the real worker reservation gate. The regression persists a charge, constructs a fresh budgeted model with a fake provider and checks that exhausted budget yields zero provider calls, unchanged ledger balance and local budget reasons for all pending constraints.
+- **Verified:** PostgreSQL-backed `go -C backend test ./internal/worker -run 'TestDurableWorker/G4' -count=1` passed with no provider/network calls. Production still constructs the same Gemini provider when the test seam is absent. Existing concurrent reservation/unknown-usage tests remain unchanged.
+- **Limits:** No budget limit or paid-service setting was changed. The user confirmed the provider cap and authorized the upcoming three dev runs and one combined evaluation; those runs are not yet claimed.
+
 ## 2026-11-27 — PA4 G3 timeout regression audit
 
 - **Tool / task:** Codex; audit G3 for Member 2.
