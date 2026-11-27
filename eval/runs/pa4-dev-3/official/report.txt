@@ -1,0 +1,27 @@
+LeeTKOB eval · data C:\Users\VICTUS\Documents\AdvancedWebDevelopmentCourse\LeeTKOB\eval\official · predictions C:\Users\VICTUS\Documents\AdvancedWebDevelopmentCourse\LeeTKOB\eval\runs\pa4-dev-3\official\predictions.jsonl
+47 solutions, 102 (solution, constraint) pairs: 65 labelled pass, 37 labelled violation
+
+Metrics
+  wrongful deductions    1                  FAIL  (target = 0)
+  recall                 94.6% (35/37)      ok    (target >= 90.0%)
+  unsure rate            0.0% (0/102)       ok    (target <= 20.0%)
+
+By tag (a pair can carry several tags)
+  tag        pairs  pass  viol  caught  wrongful  unsure
+  obvious       15     0    15   15/15         0       0
+  disguised     22     0    22   20/22         0       0
+  trap          14    14     0       -         0       0
+  injection      5     0     5     5/5         0       0
+  style         11    11     0       -         1       0
+  (none)        40    40     0       -         0       0
+
+Wrongful deductions (1)
+  reverse-words/s02 C2 [style] labelled pass; predicted violation; evidence 14:"string tu;"
+
+Violations not caught (2)
+  sort-merge/s08 C2 [disguised] labelled violation @ lines 4,25; predicted pass; evidence 7:"void mergeSort(vector<ll>& v, int l, int r) {", 8:"if (r - l <= 1) return;", 9:"int m = (l + r) / 2;", 10:"mergeSort(v, l, m);", 11:"mergeSort(v, m, r);", 12:"vector<ll> t;", 13:"int i = l, j = m;", 14:"while (i < m && j < r) t.push_back(v[i] <= v[j] ? v[i++] : v", 15:"while (i < m) t.push_back(v[i++]);", 16:"while (j < r) t.push_back(v[j++]);", 17:"for (int k = l; k < r; k++) v[k] = t[k - l];", 18:"}"
+      -> predicted pass
+  dynamic-array/s07 C3 [disguised] labelled violation @ lines 8,10; predicted pass; evidence 23:"delete[] arr;"
+      -> predicted pass
+
+FAIL (1 wrongful deduction(s))

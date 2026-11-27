@@ -1,5 +1,13 @@
 # AI log
 
+## 2026-11-27 — PA4 frozen baseline and repository protection evidence
+
+- **Tool / task:** Codex; Member 2 repeated runs, integrity and CI setup.
+- **Changed:** Saved three fresh dev evaluations of `77ef5b0` in new folders, their comparison and diagnostic findings. With explicit approval, added required live-eval/one approval/CODEOWNERS review to the team's existing ruleset and copied the local key into its Actions secret without printing it. Preserved before/after protection snapshots. Added runner tests for explicit live mode and output preservation.
+- **Verified:** Every baseline run had 39 known-usage provider responses with request IDs. All three failed with one wrongful violation each; recall 89.2–94.6%, unsure 0–2.9%, seven changed pairs, US$0.062328 total estimated usage. No results were overwritten. Five Node tooling tests, full Go/Docker/PostgreSQL tests and the complete frontend check passed. A fresh pinned upstream archive matched all 128 official hashes. The model-off checker image produced twenty valid own-case pairs at an arbitrary path in 2.8 seconds; evaluator exit 1 was preserved as expected.
+- **Rejected by automatic approval review:** Initial ruleset and secret-transfer attempts were blocked for insufficiently explicit external authorization. No workaround was used; the user then explicitly approved each exact operation before it was retried successfully.
+- **Limits:** These are failing baseline observations, not a held-out or final passing claim. The user asked for a simpler explanation of the additional-run request; no extra evaluations beyond the original authorization have started. Dedicated private marking credentials and deployed UI evidence remain pending.
+
 ## 2026-11-27 — PA4 live evaluation tooling and mutation evidence
 
 - **Tool / task:** Codex; Member 2 CI/evaluation integration.

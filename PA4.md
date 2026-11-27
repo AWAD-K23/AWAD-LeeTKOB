@@ -19,9 +19,13 @@ workflow does not use `pull_request_target`. The CI key belongs exclusively in
 the team repository's `MODEL_API_KEY` Actions secret and the trusted checker
 process, never a student execution container.
 
-Repository settings, actual CI runs and blocked-merge/fixing-commit links will be
-recorded after inspection and execution. CODEOWNERS covers tests, `.github/`,
-scripts and eval data; the file alone is not proof that required review is active.
+With explicit user approval, active ruleset `26947349` now requires `live-eval`
+alongside the existing gates/secret-history/e2e checks, one approval and CODEOWNERS
+review. [Before](docs/PA4/evidence/repository-protection-before.json) and
+[after](docs/PA4/evidence/repository-protection-after.json) API snapshots preserve
+the settings. Existing restrictions and the empty bypass list were retained.
+The selected team repository's `MODEL_API_KEY` Actions secret is configured;
+its value was neither printed nor committed. Actual CI/block/fix links follow.
 
 ## Guardrails and case history
 
@@ -55,13 +59,29 @@ repeat the audit in a disposable export without editing the checkout.
 
 ## Three runs, variability and cost
 
-Pending: freeze one commit and record three real official dev runs plus one full
-official-and-own CI-equivalent run. The user confirmed the provider cap and
-authorized these runs. Every run uses a new folder and preserves prior evidence.
-Compare them with `node scripts/compare-model-runs.mjs <run1> <run2> <run3>`.
-Changed pairs means unique `(solution, constraint)` pairs with differing verdicts
-across any of the three runs. Commit, model/configuration and dataset must match.
-Unknown provider usage and unfinished reservations remain separately disclosed.
+Three fresh official dev runs used frozen commit `77ef5b0`, identical dataset,
+model/version/configuration and sandbox image. All **failed**, rather than being
+represented as passing evidence:
+
+| Run | Wrongful | Recall | Unsure | Estimated provider cost |
+| --- | ---: | ---: | ---: | ---: |
+| [1](eval/runs/pa4-dev-1/official/report.txt) | 1 | 33/37 (89.2%) | 3/102 (2.9%) | US$0.020726 |
+| [2](eval/runs/pa4-dev-2/official/report.txt) | 1 | 34/37 (91.9%) | 3/102 (2.9%) | US$0.020148 |
+| [3](eval/runs/pa4-dev-3/official/report.txt) | 1 | 35/37 (94.6%) | 0/102 (0%) | US$0.021454 |
+
+Seven unique `(solution, constraint)` pairs changed verdict across any of the
+three runs. Lowest/highest recall: **89.2% / 94.6%**; unsure: **0% / 2.9%**.
+[Comparison output](docs/PA4/evidence/baseline-variability.json) gives the exact
+definition and changed pairs. Every run contains predictions, reports, metadata,
+usage summaries and all 39 provider IDs. There were no unknown-usage calls or
+unfinished reservations; the three runs total US$0.062328 in estimated usage.
+Run `node scripts/compare-model-runs.mjs <run1> <run2> <run3>` to reproduce this
+without provider calls. One full official-and-own CI cost remains to be measured.
+
+[Diagnostic findings](docs/PA4/evidence/baseline-findings.md) describe generic
+failure mechanisms. No labels, official source or thresholds were altered.
+These baseline failures require a checker fix and new validation; they do not
+support a passing held-out estimate.
 
 ## Marking command and model host
 
@@ -77,6 +97,13 @@ image. It analyzes code without executing it. Model credentials are supplied onl
 to the checker process; its scanner uses a cleared environment. No Docker socket,
 host mount or secrets belong in a student execution sandbox. Go honors proxy
 environment variables, and redirects never forward authentication.
+
+[Offline image rehearsal](eval/runs/pa4-marking-model-off/rehearsal.json) used
+an arbitrary dataset path, no network/credentials and all twenty own pairs. It
+completed in 2.8 seconds with valid output and evaluator exit 1 (expected offline
+semantic threshold failure). It proves command validity, not live proxy access
+or held-out performance. [Fresh upstream comparison](docs/PA4/evidence/official-upstream-comparison.json)
+also confirms all 128 pinned official files match the lecturer's archive.
 
 Private `marking.env` variable names: `MODEL_OFF`, `MODEL_NAME`, `MODEL_API_KEY`,
 and optionally `MODEL_LAB_BUDGET_MICRO_USD`. Use a dedicated working key; attach
