@@ -55,7 +55,7 @@ Backend implementation and local verification: [Member 1 handoff](MEMBER1-HANDOF
 - [x] Audit G1–G5 below against actual code/tests. Add missing tests before or with each guardrail change, in separate genuine commits. Check that each test fails when its guardrail is removed; record any PA3 mixed-history limitation honestly.
 - [x] Extend `eval/extra/` to at least ten Accepted solutions with labels and tags, covering trap, injection and disguised. Verify they compile and pass their problem tests. Keep these cases separate from the official set and commit them before related checker fixes.
 - [x] Investigate remaining missed violations with generic algorithm/evidence reasoning. Preserve exact source validation, hard-rule-first routing and safe unsure fallback; no problem-specific fixes or label changes.
-- [ ] Add a live evaluation job for PRs, main and `pa4`. Generate fresh predictions for both official and own cases inside the job using the real model, then run the unchanged evaluator on both. Every nonzero evaluator exit must fail the job.
+- [x] Add a live evaluation job for PRs, main and `pa4`. Generate fresh predictions for both official and own cases inside the job using the real model, then run the unchanged evaluator on both. Every nonzero evaluator exit must fail the job.
 - [x] Keep unit/guardrail tests offline with fake models. Retain the separate model-off checker job; its expected semantic threshold failure is not the live gate.
 - [x] Store the CI key only in repository secrets; preserve provider request IDs, model/version, tokens, timings and estimated cost in safe artifacts. Do not expose the key to student-code containers.
 - [x] Document a fork policy in `PA4.md`: secretless fork PRs must not count as a passing live eval. Require a maintainer-reviewed same-repository branch/run before merge; never execute untrusted fork code with secrets through `pull_request_target`.
@@ -63,12 +63,12 @@ Backend implementation and local verification: [Member 1 handoff](MEMBER1-HANDOF
 - [ ] Save a PR where a wrongful deduction or recall below 90% makes the required eval red and blocks merging. Link the checker fix and subsequent green run without editing labels/data, hiding exit codes or weakening branch protection.
 - [x] Freeze one commit and run the real dev evaluation three times with the same model/configuration. Save each run in a new folder with predictions, reports, summaries and provider call logs; never overwrite the PA3 runs.
 - [x] Count unique `(solution, constraint)` pairs whose verdict differs across any of the three runs. Report the definition, count, lowest/highest recall, lowest/highest unsure rate and wrongful deductions per run in `PA4.md`.
-- [ ] Measure one full CI evaluation's estimated provider cost, including official and own cases, failed/unknown-usage calls and any retries. The PA3 US$0.020851 official-only run is a baseline, not the full PA4 CI cost.
+- [x] Measure one full CI evaluation's estimated provider cost, including official and own cases, failed/unknown-usage calls and any retries. The PA3 US$0.020851 official-only run is a baseline, not the full PA4 CI cost.
 - [ ] Rehearse the generic checker image/command with an arbitrary dataset folder. Confirm valid output within the 30-minute marking limit and model access through the documented host/proxy configuration only; no hidden per-problem setup.
 - [x] Document the exact model host required by marking in README and `PA4.md`. Prepare the checker-required variable names for private `marking.env`; test working credentials separately from Git and ZIP packaging.
 - [ ] **Handoff:** Demonstrate G1–G5 with no network, a fresh real-model CI run, case history and three saved runs. Supply the report artifacts, cost arithmetic, blocked-PR/fix links and checker/marking instructions to Member 3.
 
-Implementation/evidence: [Member 2 candidate handoff](MEMBER2-HANDOFF.md). The three frozen baseline runs failed; local checker fix 60bfe73 is offline-tested but unpushed pending extra-run approval. Passing live CI and final handoff acceptance remain open.
+Implementation/evidence: [Member 2 candidate handoff](MEMBER2-HANDOFF.md). The original baseline series failed; the first correction passed two of three runs but still had one wrongful violation. The new confirmation correction cd3374d is offline/mutation-tested and will use the final approved combined CI run. Passing live CI and teammate acceptance remain open.
 
 ### Guardrail acceptance matrix
 

@@ -1,0 +1,110 @@
+{
+  "commit": "61d9c89e5d0de250572fef86a82dbe6df9c8e78a",
+  "model": "gemini-3.5-flash-lite",
+  "modelVersions": [
+    "gemini-3.5-flash-lite"
+  ],
+  "definition": "Unique (solution, constraint) pairs with more than one verdict across all three runs",
+  "changedPairCount": 2,
+  "changedPairs": [
+    "reverse-words/s02 C2",
+    "reverse-words/s04 C2"
+  ],
+  "recallRange": [
+    0.972972972972973,
+    0.972972972972973
+  ],
+  "unsureRateRange": [
+    0,
+    0.00980392156862745
+  ],
+  "runs": [
+    {
+      "folder": "eval/runs/pa4-fixed-dev-1",
+      "wrongful": 0,
+      "recall": 0.972972972972973,
+      "unsureRate": 0.00980392156862745,
+      "model": "gemini-3.5-flash-lite",
+      "reservedCalls": 39,
+      "recordedCalls": 39,
+      "knownUsageCalls": 39,
+      "unknownUsageCalls": 0,
+      "unfinishedReservations": 0,
+      "successfulResponses": 39,
+      "errors": [],
+      "providerRequestIds": 39,
+      "inputTokens": 43103,
+      "outputTokens": 3853,
+      "thinkingTokens": 0,
+      "knownEstimatedCostMicroUsd": 22579,
+      "unknownUsageReservedMicroUsd": 0,
+      "estimatedUsdFor80SimilarCalls": 0.04631589743589743,
+      "minimumStartGapMs": 5000,
+      "peakRequestsIn60Seconds": 12,
+      "predictionPairs": 102,
+      "verdictCounts": {
+        "pass": 65,
+        "violation": 36,
+        "unsure": 1
+      }
+    },
+    {
+      "folder": "eval/runs/pa4-fixed-dev-2",
+      "wrongful": 0,
+      "recall": 0.972972972972973,
+      "unsureRate": 0.00980392156862745,
+      "model": "gemini-3.5-flash-lite",
+      "reservedCalls": 39,
+      "recordedCalls": 39,
+      "knownUsageCalls": 39,
+      "unknownUsageCalls": 0,
+      "unfinishedReservations": 0,
+      "successfulResponses": 39,
+      "errors": [],
+      "providerRequestIds": 39,
+      "inputTokens": 43103,
+      "outputTokens": 3725,
+      "thinkingTokens": 0,
+      "knownEstimatedCostMicroUsd": 22260,
+      "unknownUsageReservedMicroUsd": 0,
+      "estimatedUsdFor80SimilarCalls": 0.045661538461538455,
+      "minimumStartGapMs": 5000,
+      "peakRequestsIn60Seconds": 12,
+      "predictionPairs": 102,
+      "verdictCounts": {
+        "pass": 65,
+        "violation": 36,
+        "unsure": 1
+      }
+    },
+    {
+      "folder": "eval/runs/pa4-fixed-dev-3",
+      "wrongful": 1,
+      "recall": 0.972972972972973,
+      "unsureRate": 0,
+      "model": "gemini-3.5-flash-lite",
+      "reservedCalls": 39,
+      "recordedCalls": 39,
+      "knownUsageCalls": 39,
+      "unknownUsageCalls": 0,
+      "unfinishedReservations": 0,
+      "successfulResponses": 39,
+      "errors": [],
+      "providerRequestIds": 39,
+      "inputTokens": 43103,
+      "outputTokens": 4317,
+      "thinkingTokens": 0,
+      "knownEstimatedCostMicroUsd": 23739,
+      "unknownUsageReservedMicroUsd": 0,
+      "estimatedUsdFor80SimilarCalls": 0.04869538461538462,
+      "minimumStartGapMs": 5000,
+      "peakRequestsIn60Seconds": 12,
+      "predictionPairs": 102,
+      "verdictCounts": {
+        "pass": 65,
+        "violation": 37,
+        "unsure": 0
+      }
+    }
+  ]
+}

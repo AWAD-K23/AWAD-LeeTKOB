@@ -1,4 +1,5 @@
 .env
+marking.env
 .env.*
 !.env.example
 node_modules/

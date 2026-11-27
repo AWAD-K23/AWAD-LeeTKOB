@@ -1,5 +1,12 @@
 # AI log
 
+## 2026-11-27 — Preserve the confirmation candidate's pre-CI evidence
+
+- **Tool / task:** Codex; prepare the last authorized combined evaluation for Member 2.
+- **Changed:** Saved all three `61d9c89` dev runs and their two-changed-pair comparison, the original failed CI artifact/blocked-PR proof, and the fixed-image model-off command rehearsal. Updated README's old 80-submission estimate to describe its historical one-pass/80-call basis; confirmation now adds calls. Documented the residual wrongful result rather than presenting two passing runs as reliability proof. Excluded private marking.env from Git and Docker contexts.
+- **Verified:** On `cd3374d`, all G1–G5 mutation baselines passed and their bypasses failed; removing the new confirmation gate also failed its regression. Go format/vet, all PostgreSQL tests, the full Docker sandbox suite and five Node tooling tests passed. Official integrity still reports 128 unchanged files. The image rehearsal on the earlier correction produced twenty valid pairs offline in 4.8 seconds; no semantic PASS was claimed for that model-off run.
+- **Limits:** Three repeated real runs of the confirmation guard are not available within the four-evaluation authorization. The final approved run will be CI on both datasets. Its actual results/cost must be recorded after completion; no predicted green result is claimed.
+
 ## 2026-11-27 — Semantic violation confirmation after residual wrongful result
 
 - **Tool / task:** Codex; continue the approved live validation without hiding a remaining failure.

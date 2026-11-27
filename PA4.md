@@ -25,7 +25,17 @@ review. [Before](docs/PA4/evidence/repository-protection-before.json) and
 [after](docs/PA4/evidence/repository-protection-after.json) API snapshots preserve
 the settings. Existing restrictions and the empty bypass list were retained.
 The selected team repository's `MODEL_API_KEY` Actions secret is configured;
-its value was neither printed nor committed. Actual CI/block/fix links follow.
+its value was neither printed nor committed.
+
+[Baseline CI run](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45968971182)
+failed the required `live-eval` check on [PR #27](https://github.com/AWAD-K23/AWAD-LeeTKOB/pull/27).
+The official set passed (0 wrongful, 94.6% recall, 2.0% unsure); the own set
+missed one of nine violations (88.9% recall), so the evaluator exited 1 and merge
+was blocked. [Exact blocked state](docs/PA4/evidence/baseline-pr-blocked.json) and
+[downloaded artifacts](eval/runs/pa4-ci-baseline/run-summary.json) preserve the
+result. No data, labels, check failures or branch protection were changed to
+obtain this evidence. The generic checker correction is `60bfe73`; its green
+required-check evidence is pending validation.
 
 ## Guardrails and case history
 
@@ -76,20 +86,57 @@ definition and changed pairs. Every run contains predictions, reports, metadata,
 usage summaries and all 39 provider IDs. There were no unknown-usage calls or
 unfinished reservations; the three runs total US$0.062328 in estimated usage.
 Run `node scripts/compare-model-runs.mjs <run1> <run2> <run3>` to reproduce this
-without provider calls. One full official-and-own CI cost remains to be measured.
+without provider calls.
+
+The baseline full CI evaluation cost **US$0.023860 estimated**: 21,126 microdollars
+official plus 2,734 own cases. All 49 successful responses have provider IDs and
+known usage; unknown-usage reservations, unfinished calls and retries were zero.
+This is provider token-cost estimation, not an invoice or GitHub runner cost.
+The uploaded artifact is `pa4-live-eval-45968971182-1`; its metadata records the
+Actions merge SHA, while the PR head was `df15711`.
 
 [Diagnostic findings](docs/PA4/evidence/baseline-findings.md) describe generic
 failure mechanisms. No labels, official source or thresholds were altered.
 These baseline failures require a checker fix and new validation; they do not
 support a passing held-out estimate.
 
-The offline-tested candidate fix is local commit `60bfe73`. It adds generic
+The first correction (`60bfe73`, tested on frozen `61d9c89`) adds generic
 reachable-computation/rule-scope guidance and isolates invalid evidence per
-finding without accepting any unsupported decisive verdict. All original
-guardrail regressions remain unchanged and pass; the
+finding. Its three new dev runs were:
+
+| Run | Wrongful | Recall | Unsure | Estimated provider cost |
+| --- | ---: | ---: | ---: | ---: |
+| [1](eval/runs/pa4-fixed-dev-1/official/report.txt) | 0 | 36/37 (97.3%) | 1/102 (1.0%) | US$0.022579 |
+| [2](eval/runs/pa4-fixed-dev-2/official/report.txt) | 0 | 36/37 (97.3%) | 1/102 (1.0%) | US$0.022260 |
+| [3](eval/runs/pa4-fixed-dev-3/official/report.txt) | 1 | 36/37 (97.3%) | 0/102 (0%) | US$0.023739 |
+
+Two pairs changed verdict; recall min/max **97.3% / 97.3%**, unsure **0% / 1.0%**.
+[Comparison](docs/PA4/evidence/fixed-variability.json) verifies identical commit,
+model/version, dataset and image. All 117 calls had known usage and provider IDs,
+costing US$0.068578 total. This series still failed the zero-wrongful requirement;
+two passing runs do not justify hiding the third.
+
+The latest correction `cd3374d` adds a separate confirmation call for proposed
+semantic violations. It tries to disprove the proposed finding and keeps a
+violation only when the second strictly validated response agrees. Disagreement,
+invalid evidence/output, timeout or budget failure becomes unsure. Sanitized
+proposal text prevents original comments and known identities from re-entering
+the prompt. Hard-rule findings and semantic passes do not incur another call.
+Both calls use the same rate, audit and budget controls; this is not a retry.
+The confirmation tests cover positive/negative decisions, budget and provider
+failures, cancellation, wire framing and identity redaction. Existing call-count
+assertions intentionally require two calls; their verdict/evidence/isolation
+assertions were retained. Model consensus can still share an error and is not
+claimed to be a correctness proof.
+
+The original guardrail regressions still pass; the
 [second mutation audit](docs/PA4/evidence/guardrail-mutations-after-fix.json) still
-catches all five bypasses. The candidate is not pushed or claimed to pass real
-evaluation; extra paid validation remains unapproved. See the
+catches all five bypasses. The latest
+[mutation audit](docs/PA4/evidence/confirmation-guard-mutations.json) also removes
+the confirmation gate and requires its regression to fail. The final approved
+official-and-own CI evaluation will test the confirmation correction; there are
+not three repeated real runs of this latest correction within the authorized
+run budget. Results are preserved without overwriting prior failures. See the
 [Member 2 handoff](docs/PA4/MEMBER2-HANDOFF.md).
 
 ## Marking command and model host

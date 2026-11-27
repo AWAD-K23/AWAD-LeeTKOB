@@ -179,11 +179,14 @@ without the model key. Student execution sandboxes never receive credentials.
 The supported model is `gemini-3.5-flash-lite`. With `MODEL_OFF=1`, hard rules
 still run and semantic constraints remain unsure without provider calls.
 
-**What one lab of 80 submissions costs.** Measured on the committed dev-set run
+**Historical one-pass cost baseline.** Measured on the committed PA3 dev-set run
 [`eval/runs/real-dev-numbered/`](eval/runs/real-dev-numbered/) (one call per submission with a
 semantic constraint): 39 calls, 37,838 input and 3,795 output tokens, no thinking tokens, at
 US$0.30 / US$2.50 per million tokens, rounded up per call = US$0.020851
-(`usage-summary.json`). For 80 submissions: `0.020851 / 39 × 80 = US$0.043`. Each call first
+(`usage-summary.json`). For 80 similar calls: `0.020851 / 39 × 80 = US$0.043`.
+The current checker can make a second call for semantic violations, so this is
+not a current estimate for 80 submissions. See [PA4 measurements](PA4.md).
+Each call first
 reserves US$0.478 (the model's full input and output limits) against the lab's US$1 budget and is
 charged its measured cost once the provider reports usage.
 
@@ -195,6 +198,7 @@ The key belongs only in the trusted worker or standalone checker environment.
 | --- | --- |
 | Input | Statement, semantic rules, and code with comments and known identities removed |
 | Response | Validated verdict/evidence per constraint; never a deduction |
+| Confirmation | A separate call tries to disprove semantic violations; disagreement or failure becomes unsure |
 | Failure | Invalid answers, timeouts, and blocked calls become unsure |
 | Requests | Calls are paced within each process; no automatic provider retries |
 | Production budget | Shared by the lab and retained across worker restarts |

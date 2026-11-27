@@ -1,6 +1,7 @@
 .git
 .env
 .env.*
+**/marking.env
 **/node_modules
 **/dist
 **/test-results

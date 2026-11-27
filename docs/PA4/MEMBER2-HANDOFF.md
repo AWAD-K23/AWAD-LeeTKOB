@@ -1,4 +1,4 @@
-# PA4 Member 2 handoff — candidate, live fix validation pending
+# PA4 Member 2 handoff — confirmation correction awaiting CI
 
 November 27, 2026 (Asia/Saigon). This is a partial acceptance record with explicit
 failing performance evidence. Do not present the checker candidate as passing.
@@ -15,6 +15,8 @@ failing performance evidence. Do not present the checker candidate as passing.
   Both [baseline mutation evidence](evidence/guardrail-mutations.json) and
   [candidate mutation evidence](evidence/guardrail-mutations-after-fix.json) show
   all five normal regressions passing and their bypassed guards causing failures.
+  [Confirmation audit](evidence/confirmation-guard-mutations.json) repeats these
+  five checks and also verifies that bypassing the new confirmation gate fails.
 - Fresh official-and-own live CI for PR/main/pa4, with failure propagation and
   provider/cost artifacts. Model-off checking and fake-model unit tests remain
   separate. Fork PRs fail rather than silently count as passing without secrets.
@@ -35,8 +37,14 @@ Raw predictions, reports, provider logs and configuration are preserved under
 `eval/runs/pa4-dev-{1,2,3}/`. No prior run was overwritten.
 
 [PR #27](https://github.com/AWAD-K23/AWAD-LeeTKOB/pull/27) preserves the failing
-baseline. Its original-budget combined live evaluation is the fourth approved
-evaluation. The candidate fix is local commit `60bfe73`, currently unpushed:
+baseline. Its original-budget combined live evaluation failed on own cases at
+8/9 recall (88.9%), while the official set passed. The required check blocked
+merge; [saved state](evidence/baseline-pr-blocked.json) and
+[CI artifacts](../../eval/runs/pa4-ci-baseline/run-summary.json) preserve proof.
+All 49 successful calls had provider IDs/known usage and cost an estimated
+US$0.023860, with no unknown reservations or retries.
+
+The first correction is commit `60bfe73`:
 generic guidance follows actual reachable computation and independent rule scope,
 and invalid evidence no longer discards a separate constraint's valid evidence.
 Malformed overall schema/IDs still reject the response; every invalid individual
@@ -47,8 +55,22 @@ official problem/solution IDs or quoted dev code.
 Go format/vet/full PostgreSQL tests passed after the fix. The complete Docker
 sandbox suite and frontend check also passed during this work. Five Node tooling
 tests verify comparison correctness, metadata/population rejection, explicit
-live mode and refusal to overwrite evidence. No fresh passing real-model result
-for `60bfe73` is claimed; additional live runs are awaiting explicit approval.
+live mode and refusal to overwrite evidence.
+
+The three authorized dev runs on `61d9c89` finished: two passed, but one still had
+a wrongful violation. All caught 36/37 violations; unsure was 1/102, 1/102 and
+0/102. Two pairs changed verdict; all 117 calls had known usage/provider IDs,
+costing US$0.068578. [Comparison](evidence/fixed-variability.json) and raw run
+folders preserve the failure. These are not three passing runs.
+
+The latest correction `cd3374d` requires an additional strictly validated call
+to confirm semantic violations. It attempts to disprove the proposal; disagreement
+or any confirmation failure becomes unsure. Both calls use the existing cap,
+audit and pacing controls; comments/known identities remain removed in the
+confirmation request. Positive, disagreement, malformed, cap/provider error,
+timeout, wire and identity tests pass, as does the full Docker/PostgreSQL suite.
+The final approved combined CI run remains to be executed. This latest correction
+has not had three repeated real runs within the authorized four-run budget.
 
 ## Acceptance commands
 
@@ -83,9 +105,10 @@ receive no key, host mount, Docker socket or network. Unit tests never use it.
 
 ## Remaining
 
-1. Preserve the actual combined CI result, artifact/cost and merge-block evidence.
-2. After extra-run approval, push the candidate fix and obtain a green required
-   evaluation; record three fresh runs of one fixed commit if authorized. Failing
+1. Push the confirmation correction and obtain the final approved required CI
+   result, preserving metrics/cost/artifacts. The new guard has no claim of
+   repeated-run stability yet.
+2. Record the result and supply the completed evidence to Member 3. Failing
    baselines must remain disclosed; never change data/labels or weaken the gate.
 3. Supply a dedicated private marking key/credentials outside Git and the ZIP;
    verify proxy access in the marking environment and revoke after marking.
