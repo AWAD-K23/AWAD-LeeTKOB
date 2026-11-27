@@ -1,5 +1,12 @@
 # AI log
 
+## 2026-11-27 — PA4 Member 2 candidate handoff
+
+- **Tool / task:** Codex; prepare the reviewable Member 2 handoff while paid revalidation is on hold.
+- **Changed:** Added the candidate handoff, updated completed/remaining checklist items honestly, documented local fix `60bfe73`, and added the optional budget variable name (blank) to `.env.example`. Saved a second mutation audit for the candidate; all five guards still fail their tests when bypassed.
+- **Verified:** Format, official integrity, five Node tooling tests and Git whitespace checks passed. Go vet/full PostgreSQL tests passed on the candidate. The approved baseline draft PR is #27, run 45968971182: gates, secret-history, e2e and sandbox passed while the original-budget live evaluation was still running. No extra model run or fix push was started after the user's clarification request.
+- **Limits:** Passing fixed-commit live results, the combined CI cost/result, dedicated marking credentials and Member 3 deployment/acceptance remain pending. Local commits are ready for review; this documentation commit is not pushed to avoid triggering another paid run without approval.
+
 ## 2026-11-27 — PA4 generic checker correction after failed real baseline
 
 - **Tool / task:** Codex; fix the checker after preserving three failing real runs.

@@ -83,6 +83,15 @@ failure mechanisms. No labels, official source or thresholds were altered.
 These baseline failures require a checker fix and new validation; they do not
 support a passing held-out estimate.
 
+The offline-tested candidate fix is local commit `60bfe73`. It adds generic
+reachable-computation/rule-scope guidance and isolates invalid evidence per
+finding without accepting any unsupported decisive verdict. All original
+guardrail regressions remain unchanged and pass; the
+[second mutation audit](docs/PA4/evidence/guardrail-mutations-after-fix.json) still
+catches all five bypasses. The candidate is not pushed or claimed to pass real
+evaluation; extra paid validation remains unapproved. See the
+[Member 2 handoff](docs/PA4/MEMBER2-HANDOFF.md).
+
 ## Marking command and model host
 
 Allow HTTPS only to **`generativelanguage.googleapis.com:443`**, through the marker's
