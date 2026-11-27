@@ -1,5 +1,11 @@
 # AI log
 
+## 2026-11-27 — PA4 G3 timeout regression audit
+
+- **Tool / task:** Codex; audit G3 for Member 2.
+- **Changed:** Added a cancelling fake model that returns valid decisive JSON after its deadline. The checker must discard that late success, finish within a bounded time and provide the local timeout reason.
+- **Verified:** `go -C backend test ./internal/semantic -run TestG3 -count=1` passed offline. The production timeout logic needed no change.
+
 ## 2026-11-27 — PA4 G2 evidence regression audit
 
 - **Tool / task:** Codex; audit G2 for Member 2.
