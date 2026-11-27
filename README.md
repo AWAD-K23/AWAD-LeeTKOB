@@ -23,7 +23,10 @@ are published; the model never chooses deductions.
 - Hard rules check supported bans without AI. Gemini checks remaining semantic rules.
 - Student responses exclude protected constraint findings and deductions.
 
-**Current limits:** TA review is available; mark publication and appeals are pending.
+**Current limits:** TA review and the server publication gate are available. The
+Publish/student-result UI and appeals are pending. See the
+[PA4 publication contract](docs/contract/publication.md) and
+[Member 1 handoff](docs/PA4/MEMBER1-HANDOFF.md).
 PA3 is complete per the team; final evidence and limitations are in [PA3.md](PA3.md).
 See [project progress](docs/PROJECT-PROGRESS.md) and the [PA4 plan](docs/PA4/PA4-PLAN.md) for current work.
 

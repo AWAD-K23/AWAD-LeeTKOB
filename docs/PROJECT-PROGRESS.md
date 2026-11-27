@@ -103,6 +103,12 @@ Detailed ownership and delivery history remain in the [PA3 plan](PA3/PA3-PLAN.md
 
 ## PA4 — evaluation, guardrails, human gate and red-team
 
+**November 27 backend update:** Member 1's sampling, review requirements and atomic
+Publish gate are implemented and tested locally against PostgreSQL. See the
+[contract](contract/publication.md) and [handoff](PA4/MEMBER1-HANDOFF.md). Member 3
+UI acceptance/deployment and Member 2/3 evaluation/release evidence remain pending;
+the November 25 checkpoint overview above is the original planning baseline.
+
 Source: [full PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and red-team.md>). Execution and member handoffs: [PA4 plan](PA4/PA4-PLAN.md). Existing guardrail code is useful progress; its complete test matrix, UI behavior and history requirements still need verification.
 
 | Status | Job | Evidence / next action |
@@ -125,9 +131,9 @@ Source: [full PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and 
 | ⬜ | Verify no model instruction changes the TA-set deduction on screen | Prove configured deduction survives injected fields/instructions; checker must have no mark-writing path |
 | ⬜ | Verify guardrail/test commit history and deployed injection behavior | Each guardrail/test in its own real commit, test no later than code; injections must become violation or unsure, never pass; record historical limitations honestly |
 | ✅ | Persist TA decisions independently of model findings | `constraint_reviews` and `constraint_review_history`, reviewer identity and configured deductions; [TA review evidence](PA3/TA-REVIEW-QUEUE.md) |
-| ⬜ | Require review of every violation and unsure finding | Enforce requirements on the server |
-| ⬜ | Randomly sample 10% of pass verdicts, rounded up, on the server | Fixed-seed test demonstrates the random sample; persist selection; selecting the first passes is insufficient |
-| ⬜ | Implement Publish as the only action exposing a deduction to students | Direct API tests must reject pending reviews, student callers and another class's TA; absence of Publish earns no human-gate completion |
+| ✅ | Require review of every violation and unsure finding | Server Publish gate and direct PostgreSQL API tests; [handoff](PA4/MEMBER1-HANDOFF.md) |
+| ✅ | Randomly sample 10% of pass verdicts, rounded up, on the server | Persisted samples, fixed-seed edge tests and restart persistence; [handoff](PA4/MEMBER1-HANDOFF.md) |
+| ✅ | Implement Publish as the only action exposing a deduction to students | Atomic revision gate, pending/role/class denials and student visibility tested locally; Member 3 UI/deployment pending; [contract](contract/publication.md) |
 | ⬜ | Write PA4.md section “Where we stop it” | Use own numbers: who pays when wrong, how error is detected, where it is stopped; explain Publish placement and the cost of unsampled passes |
 | ⬜ | Complete at least eight reproducible red-team attacks across five categories | `docs/red-team/<target-student-IDs>.md`; include at least one code-derived attack, held and broken results, exact input/time/output, rule, impact and proposed fix; lecturer replays two |
 | ⬜ | Follow the assigned target and rules of engagement | At most about 1 request/second; one resource attack per kind; trigger cap once; stop on live key/real personal data and notify lecturer/target that day; report an unavailable target by November 30 with timed attempts |

@@ -1,5 +1,13 @@
 # AI log
 
+## 2026-11-27 — PA4 Member 1 handoff and check evidence
+
+- **Tool:** Codex.
+- **Asked for:** Finish Member 1's handoff and break down the AI log and commits into focused groups.
+- **Changed:** Added `docs/PA4/MEMBER1-HANDOFF.md` with migration steps, API examples, state transitions, integration instructions and verification evidence. Updated README, the Member 1 checklist, project progress and the review/Publish architecture guide. Split the original combined AI-log entry into contract, backend/tests and handoff entries; retained older history. Contract: `6b40ca2`; implementation and tests: `f287fec`.
+- **Verified:** Frontend dependencies installed; lint passed with two existing Fast Refresh warnings, and separate type-checking and production build passed. All 128 official file hashes verified. Extra-case verification passed all five unchanged cases in a temporary Git export with CRLF conversion disabled. Git whitespace checks passed before committing.
+- **Limits:** The combined frontend check stops at pre-existing formatting in untouched `frontend/src/style.css`. Direct extra-case verification fails on Windows CRLF working-tree outputs; neither fixtures nor the verifier were changed. Member 3 acceptance, UI integration, deployment, live evaluation and release evidence remain pending. These are local commits; no push was performed.
+
 ## 2026-11-27 — PA4 Member 1 backend and regression tests
 
 - **Tool:** Codex.

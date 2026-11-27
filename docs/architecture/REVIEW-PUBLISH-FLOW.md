@@ -1,6 +1,9 @@
 # TA review and Publish flow
 
-**Reviewed:** November 25, 2026. The first sections describe implemented PA3 behavior. The PA4 design below is proposed work: there is currently no pass-sampling persistence, Publish endpoint, publication table or student marks endpoint.
+**Updated:** November 27, 2026. PA4 server sampling and publication are implemented.
+The PA3 UI still needs Member 3 integration. The authoritative backend behavior is
+the [publication contract](../contract/publication.md); see the
+[Member 1 handoff and verification](../PA4/MEMBER1-HANDOFF.md).
 
 ## Implemented review path
 
@@ -25,7 +28,9 @@ The membership check joins the lab's class with `class_tas`. Non-TA roles receiv
 
 Latest is selected by `(created_at, id)` within each student/lab. A newer pending or failed submission still replaces the older attempt for counting; the queue only includes it after it is judged Accepted and has findings. Earlier attempts stay readable through the separate endpoint, and the decision route refuses them.
 
-The queue currently includes all pass findings as well as violations/unsure. It is not PA4's required random 10% pass sample.
+The queue includes all pass findings as well as violations/unsure. Required rows
+are explicitly flagged: every violation/unsure and the persisted random 10% pass
+sample, rounded up. Other pass findings remain optionally reviewable.
 
 ## Saving a TA decision
 
@@ -37,7 +42,7 @@ sequenceDiagram
     TA->>API: Decision and evidence
     API->>DB: Check class membership
     API->>API: Validate Origin, JSON and decision
-    API->>DB: Begin transaction and lock eligible submission
+    API->>DB: Begin transaction and lock current lab revision
     API->>API: Require exact original-source evidence for violation
     API->>DB: Upsert current review with configured deduction
     API->>DB: Insert decision history with TA identity
@@ -51,9 +56,25 @@ A pass requires empty evidence and stores deduction 0. A violation requires none
 
 These writes do not publish a mark. Student submission endpoints do not read review findings, reasons, evidence or deductions. Unsure causes are set locally by checker/worker code and displayed to the assigned TA, including exhausted budget and timeout; they are not free-form model explanations.
 
-## Planned PA4 review population and sampling
+## PA4 backend sampling and publication
 
-**Status: design to implement and test.** [Member 1's PA4 checklist](../PA4/PA4-PLAN.md#member-1--server-sampling-required-reviews-and-publish) owns the backend; Member 3 integrates the UI. Route names, response shapes and migration details must be agreed in a contract before implementation.
+Migration [00008_publication.sql](../../backend/migrations/00008_publication.sql)
+adds persisted samples, review revisions, publications and student result snapshots.
+[publication.go](../../backend/internal/api/publication.go) implements server random
+sampling, progress, atomic Publish and ownership-protected published results.
+Population triggers serialize writes with Publish and invalidate prior reviews and
+student visibility. Decision edits require republishing. The
+[contract](../contract/publication.md) defines exact routes, errors and transitions;
+[publication_test.go](../../backend/internal/api/publication_test.go) covers them
+against PostgreSQL, including concurrent mutation and restart persistence.
+
+The following checklist is retained as the original design/acceptance criteria;
+backend requirements are now implemented. UI, deployment and live-model evidence
+remain separate Member 2/3 work.
+
+### Original design criteria
+
+See [Member 1's completed backend checklist](../PA4/PA4-PLAN.md#member-1--server-sampling-required-reviews-and-publish) and the agreed implementation contract. Member 3 integrates the UI.
 
 1. Define a review generation for the lab's current counted submissions, findings and constraint configuration. Incomplete judging/checking must not silently make a missing result eligible for publication.
 2. Require review of every violation and every unsure finding in that generation.
@@ -61,11 +82,13 @@ These writes do not publish a mark. Student submission endpoints do not read rev
 4. Preserve optional TA access to other findings and earlier submissions while distinguishing which findings block Publish.
 5. Treat new counted submissions, changed constraints or rejudging as changes to the review population. A stale review/sample cannot authorize a different generation. Define the refresh and publication policy in the contract and test it.
 
-Proposed additional records must represent the generation, persisted sample, publication snapshot and publishing TA/time. These are design requirements, not existing tables or settled column names. Reuse the current finding/review distinction and history rather than putting a mark on a model finding.
+Implemented records represent the revision, persisted sample, publication snapshot
+and publishing TA/time. The current finding/review distinction and history are
+reused; model findings have no mark-writing path.
 
-## Planned Publish state transitions
+## Publish state transitions
 
-**Status: proposed behavior, not a current endpoint.**
+**Status: implemented on the server; UI integration pending.**
 
 ```mermaid
 stateDiagram-v2
@@ -79,11 +102,20 @@ stateDiagram-v2
     Published --> Preparing: New generation under agreed revision policy
 ```
 
-The states describe the planned logical workflow, not database enums. The contract must specify how an existing published snapshot behaves when a new generation is prepared; implementation must not expose partial revisions or silently replace published results.
+The states describe the logical workflow, not database enums. Population changes
+invalidate published visibility until the new revision is reviewed and published;
+the prior snapshot remains stored. Partial revisions are never exposed.
 
-Publish must check the authenticated role and database class membership, then verify the same generation and every required review inside a transaction coordinated with population changes. A disabled button is only a UI aid. Pending violations, unsure findings or sampled passes must make a direct Publish request fail; a student and another class's TA must also be refused.
+Publish checks the authenticated role and database class membership, then verifies
+the same revision and every required review inside a transaction coordinated with
+population changes. A disabled button is only a UI aid. Pending violations, unsure
+findings or sampled passes make direct Publish requests fail; a student and another
+class's TA are also refused.
 
-Only a successful Publish makes the reviewed deduction visible to its owning student. Preserve the separation between model findings, TA decisions and published results. The worker/checker has no mark-writing path. Retrying Publish must not create duplicate or conflicting results; decide idempotency and revision behavior in the contract.
+Only a successful Publish makes the reviewed deduction visible to its owning
+student. Model findings, TA decisions and published results remain separate. The
+worker/checker has no mark-writing path. Repeating Publish for the current revision
+upserts one snapshot per counted submission.
 
 ## Acceptance evidence still required for PA4
 

@@ -33,19 +33,21 @@ The passing saved run is one dev-set observation. It does not establish repeated
 
 ## Member 1 — server sampling, required reviews and Publish
 
-- [ ] Review the existing API, migrations and TA decision history with Member 3. Write the publication/review contract under `docs/contract/` before connecting the UI.
-- [ ] Define the eligible review population using counted submissions and per-constraint findings. Preserve latest-submission behavior and read-only earlier submissions from PA3.
-- [ ] Queue every violation and every unsure, plus `ceil(0.10 × pass count)` randomly chosen pass findings. Draw on the server and persist the selection; reopening the queue must not redraw it.
-- [ ] Add a fixed-seed test through an injectable random source. Verify sample size, uniqueness, membership and that selection is random rather than the first rows; include 0, 1 and non-multiple-of-ten pass counts.
-- [ ] Define how new submissions, rejudging and constraint changes affect the review population. Version or invalidate stale review/publication state so a previously reviewed attempt cannot authorize publishing a replacement.
-- [ ] Reuse independent TA decisions, reviewer attribution and append-only decision history. Ensure every required finding has a valid TA decision before publication.
-- [ ] Implement Publish with role/class authorization and pending-review validation on the server. Validate and store the published result atomically against the same review population; concurrent submissions/rejudging must not bypass the gate.
-- [ ] Make Publish the only action exposing a deduction to the owning student. Derive deductions from configured constraints and TA decisions; the checker must have no mark-writing tool or path.
-- [ ] Add direct API tests for pending reviews, a student caller, another class's TA, unreviewed sampled passes, successful publication, and student visibility before/after publication. Cover stale reviews and concurrent changes meaningfully.
-- [ ] Keep violation, unsure and sampled-pass review requirements visible in the API response, alongside review progress and reasons. Preserve class and student ownership checks on every new read/write route.
-- [ ] **Handoff:** Demonstrate deterministic sampling tests, denied direct Publish requests, successful authorized Publish and the student's published deduction. Supply migration steps, API examples, state transitions and passing check evidence to Member 3.
+- [x] Reviewed the existing API, migrations and TA decision history; wrote the [publication contract](../contract/publication.md) before UI integration. Member 3 acceptance is pending.
+- [x] Define the eligible review population using counted submissions and per-constraint findings. Preserve latest-submission behavior and read-only earlier submissions from PA3.
+- [x] Queue every violation and every unsure, plus `ceil(0.10 × pass count)` randomly chosen pass findings. Draw on the server and persist the selection; reopening the queue must not redraw it.
+- [x] Add a fixed-seed test through an injectable random source. Verify sample size, uniqueness, membership and that selection is random rather than the first rows; include 0, 1 and non-multiple-of-ten pass counts.
+- [x] Define how new submissions, rejudging and constraint changes affect the review population. Version or invalidate stale review/publication state so a previously reviewed attempt cannot authorize publishing a replacement.
+- [x] Reuse independent TA decisions, reviewer attribution and append-only decision history. Ensure every required finding has a valid TA decision before publication.
+- [x] Implement Publish with role/class authorization and pending-review validation on the server. Validate and store the published result atomically against the same review population; concurrent submissions/rejudging must not bypass the gate.
+- [x] Make Publish the only action exposing a deduction to the owning student. Derive deductions from configured constraints and TA decisions; the checker must have no mark-writing tool or path.
+- [x] Add direct API tests for pending reviews, a student caller, another class's TA, unreviewed sampled passes, successful publication, and student visibility before/after publication. Cover stale reviews and concurrent changes meaningfully.
+- [x] Keep violation, unsure and sampled-pass review requirements visible in the API response, alongside review progress and reasons. Preserve class and student ownership checks on every new read/write route.
+- [x] **Handoff:** Demonstrate deterministic sampling tests, denied direct Publish requests, successful authorized Publish and the student's published deduction. Supply migration steps, API examples, state transitions and passing check evidence to Member 3.
 
 **Acceptance:** No direct request can publish while required reviews remain; queue reloads preserve the sample; a new counted submission cannot inherit an old decision; student deductions appear only after authorized Publish.
+
+Backend implementation and local verification: [Member 1 handoff](MEMBER1-HANDOFF.md). Member 3 UI integration, teammate acceptance and deployment are still pending.
 
 ## Member 2 — guardrails, own cases and real-model evaluation
 
