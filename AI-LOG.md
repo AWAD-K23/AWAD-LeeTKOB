@@ -1,5 +1,14 @@
 # AI log
 
+## 2026-11-27 — PA4 Member 1 publication contract
+
+- **Tool:** Codex.
+- **Asked for:** Read PROJECT-PROGRESS.md, implement Member 1 in PA4-PLAN.md, then break down the AI log and commits.
+- **Changed:** Wrote `docs/contract/publication.md` before implementation. Defined counted submissions, persisted random pass sampling, mandatory reviews, revision invalidation, authorized Publish and student result visibility. Specified request/response shapes and errors for Member 3's UI integration.
+- **Design decision:** Population changes invalidate the whole lab's reviews and publication conservatively. Student status/history responses keep their existing shape; a separate protected route exposes published deductions.
+- **Verified:** Compared the contract with the existing PA3 review routes and the completed backend implementation.
+- **Limits:** Member 3 acceptance and UI integration are pending. These commits group work already completed in the workspace; no test-first commit history is claimed or reconstructed. Backend implementation/tests and handoff evidence follow in separate commits.
+
 > This is a dated history of assistant-supported work, not a live completion tracker. Later entries may supersede earlier status statements. For current PA status, use [the project tracker](docs/PROJECT-PROGRESS.md) and [the PA3 plan](docs/PA3/PA3-PLAN.md); verify each completion claim against its cited commit, test run, or saved evidence.
 
 
