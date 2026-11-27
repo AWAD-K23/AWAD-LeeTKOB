@@ -1,5 +1,12 @@
 # AI log
 
+## 2026-11-27 — PA4 G1 schema regression audit
+
+- **Tool / task:** Codex; audit G1 for Member 2.
+- **Changed:** Added fake-model tests for fenced/prose/invalid JSON, unknown verdicts, missing constraints and duplicate IDs at otherwise correct cardinality. Decisive response fixtures include valid exact evidence so an unrelated missing-evidence rejection cannot hide a broken schema guard.
+- **Verified:** `go -C backend test ./internal/semantic -run TestG1 -count=1` passed without network. Existing production schema checks needed no change. Mutation evidence is recorded in the Member 2 handoff after the audit.
+- **Limits:** Existing PA3 guardrail history is unchanged; this commit adds G1-specific regression coverage, not a claim that the original guard was introduced separately.
+
 ## 2026-11-27 — PA4 Member 2 own cases before checker changes
 
 - **Tool:** Codex.
