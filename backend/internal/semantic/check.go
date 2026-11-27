@@ -146,7 +146,7 @@ func (c Checker) Check(
 	}
 
 	for _, verdict := range validated {
-		if verdict.Verdict == "unsure" {
+		if verdict.Verdict == "unsure" && verdict.Reason == "" {
 			verdict.Reason = "Model returned unsure."
 		}
 		out[positions[verdict.ConstraintID]] = verdict
@@ -166,7 +166,9 @@ func redact(text string, identities []string) string {
 }
 
 // The provider cannot add deductions or invent extra fields, IDs, or evidence.
-// Reject the entire response if any constraint is missing or malformed.
+// Reject malformed response structure or missing/duplicate IDs as a whole.
+// Evidence failures make that finding unsure without discarding independently
+// valid findings. No decisive result survives without exact nonblank evidence.
 func validate(
 	raw []byte,
 	constraints []hardrules.Constraint,
@@ -221,20 +223,33 @@ func validate(
 			return nil, invalid
 		}
 		if item.Verdict != "unsure" && len(*item.Evidence) == 0 {
-			return nil, invalid
+			out = append(out, hardrules.Verdict{
+				ConstraintID: item.ConstraintID, Verdict: "unsure", Source: "model",
+				Evidence: []hardrules.Evidence{}, Reason: "Model response failed schema validation.",
+			})
+			continue
 		}
 
 		evidence := []hardrules.Evidence{}
+		invalidEvidence := false
 		for _, point := range *item.Evidence {
 			if point.Line < 1 || point.Line > len(cleanLines) ||
 				strings.TrimSpace(point.Text) == "" || point.Text != cleanLines[point.Line-1] {
-				return nil, ErrEvidenceMismatch
+				invalidEvidence = true
+				break
 			}
 
 			// Store exact original lines so the TA sees the submitted source.
 			evidence = append(evidence, hardrules.Evidence{
 				Line: point.Line, Text: originalLines[point.Line-1],
 			})
+		}
+		if invalidEvidence {
+			out = append(out, hardrules.Verdict{
+				ConstraintID: item.ConstraintID, Verdict: "unsure", Source: "model",
+				Evidence: []hardrules.Evidence{}, Reason: "Model evidence did not match submitted code.",
+			})
+			continue
 		}
 
 		reason := ""

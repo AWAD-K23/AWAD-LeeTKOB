@@ -1,5 +1,12 @@
 # AI log
 
+## 2026-11-27 — PA4 generic checker correction after failed real baseline
+
+- **Tool / task:** Codex; fix the checker after preserving three failing real runs.
+- **Changed:** Added generic model guidance to follow reachable computation, aliases/macros, independent rule scope and allocation lifetimes, instead of relying on names/declarations or unrelated rule failures. Isolated invalid evidence per finding so another constraint's independently valid evidence is retained. Overall malformed JSON/schema, missing/duplicate IDs and unknown fields remain rejected; every individual invalid finding stays unsure with empty evidence and a local reason.
+- **Verified:** New `TestIndependentFindingEvidenceFailures` failed on the prior implementation for both missing and invented evidence. It passes with the correction. Existing G1/G2/G3/G5, invalid-response, boundary and reason tests were unchanged and pass; Go vet and the full PostgreSQL-backed suite pass. No source-evidence criterion, label, official file or threshold was relaxed. Production prompts contain no dev problem/solution IDs or quoted dev code.
+- **Limits:** This is an offline-tested candidate, not a claim that the wrongful verdicts are fixed in real-model evaluation. The original-budget fourth evaluation is running on the preserved baseline in draft PR #27; extra fixed-commit live evaluations remain unapproved. This fix is committed locally without pushing a further paid CI run.
+
 ## 2026-11-27 — PA4 frozen baseline and repository protection evidence
 
 - **Tool / task:** Codex; Member 2 repeated runs, integrity and CI setup.
