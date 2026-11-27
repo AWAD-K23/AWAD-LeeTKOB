@@ -1,5 +1,11 @@
 # AI log
 
+## 2026-11-27 — PA4 G2 evidence regression audit
+
+- **Tool / task:** Codex; audit G2 for Member 2.
+- **Changed:** Added fake-model tests for invented text/lines, correct text at the wrong line, stripped-comment-only evidence and blank evidence. Added a positive control proving cleaned evidence maps back to the exact original line and trailing comment.
+- **Verified:** `go -C backend test ./internal/semantic -run TestG2 -count=1` passed offline. No evidence matching rule or existing label was relaxed; production checks already enforce this boundary.
+
 ## 2026-11-27 — PA4 G1 schema regression audit
 
 - **Tool / task:** Codex; audit G1 for Member 2.
