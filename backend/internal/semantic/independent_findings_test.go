@@ -19,7 +19,10 @@ func TestIndependentFindingEvidenceFailures(t *testing.T) {
 		{"invented evidence", "Model evidence did not match submitted code.", []hardrules.Evidence{{Line: 1, Text: "fabricated"}}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			model := fakeModel(func(context.Context, Request) ([]byte, error) {
+			model := fakeModel(func(_ context.Context, request Request) ([]byte, error) {
+				if len(request.ProposedViolations) > 0 {
+					return confirmationResponse(request, "violation"), nil
+				}
 				return json.Marshal(map[string]any{"verdicts": []any{
 					map[string]any{"constraintId": "first", "verdict": "violation", "evidence": []hardrules.Evidence{{Line: 1, Text: "int value = 1;"}}},
 					map[string]any{"constraintId": "second", "verdict": "pass", "evidence": tc.evidence},

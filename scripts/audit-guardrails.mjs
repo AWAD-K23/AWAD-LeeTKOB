@@ -51,6 +51,12 @@ const mutations = [
       'if err := strictKeys(json.NewDecoder(bytes.NewReader(raw)), 0); err != nil {',
       'if false {'), 'decoder.DisallowUnknownFields()', '// Mutation: allow unknown fields'),
   },
+  {
+    guard: 'Semantic violation confirmation', file: semantic, pkg: './internal/semantic', test: '^TestViolationConfirmation',
+    mutate: source => replace(source,
+      'validated = c.confirmViolations(ctx, timeout, Request{\n\t\tStatement: statement, Constraints: pending, Source: cleaned,\n\t}, string(source), validated)',
+      '// Mutation: skip confirmation of semantic violations'),
+  },
 ];
 const env = { ...process.env, MODEL_OFF: '1', MODEL_API_KEY: '' };
 const results = [];

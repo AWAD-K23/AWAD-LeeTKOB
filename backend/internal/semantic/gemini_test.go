@@ -212,3 +212,40 @@ func TestGeminiCancellationAndAuditFailure(t *testing.T) {
 		t.Fatal("unknown model accepted without reviewed rates")
 	}
 }
+
+func TestGeminiSendsConfirmationCandidates(t *testing.T) {
+	model, err := NewGemini(SupportedModel, "fake-test-key", func(CallLog) error { return nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	model.wait = func(context.Context) error { return nil }
+	model.client.Transport = fakeTransport(func(req *http.Request) (*http.Response, error) {
+		var sent struct {
+			Contents []struct {
+				Parts []struct {
+					Text string `json:"text"`
+				} `json:"parts"`
+			} `json:"contents"`
+		}
+		data, _ := io.ReadAll(req.Body)
+		if err := json.Unmarshal(data, &sent); err != nil {
+			t.Fatal(err)
+		}
+		var prompt wireRequest
+		if len(sent.Contents) != 1 || len(sent.Contents[0].Parts) != 1 {
+			t.Fatalf("missing prompt: %s", data)
+		}
+		if err := json.Unmarshal([]byte(sent.Contents[0].Parts[0].Text), &prompt); err != nil {
+			t.Fatal(err)
+		}
+		if len(prompt.ProposedViolations) != 1 || prompt.ProposedViolations[0].ConstraintID != "a" || len(prompt.Code) != 1 || prompt.Code[0].Text != "int quantity = 1;" {
+			t.Fatalf("confirmation data lost: %+v", prompt)
+		}
+		return &http.Response{StatusCode: 200, Header: http.Header{}, Body: io.NopCloser(strings.NewReader(`{"responseId":"fake-confirmation-id","usageMetadata":{"promptTokenCount":1,"candidatesTokenCount":1},"candidates":[{"finishReason":"STOP","content":{"parts":[{"text":"{\"verdicts\":[{\"constraintId\":\"a\",\"verdict\":\"unsure\",\"evidence\":[]}]}"}]}}]}`))}, nil
+	})
+	_, err = model.Generate(context.Background(), Request{Statement: "Review", Source: "int quantity = 1;", Constraints: []hardrules.Constraint{{ID: "a", Text: "Use floating point"}},
+		ProposedViolations: []ProposedViolation{{ConstraintID: "a", Evidence: []hardrules.Evidence{{Line: 1, Text: "int quantity = 1;"}}}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+}

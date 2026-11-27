@@ -260,7 +260,7 @@ func TestDurableWorker(t *testing.T) {
 			},
 		}
 
-		if found, err := integrated.ProcessOne(ctx); err != nil || !found || calls != 1 {
+		if found, err := integrated.ProcessOne(ctx); err != nil || !found || calls != 2 {
 			t.Fatal(found, calls, err)
 		}
 

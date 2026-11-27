@@ -16,9 +16,17 @@ import (
 // Request deliberately excludes account IDs, deductions, and private tests.
 // Source must have comments removed before it is passed to a provider.
 type Request struct {
-	Statement   string                 `json:"statement"`
-	Constraints []hardrules.Constraint `json:"constraints"`
-	Source      string                 `json:"code"`
+	Statement          string                 `json:"statement"`
+	Constraints        []hardrules.Constraint `json:"constraints"`
+	Source             string                 `json:"code"`
+	ProposedViolations []ProposedViolation    `json:"proposedViolations,omitempty"`
+}
+
+// Only already validated, sanitized model findings enter the confirmation pass.
+// No TA decision, mark, identity or private test is included.
+type ProposedViolation struct {
+	ConstraintID string               `json:"constraintId"`
+	Evidence     []hardrules.Evidence `json:"evidence"`
 }
 
 // Model is replaceable so guardrail tests never need network access.
@@ -145,6 +153,9 @@ func (c Checker) Check(
 		return out
 	}
 
+	validated = c.confirmViolations(ctx, timeout, Request{
+		Statement: statement, Constraints: pending, Source: cleaned,
+	}, string(source), validated)
 	for _, verdict := range validated {
 		if verdict.Verdict == "unsure" && verdict.Reason == "" {
 			verdict.Reason = "Model returned unsure."

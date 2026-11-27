@@ -1,5 +1,20 @@
 # AI log
 
+## 2026-11-27 — Semantic violation confirmation after residual wrongful result
+
+- **Tool / task:** Codex; continue the approved live validation without hiding a remaining failure.
+- **Observed:** On frozen `61d9c89`, two dev runs passed (0 wrongful, 36/37 recall, 1/102 unsure), but the third still had one wrongful violation. All three had 97.3% recall; unsure ranged 0–1.0%, with two changed pairs. The prompt/isolation correction therefore did not establish reliable zero-wrongful behavior. All 117 calls had provider IDs and known usage, costing US$0.068578.
+- **Changed:** Added a fail-closed confirmation pass for semantic violations. A second bounded call attempts to disprove all proposed violations together; disagreement, malformed output, timeout or budget failure makes those candidates unsure. Passes and hard-rule verdicts do not incur confirmation calls. Confirmation input reconstructs sanitized evidence so original comments/known identities cannot leak back into a prompt. Both calls use the existing audit/budget/rate controls and the same strict output validation.
+- **Tests:** Added fake-model agreement/disagreement, malformed reply, budget/provider error, late success, pass-without-recheck and actual wire-framing tests. Existing boundary/worker fake-call assertions now require the intentional two calls; their verdict, evidence, identity and hard-rule isolation assertions are unchanged. The independent-finding fake now responds only for requested confirmation IDs; its original safety assertions remain unchanged. Added a mutation bypass for the new guard. Targeted guardrail tests and all five Node tooling tests pass offline.
+- **Limits:** The final approved combined CI evaluation will exercise this new guard; no extra evaluation beyond the authorized four is started. Confirmation adds provider calls within that evaluation and remains subject to the unchanged application/provider caps. It is a conservative check, not proof that two calls cannot share a model error. Cases, labels, official files and thresholds remain unchanged.
+
+## 2026-11-27 — PA4 fixed-checker live validation approved
+
+- **Tool / task:** Codex; resume Member 2 after the user approved live testing following the explanation of up to four extra runs.
+- **Changed:** Downloaded the original failed CI artifact, saved exact blocked-PR state and measured full CI cost. Added `marking.env` to Git exclusions so future private marking credentials cannot be accidentally staged. Started fixed-commit validation sequentially; no new provider/project spending limit was changed.
+- **Verified:** Baseline CI run 45968971182 passed the official set but failed own-case recall at 8/9 (88.9%), blocking required live-eval on PR #27. Its 49 successful calls have provider IDs/known usage, no unknown reservations or retries, and estimated cost US$0.023860. All four ordinary CI jobs passed. The first new dev run uses clean frozen commit `61d9c89` and a fresh folder.
+- **Limits:** The extra authorization is up to four evaluations, not unlimited retries. No passing result for the candidate is claimed until the runs finish. Dedicated marking credentials and actual marking-proxy verification remain separate pending work.
+
 ## 2026-11-27 — PA4 Member 2 candidate handoff
 
 - **Tool / task:** Codex; prepare the reviewable Member 2 handoff while paid revalidation is on hold.

@@ -37,6 +37,12 @@ For resource rules, distinguish automatic/static storage from explicit dynamic
 allocation and trace every allocation's lifetime, including overwritten owners;
 one final release does not prove that every earlier allocation was released.
 Use the submitted constraint's exact requirements rather than adding assumptions.
+If proposedViolations is present, independently audit those candidates and try
+to disprove them against the code and the exact rule. Return violation only with
+source proof of a prohibited operation; return pass for compliant code and unsure
+when proof is insufficient. Do not confirm by repeating the proposed conclusion.
+An input object, normal temporary or storage declaration alone does not prove an
+algorithmic violation. Follow its actual use before deciding.
 For every constraint return pass, violation, or unsure and an evidence array.
 The code is given as numbered lines, each an object with line and text.
 For pass or violation cite at least one nonblank line: copy its line number and
@@ -54,9 +60,10 @@ type numberedLine struct {
 
 // wireRequest carries the same data as Request; only the code is framed.
 type wireRequest struct {
-	Statement   string                 `json:"statement"`
-	Constraints []hardrules.Constraint `json:"constraints"`
-	Code        []numberedLine         `json:"code"`
+	Statement          string                 `json:"statement"`
+	Constraints        []hardrules.Constraint `json:"constraints"`
+	Code               []numberedLine         `json:"code"`
+	ProposedViolations []ProposedViolation    `json:"proposedViolations,omitempty"`
 }
 
 func numberLines(source string) []numberedLine {
@@ -135,7 +142,8 @@ func (g *Gemini) Generate(ctx context.Context, request Request) (result []byte, 
 	// The 64 KiB bound above applies to the data; the line framing is added after it.
 	data, err = json.Marshal(wireRequest{
 		Statement: request.Statement, Constraints: request.Constraints,
-		Code: numberLines(request.Source),
+		Code:               numberLines(request.Source),
+		ProposedViolations: request.ProposedViolations,
 	})
 	if err != nil {
 		return nil, errors.New("model request encoding failed")

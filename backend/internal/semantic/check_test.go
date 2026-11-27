@@ -52,7 +52,7 @@ func TestCheckerBoundary(t *testing.T) {
 	out := (Checker{Enabled: true, Model: model}).Check(
 		context.Background(), "Compare", source, constraints, checks,
 	)
-	if calls != 1 || out[0].Verdict != "violation" || out[0].Source != "hard_rule" ||
+	if calls != 2 || out[0].Verdict != "violation" || out[0].Source != "hard_rule" ||
 		out[1].Verdict != "violation" || out[1].Source != "model" ||
 		out[1].Evidence[0].Text != strings.Split(string(source), "\n")[1] {
 		t.Fatalf("unexpected verdicts: %+v", out)
