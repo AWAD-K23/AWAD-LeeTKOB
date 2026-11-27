@@ -163,6 +163,19 @@ forwarding to Go. Direct clients on port 8080 use unprefixed paths such as `/me`
 
 ## Model checking and evaluation
 
+PA4's live gate runs `node scripts/run-live-eval.mjs <new-run-folder>` on both
+official and own cases, generating predictions in the job and failing on every
+nonzero evaluator exit. Unit/guardrail tests remain offline. See [PA4.md](PA4.md)
+for fork handling and current evidence.
+
+The marker must allow HTTPS to **`generativelanguage.googleapis.com:443`**.
+The provider is fixed in code; normal `HTTPS_PROXY`/`HTTP_PROXY` configuration is
+honored by Go's HTTP transport. The checker needs `MODEL_OFF`, `MODEL_NAME` and
+`MODEL_API_KEY`; `MODEL_LAB_BUDGET_MICRO_USD` is optional. Supply dedicated marking
+credentials privately, beside the ZIP, never in Git. The trusted checker analyzes
+source; it does not execute submissions. Its scanner receives a clean environment
+without the model key. Student execution sandboxes never receive credentials.
+
 The supported model is `gemini-3.5-flash-lite`. With `MODEL_OFF=1`, hard rules
 still run and semantic constraints remain unsure without provider calls.
 

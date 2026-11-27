@@ -1,5 +1,13 @@
 # AI log
 
+## 2026-11-27 — PA4 live evaluation tooling and mutation evidence
+
+- **Tool / task:** Codex; Member 2 CI/evaluation integration.
+- **Changed:** Added a live runner that builds the current checker, generates fresh predictions for official and own datasets, preserves provider/cost evidence and propagates every nonzero evaluator exit. Added same-commit three-run comparison with tests, a disposable-copy guardrail mutation audit, live PR/main/pa4 CI, an explicit failing fork policy, CODEOWNERS, model-host/marking instructions and a PA4 draft. Keys stay with the trusted checker; its separate Docker scanners get no credentials, network or mounts.
+- **Verified:** All five guardrail baselines passed and their targeted mutations failed with assertion failures; saved exact evidence on `55b7c85`. Go format/vet/full PostgreSQL-backed tests passed. Three synthetic comparison tests passed, including commit/population mismatch rejection. The metadata-mismatch test initially exposed an unchecked missing datasets field; the implementation was corrected instead of weakening the assertion. Official integrity still reports all 128 files unchanged.
+- **Changed after checks:** Prettier's earlier CSS failure was Windows line endings, not content changes. Normalized the working stylesheet and specified LF for CSS and our own fixtures; Git shows no stylesheet content diff. This supersedes the earlier formatting blocker without changing cases, labels or check thresholds.
+- **Limits:** The classic main-protection endpoint returned 404, but subsequent inspection found active ruleset `26947349`; it already requires gates/secret-history/e2e. No protection was removed. Fresh live results, CI evidence and settings updates follow separately. The user chose the team repository and approved three dev runs plus one combined evaluation after confirming the provider cap.
+
 ## 2026-11-27 — PA4 G5 model deductions audit
 
 - **Tool / task:** Codex; audit G5 for Member 2.

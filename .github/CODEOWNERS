@@ -1,0 +1,7 @@
+# A reviewer with write access must approve changes to the evaluation target,
+# test coverage or the workflow enforcing it. Required review is configured on main.
+/.github/ @longtoZ @baohuyhuy @akus176
+/eval/ @longtoZ @baohuyhuy @akus176
+**/*_test.go @longtoZ @baohuyhuy @akus176
+/frontend/e2e/ @longtoZ @baohuyhuy @akus176
+/scripts/ @longtoZ @baohuyhuy @akus176
