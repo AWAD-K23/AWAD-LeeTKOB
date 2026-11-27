@@ -68,7 +68,7 @@ Backend implementation and local verification: [Member 1 handoff](MEMBER1-HANDOF
 - [x] Document the exact model host required by marking in README and `PA4.md`. Prepare the checker-required variable names for private `marking.env`; test working credentials separately from Git and ZIP packaging.
 - [ ] **Handoff:** Demonstrate G1–G5 with no network, a fresh real-model CI run, case history and three saved runs. Supply the report artifacts, cost arithmetic, blocked-PR/fix links and checker/marking instructions to Member 3.
 
-Implementation/evidence: [Member 2 candidate handoff](MEMBER2-HANDOFF.md). The original baseline series failed; the first correction passed two of three runs but still had one wrongful violation. The new confirmation correction cd3374d is offline/mutation-tested and will use the final approved combined CI run. Passing live CI and teammate acceptance remain open.
+Implementation/evidence: [Member 2 candidate handoff](MEMBER2-HANDOFF.md). The first correction passed two of three dev runs but still had one wrongful violation. Confirmation CI passed official metrics but failed own-case recall at 8/9 because one primary violation lacked evidence. Local provider-schema fix e592bf7 passes offline/mutation tests; one further CI evaluation is now authorized after the user said continue. Passing live CI and teammate acceptance remain open.
 
 ### Guardrail acceptance matrix
 

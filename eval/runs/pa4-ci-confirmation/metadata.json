@@ -1,0 +1,19 @@
+{
+  "commit": "93b0152fb424fe821d5ddf10790fcbe1eded60e6",
+  "model": "gemini-3.5-flash-lite",
+  "host": "generativelanguage.googleapis.com",
+  "budgetMicroUsdPerProblem": "1000000",
+  "startedAt": "2026-11-27T11:09:03.584Z",
+  "scanner": "isolated Docker; no model credentials",
+  "sandboxImage": "sha256:a3b3acd099150a70075e37e6e3cbca5defc18ba60f8cd42813ce0169d69671fe",
+  "datasets": [
+    {
+      "name": "official",
+      "sha256": "a365a7a79fa0ac6727034c495a27dbfdf09d046edf65b5c476d58649ac8bd7c5"
+    },
+    {
+      "name": "extra",
+      "sha256": "fd75c5419c2eee6f811ae812d82bcc1b7abb1bd90fbd9ddb749aeb94692c9130"
+    }
+  ]
+}

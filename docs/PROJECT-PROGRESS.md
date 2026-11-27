@@ -103,6 +103,16 @@ Detailed ownership and delivery history remain in the [PA3 plan](PA3/PA3-PLAN.md
 
 ## PA4 — evaluation, guardrails, human gate and red-team
 
+**November 27 Member 2 update:** Required real-model CI, ten own Accepted cases,
+G1–G5 regression/mutation audits, two three-run studies and measured CI cost are
+implemented. The baseline required check failed and blocked PR #27. The first
+correction still had a wrongful result in one of three runs; a new fail-closed
+confirmation gate passed official CI metrics but still failed own-case recall.
+A local provider-schema fix now has one newly authorized live check pending.
+See [PA4.md](../PA4.md) and [Member 2 handoff](PA4/MEMBER2-HANDOFF.md). No held-out
+result, repeated-run stability of the latest gate or deployed UI acceptance is
+claimed.
+
 **November 27 backend update:** Member 1's sampling, review requirements and atomic
 Publish gate are implemented and tested locally against PostgreSQL. See the
 [contract](contract/publication.md) and [handoff](PA4/MEMBER1-HANDOFF.md). Member 3
@@ -119,14 +129,14 @@ Source: [full PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and 
 | ✅ | Produce valid generic prediction JSONL without reading labels to decide answers | Checker command and saved evaluation artifacts |
 | ✅ | Demonstrate zero wrongful deductions on the saved official dev-set run | 0 wrongful deductions in the passing [numbered-line run](../eval/runs/real-dev-numbered/report.txt); one run, not proof for unseen data |
 | ✅ | Add five own labelled/tagged Accepted cases separately from official data | `eval/extra/`; PA4 requires at least ten and the history/coverage checks below |
-| ⬜ | Generate fresh real-model predictions inside CI for official and own cases | Every eval exit other than 0 must fail; committed predictions and model-off runs do not meet this requirement; unit tests still use fakes |
-| ⬜ | Make the live eval job a required check on main and run it for PRs | Document fork PR handling because forks receive no secrets; keep CI key in repository secrets |
+| ✅ | Generate fresh real-model predictions inside CI for official and own cases | Actual [baseline CI](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45968971182) generated both sets and failed on own-case recall; unit tests remain fake/offline |
+| ✅ | Make the live eval job a required check on main and run it for PRs | Active ruleset, secret and failing fork policy; [settings evidence](PA4/evidence/repository-protection-after.json) |
 | ⬜ | Prove a red eval blocks merging, then fix the checker | Link the blocked PR and fixing commit; do not change labels/data or suppress failures |
-| ⬜ | Extend own cases from five to at least ten, covering trap, injection and disguised | Each case must precede the checker change that handles it; inspect real history without reconstructing it |
-| ⬜ | Record three real dev-set runs of the same commit | In PA4.md: changed-verdict pair count, lowest/highest recall and unsure rate, and cost of one CI run |
+| ✅ | Extend own cases from five to at least ten, covering trap, injection and disguised | Five new cases committed in f1510fa before checker fixes; original cases/history preserved; [rationale](../eval/extra/README.md) |
+| ✅ | Record three real dev-set runs of the same commit | Two preserved series, variability and cost in [PA4.md](../PA4.md); both include failures and do not prove latest-gate stability |
 | ⬜ | Meet all three thresholds on the lecturer's held-out run | 0 wrongful, recall ≥90%, unsure ≤20%; ≥95% recall reaches the top of the held-out band; dev results are only an estimate |
 | ⬜ | Validate reliability after the numbered-line evidence fix | Latest saved run passes; earlier provider 503/budget/evidence failures remain useful regression evidence. Preserve safe unsure fallback and confirm stability across fresh runs |
-| ⬜ | Audit G1–G5 with meaningful fake-model/no-network tests | Cover fenced/prose JSON, unknown verdict, missing/duplicate constraints, invented/misnumbered/comment-only evidence, timeout, exhausted cap, and injected marks; tests must fail if their guardrail is removed |
+| ✅ | Audit G1–G5 with meaningful fake-model/no-network tests | Covered schema/evidence/timeouts/cap/marks, plus confirmation; all bypass mutations failed their regressions; [evidence](PA4/evidence/confirmation-guard-mutations.json) |
 | ✅ | Show the TA why a check became unsure, including cap exhaustion | FAQ-09 local reasons are persisted, returned through the TA-only API and displayed in review; [TA review evidence](PA3/TA-REVIEW-QUEUE.md). Complete the G1–G5 audit above |
 | ⬜ | Verify no model instruction changes the TA-set deduction on screen | Prove configured deduction survives injected fields/instructions; checker must have no mark-writing path |
 | ⬜ | Verify guardrail/test commit history and deployed injection behavior | Each guardrail/test in its own real commit, test no later than code; injections must become violation or unsure, never pass; record historical limitations honestly |
@@ -140,9 +150,13 @@ Source: [full PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and 
 | ⬜ | Rehearse the generic held-out invocation under marking restrictions | 30-minute limit; network only through a proxy to the README's model host; valid predictions required; do not special-case dev solution IDs |
 | ⬜ | Prepare private marking credentials and their lifecycle | `marking.env` beside the ZIP, never in Git or inside ZIP; only checker-required variables; dedicated key/endpoint credentials; revoke after PA4 marks; without working access the lecturer uses model-off |
 | ⬜ | Complete PA4 evidence, AI log and submission | Root PA4.md: tag CI, blocked PR/fix, repeated runs/cost, human-gate explanation, model host and fork policy; actual Changed/Rejected entries; public `pa4` tag, running deployment, rubric self-assessment and ZIP including .git |
-| ⬜ | Ensure the submitted pa4 tag has a CI run | Workflow currently lists only pa2/pa3 tags; extend tag coverage as part of the CI work |
+| ⬜ | Ensure the submitted pa4 tag has a CI run | The pa4 workflow trigger is implemented; the actual release tag/run remains Member 3 work |
 
-The rubric also highlights CODEOWNERS review for tests, `.github/` and eval data as protection against moving the target; this is not currently configured. Ordinary checks/guardrail tests must still work offline after dependencies are installed within 15 minutes; the separately authorized live evaluation job is the exception that contacts the provider.
+CODEOWNERS now covers tests, `.github/`, scripts and eval data, and main's active
+ruleset requires one approval and code-owner review. The file takes effect on
+main after PR #27 is merged; its branch syntax has no GitHub-reported errors.
+Ordinary checks/guardrail tests remain offline after dependency installation;
+the separately authorized live evaluation job contacts the provider.
 
 ### Saved real-model evaluation
 

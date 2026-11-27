@@ -1,5 +1,13 @@
 # AI log
 
+## 2026-11-27 — Single provider-schema follow-up after “continue”
+
+- **Tool / task:** Codex; continue after disclosing that the four-run batch was exhausted and the schema fix was local.
+- **Authorization / scope:** Interpreted the user's “continue” in that context as approval for one further CI evaluation (estimated about US$0.04), stated that bound before proceeding, and will stop after that run. Provider/project spending limits are unchanged.
+- **Changed:** Preserved confirmation CI's complete artifacts, blocked-PR state and computed call/cost summary. Updated the handoff, report and tracker with the failed own-case recall and the locally tested schema correction. No cases, labels, thresholds or guardrails were loosened.
+- **Verified:** Seven mutation baselines passed and each removed guard failed. Go format/vet and the full PostgreSQL-backed suite passed with module downloads disabled after dependency installation; all five Node tooling tests pass. All 128 official hashes remain unchanged. The new test-only JSON Schema dependency is pinned; the schema correction has not yet had real-provider validation.
+- **Limits:** The pending follow-up is one evaluation, not unlimited reruns. The prior new four-run batch cost US$0.109932, including confirmation CI at US$0.041354; all 75 calls in that CI had known usage and provider IDs, with no unknown reservations/retries.
+
 ## 2026-11-27 — Final authorized CI result and provider-schema mismatch
 
 - **Tool / task:** Codex; finish the four newly authorized evaluations and preserve the actual outcome.

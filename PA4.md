@@ -133,10 +133,39 @@ The original guardrail regressions still pass; the
 [second mutation audit](docs/PA4/evidence/guardrail-mutations-after-fix.json) still
 catches all five bypasses. The latest
 [mutation audit](docs/PA4/evidence/confirmation-guard-mutations.json) also removes
-the confirmation gate and requires its regression to fail. The final approved
-official-and-own CI evaluation will test the confirmation correction; there are
-not three repeated real runs of this latest correction within the authorized
-run budget. Results are preserved without overwriting prior failures. See the
+the confirmation gate and requires its regression to fail. There are not three
+repeated real runs of this correction within the authorized run budget.
+
+The final approved [confirmation CI run](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45987925317)
+finished with:
+
+| Dataset | Wrongful | Recall | Unsure | Evaluator |
+| --- | ---: | ---: | ---: | --- |
+| [Official](eval/runs/pa4-ci-confirmation/official/report.txt) | 0 | 35/37 (94.6%) | 5/102 (4.9%) | PASS |
+| [Own](eval/runs/pa4-ci-confirmation/extra/report.txt) | 0 | 8/9 (88.9%) | 1/20 (5.0%) | FAIL |
+
+The missed own finding was a violation with **empty evidence** from the primary
+model. Local validation correctly made it unsure; it did not reach confirmation.
+The required check stayed red and [merge stayed blocked](docs/PA4/evidence/confirmation-ci-blocked.json).
+All four ordinary CI jobs passed. Its 75 calls (49 primary plus 26 confirmation)
+all have provider IDs/known usage. Cost was **US$0.041354 estimated**, with no
+unknown reservations/retries: US$0.035837 official plus US$0.005517 own cases.
+The four newly authorized evaluations total **US$0.109932**, and no fifth was run.
+
+Local follow-up `e592bf7` fixes a provider/local schema mismatch: the provider
+schema previously allowed empty evidence for decisive verdicts. It now uses
+conditional branches requiring at least one evidence item for pass/violation,
+while preserving empty-evidence unsure. Google documents these supported
+[structured-output features](https://ai.google.dev/gemini-api/docs/structured-output).
+A regression checks the actual serialized schema using a real JSON Schema
+validator; it failed before the fix and passes after. Existing local validation
+is unchanged. [Seven mutation checks](docs/PA4/evidence/provider-schema-guard-mutations.json)
+pass normally and fail when each guard is bypassed, including this schema bound.
+This follow-up **has not yet had a real provider/CI run**. After the user said
+“continue,” one further CI evaluation (estimated about US$0.04) was authorized
+and is being prepared. No passing final handoff or held-out performance is
+claimed. [Computed prior CI cost/call summary](docs/PA4/evidence/confirmation-ci-summary.json)
+and all failures are preserved. See the
 [Member 2 handoff](docs/PA4/MEMBER2-HANDOFF.md).
 
 ## Marking command and model host

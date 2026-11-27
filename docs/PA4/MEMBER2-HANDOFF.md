@@ -1,4 +1,4 @@
-# PA4 Member 2 handoff — confirmation correction awaiting CI
+# PA4 Member 2 handoff — provider-schema correction awaiting live validation
 
 November 27, 2026 (Asia/Saigon). This is a partial acceptance record with explicit
 failing performance evidence. Do not present the checker candidate as passing.
@@ -17,6 +17,8 @@ failing performance evidence. Do not present the checker candidate as passing.
   all five normal regressions passing and their bypassed guards causing failures.
   [Confirmation audit](evidence/confirmation-guard-mutations.json) repeats these
   five checks and also verifies that bypassing the new confirmation gate fails.
+  [Provider-schema audit](evidence/provider-schema-guard-mutations.json) verifies
+  all seven guards, including the local follow-up's decisive-evidence bound.
 - Fresh official-and-own live CI for PR/main/pa4, with failure propagation and
   provider/cost artifacts. Model-off checking and fake-model unit tests remain
   separate. Fork PRs fail rather than silently count as passing without secrets.
@@ -69,8 +71,23 @@ or any confirmation failure becomes unsure. Both calls use the existing cap,
 audit and pacing controls; comments/known identities remain removed in the
 confirmation request. Positive, disagreement, malformed, cap/provider error,
 timeout, wire and identity tests pass, as does the full Docker/PostgreSQL suite.
-The final approved combined CI run remains to be executed. This latest correction
-has not had three repeated real runs within the authorized four-run budget.
+The final approved [CI run](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45987925317)
+passed official metrics (0 wrongful, 35/37 recall, 5/102 unsure) but failed own
+recall (8/9, with 0 wrongful and 1/20 unsure). A primary model violation lacked
+evidence; the checker correctly left it unsure. Merge remains blocked. All other
+jobs passed. [Saved artifacts](../../eval/runs/pa4-ci-confirmation/run-summary.json)
+contain 75 known-usage responses with provider IDs: 49 primary and 26 confirmation.
+Estimated cost: US$0.041354; unknown reservations/retries zero. The newly approved
+four-run batch cost US$0.109932. No fifth evaluation was started.
+
+Local follow-up `e592bf7` aligns the provider schema with the unchanged local
+evidence guard: pass/violation require a nonempty evidence array, while unsure
+can stay empty. A real JSON Schema engine tests the actual wire schema and
+counterexamples offline. The test failed before the correction and passes now;
+all seven guard bypasses fail their regressions. Go format/vet/unit tests pass.
+This fix is **untested against the real provider**. After the four-run batch,
+the user said “continue”; one further CI evaluation (estimated about US$0.04)
+is now authorized. It is not a green or complete final handoff until verified.
 
 ## Acceptance commands
 
@@ -105,11 +122,11 @@ receive no key, host mount, Docker socket or network. Unit tests never use it.
 
 ## Remaining
 
-1. Push the confirmation correction and obtain the final approved required CI
-   result, preserving metrics/cost/artifacts. The new guard has no claim of
-   repeated-run stability yet.
-2. Record the result and supply the completed evidence to Member 3. Failing
-   baselines must remain disclosed; never change data/labels or weaken the gate.
+1. Use the single newly authorized CI run to validate `e592bf7` and the stricter
+   provider schema in one live CI evaluation. Do not weaken evidence/labels or
+   suppress the required check. Latest-code repeated-run stability is unproven.
+2. Obtain a green required evaluation and supply its complete evidence to
+   Member 3. Preserve all failing baselines and measured costs.
 3. Supply a dedicated private marking key/credentials outside Git and the ZIP;
    verify proxy access in the marking environment and revoke after marking.
 4. Member 3 accepts the handoff and supplies deployed UI/injection checks, target
