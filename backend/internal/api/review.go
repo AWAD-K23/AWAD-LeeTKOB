@@ -54,22 +54,30 @@ func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	rows, err := s.DB.Query(r.Context(), `
+	tx, revision, err := s.reviewPopulation(r.Context(), lab)
+	if err != nil {
+		internal(w)
+		return
+	}
+	defer tx.Rollback(r.Context())
+	rows, err := tx.Query(r.Context(), `
 		SELECT s.id::text,s.student_id::text,s.created_at::text,
 		j.verdict,convert_from(s.source,'UTF8'),c.id::text,c.description,
 		c.deduction::float8,v.verdict,v.reason,v.evidence,v.source,
 		COALESCE(cr.decision,''),COALESCE(cr.evidence,'[]'::jsonb),
-		COALESCE(cr.applied_deduction::float8,0)
+		COALESCE(cr.applied_deduction::float8,0), sample.submission_id IS NOT NULL
 		FROM submissions s
 		JOIN judge_results j ON j.submission_id=s.id
 		JOIN constraint_verdicts v ON v.submission_id=s.id
 		JOIN lab_constraints c ON c.id=v.constraint_id AND c.lab_id=s.lab_id
-		LEFT JOIN constraint_reviews cr ON cr.submission_id=s.id AND cr.constraint_id=c.id
+		LEFT JOIN constraint_reviews cr ON cr.submission_id=s.id AND cr.constraint_id=c.id AND cr.review_revision=$2
+		LEFT JOIN review_pass_samples sample ON sample.lab_id=$1 AND sample.revision=$2
+		AND sample.submission_id=s.id AND sample.constraint_id=c.id
 		WHERE s.lab_id=$1 AND j.verdict='Accepted'
 		AND NOT EXISTS (SELECT 1 FROM submissions newer WHERE newer.lab_id=s.lab_id
 			AND newer.student_id=s.student_id AND
 			(newer.created_at, newer.id) > (s.created_at, s.id))
-		ORDER BY s.created_at DESC,s.id,c.id`, lab)
+		ORDER BY s.created_at DESC,s.id,c.id`, lab, revision)
 	if err != nil {
 		internal(w)
 		return
@@ -79,12 +87,20 @@ func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var submissionID, studentID, createdAt, judge, code, constraintID, description, verdict, reason, source, decision string
 		var deduction, appliedDeduction float64
+		var sampled bool
 		var evidence, reviewedEvidence []byte
-		if err := rows.Scan(&submissionID, &studentID, &createdAt, &judge, &code, &constraintID, &description, &deduction, &verdict, &reason, &evidence, &source, &decision, &reviewedEvidence, &appliedDeduction); err != nil {
+		if err := rows.Scan(&submissionID, &studentID, &createdAt, &judge, &code, &constraintID, &description, &deduction, &verdict, &reason, &evidence, &source, &decision, &reviewedEvidence, &appliedDeduction, &sampled); err != nil {
 			internal(w)
 			return
 		}
+		reviewReason := ""
+		if verdict == "violation" || verdict == "unsure" {
+			reviewReason = verdict
+		} else if sampled {
+			reviewReason = "sampled-pass"
+		}
 		out = append(out, map[string]any{
+			"reviewRevision": revision, "reviewRequired": reviewReason != "", "sampledPass": sampled, "reviewReason": reviewReason,
 			"submissionId": submissionID, "studentId": studentID, "createdAt": createdAt,
 			"judgeVerdict": judge, "sourceCode": code, "constraintId": constraintID,
 			"constraint": description, "deduction": deduction, "verdict": verdict,
@@ -94,6 +110,11 @@ func (s *Server) reviewQueue(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	if rows.Err() != nil {
+		internal(w)
+		return
+	}
+	rows.Close()
+	if err := tx.Commit(r.Context()); err != nil {
 		internal(w)
 		return
 	}
@@ -190,8 +211,8 @@ func (s *Server) reviewDecision(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "invalid-request", "Invalid request", "Choose pass or violation and valid evidence.")
 		return
 	}
-	// Lock the submission and validate that this is still the counted attempt.
-	tx, err := s.DB.Begin(r.Context())
+	// The lab lock serializes decisions with population changes and Publish.
+	tx, revision, err := s.reviewPopulation(r.Context(), lab)
 	if err != nil {
 		internal(w)
 		return
@@ -206,8 +227,7 @@ func (s *Server) reviewDecision(w http.ResponseWriter, r *http.Request) {
 		WHERE s.id=$1 AND s.lab_id=$2
 		AND NOT EXISTS (SELECT 1 FROM submissions newer WHERE newer.lab_id=s.lab_id
 			AND newer.student_id=s.student_id AND
-			(newer.created_at,newer.id)>(s.created_at,s.id))
-		FOR UPDATE OF s`, submission, lab, constraint).Scan(&code)
+			(newer.created_at,newer.id)>(s.created_at,s.id))`, submission, lab, constraint).Scan(&code)
 	if errors.Is(err, pgx.ErrNoRows) {
 		fail(w, 404, "not-found", "Submission not found", "The submission was not found.")
 		return
@@ -225,21 +245,25 @@ func (s *Server) reviewDecision(w http.ResponseWriter, r *http.Request) {
 		internal(w)
 		return
 	}
-	_, err = tx.Exec(r.Context(), `INSERT INTO constraint_reviews(submission_id,constraint_id,ta_id,decision,evidence,applied_deduction)
-		SELECT $1,$2,$3,$4,$5,CASE WHEN $4='violation' THEN c.deduction ELSE 0 END
+	_, err = tx.Exec(r.Context(), `INSERT INTO constraint_reviews(submission_id,constraint_id,ta_id,decision,evidence,applied_deduction,review_revision)
+		SELECT $1,$2,$3,$4,$5,CASE WHEN $4='violation' THEN c.deduction ELSE 0 END,$7
 		FROM lab_constraints c WHERE c.id=$2 AND c.lab_id=$6
 		ON CONFLICT(submission_id,constraint_id) DO UPDATE SET
 		ta_id=excluded.ta_id,decision=excluded.decision,evidence=excluded.evidence,
-		applied_deduction=excluded.applied_deduction,reviewed_at=now()`,
-		submission, constraint, id, in.Decision, evidence, lab)
+		applied_deduction=excluded.applied_deduction,review_revision=excluded.review_revision,reviewed_at=now()`,
+		submission, constraint, id, in.Decision, evidence, lab, revision)
 	if err != nil {
 		internal(w)
 		return
 	}
-	_, err = tx.Exec(r.Context(), `INSERT INTO constraint_review_history(id,submission_id,constraint_id,ta_id,decision,evidence,applied_deduction)
-		SELECT $1,r.submission_id,r.constraint_id,r.ta_id,r.decision,r.evidence,r.applied_deduction
+	_, err = tx.Exec(r.Context(), `INSERT INTO constraint_review_history(id,submission_id,constraint_id,ta_id,decision,evidence,applied_deduction,review_revision)
+		SELECT $1,r.submission_id,r.constraint_id,r.ta_id,r.decision,r.evidence,r.applied_deduction,r.review_revision
 		FROM constraint_reviews r WHERE r.submission_id=$2 AND r.constraint_id=$3`, uuid.New(), submission, constraint)
 	if err != nil {
+		internal(w)
+		return
+	}
+	if _, err = tx.Exec(r.Context(), `UPDATE lab_publications SET active=false WHERE lab_id=$1 AND revision=$2`, lab, revision); err != nil {
 		internal(w)
 		return
 	}

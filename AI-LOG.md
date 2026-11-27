@@ -1,5 +1,14 @@
 # AI log
 
+## 2026-11-27 — PA4 Member 1 backend and regression tests
+
+- **Tool:** Codex.
+- **Asked for:** Implement Member 1's server sampling, required reviews and Publish gate; group implementation and tests in one commit.
+- **Changed:** Added migration 00008, persisted random pass samples, review progress and revision invalidation. Added atomic TA/class-authorized Publish and owning-student published-result access. Reused separate TA decisions, configured deductions, reviewer attribution and append-only API history. Added fixed-seed sampling and direct PostgreSQL API tests alongside the implementation; updated the existing API fixture to load the new migration without changing its assertions.
+- **Design decision:** Replaced submission-only locking with a shared lab-row lock and database triggers so worker writes, rejudging, constraint edits and new submissions participate in the same publication boundary. A decision edit hides the publication until Publish is repeated. No user-rejected suggestion is claimed.
+- **Verified:** Go format, vet and the full backend suite passed against an isolated PostgreSQL 17 Docker database. Publication tests passed three additional consecutive runs. Coverage includes edge sample counts, restart persistence, pending/sample/role/class denials, strict mark-field rejection, configured deductions, student visibility, stale reviews, incomplete findings and a concurrent mutation that blocks Publish before producing a stale-revision denial. The real Goose migration command applied through version 8.
+- **Limits:** No real model call, public deployment or UI integration was performed. The temporary database was isolated from project data and its container was stopped after verification. Tests and implementation are committed together; no earlier test-first history is claimed.
+
 ## 2026-11-27 — PA4 Member 1 publication contract
 
 - **Tool:** Codex.
