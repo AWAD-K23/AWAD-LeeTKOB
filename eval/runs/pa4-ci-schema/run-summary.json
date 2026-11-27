@@ -1,0 +1,63 @@
+{
+  "commit": "87f1dd8eae8b86f177a48f83b14a397a947a18e6",
+  "finishedAt": "2026-11-27T13:52:18.711Z",
+  "results": [
+    {
+      "dataset": "official",
+      "evaluatorExit": 0,
+      "model": "gemini-3.5-flash-lite",
+      "reservedCalls": 61,
+      "recordedCalls": 61,
+      "knownUsageCalls": 61,
+      "unknownUsageCalls": 0,
+      "unfinishedReservations": 0,
+      "successfulResponses": 61,
+      "errors": [],
+      "providerRequestIds": 61,
+      "inputTokens": 73189,
+      "outputTokens": 6720,
+      "thinkingTokens": 0,
+      "knownEstimatedCostMicroUsd": 38785,
+      "unknownUsageReservedMicroUsd": 0,
+      "estimatedUsdFor80SimilarCalls": 0.0508655737704918,
+      "minimumStartGapMs": 5000,
+      "peakRequestsIn60Seconds": 12,
+      "predictionPairs": 102,
+      "verdictCounts": {
+        "pass": 65,
+        "violation": 36,
+        "unsure": 1
+      }
+    },
+    {
+      "dataset": "extra",
+      "evaluatorExit": 0,
+      "model": "gemini-3.5-flash-lite",
+      "reservedCalls": 16,
+      "recordedCalls": 16,
+      "knownUsageCalls": 16,
+      "unknownUsageCalls": 0,
+      "unfinishedReservations": 0,
+      "successfulResponses": 16,
+      "errors": [],
+      "providerRequestIds": 16,
+      "inputTokens": 10906,
+      "outputTokens": 1260,
+      "thinkingTokens": 0,
+      "knownEstimatedCostMicroUsd": 6429,
+      "unknownUsageReservedMicroUsd": 0,
+      "estimatedUsdFor80SimilarCalls": 0.032145,
+      "minimumStartGapMs": 5000,
+      "peakRequestsIn60Seconds": 12,
+      "predictionPairs": 20,
+      "verdictCounts": {
+        "pass": 11,
+        "violation": 9,
+        "unsure": 0
+      }
+    }
+  ],
+  "knownEstimatedCostMicroUsd": 45214,
+  "unknownUsageReservedMicroUsd": 0,
+  "exit": 0
+}

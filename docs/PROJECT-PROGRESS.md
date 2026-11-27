@@ -108,7 +108,7 @@ G1–G5 regression/mutation audits, two three-run studies and measured CI cost a
 implemented. The baseline required check failed and blocked PR #27. The first
 correction still had a wrongful result in one of three runs; a new fail-closed
 confirmation gate passed official CI metrics but still failed own-case recall.
-A local provider-schema fix now has one newly authorized live check pending.
+Provider-schema fix e592bf7 passed the subsequent required CI run on both sets: official 0 wrongful/97.3% recall/1.0% unsure; own 0 wrongful/100% recall/0% unsure.
 See [PA4.md](../PA4.md) and [Member 2 handoff](PA4/MEMBER2-HANDOFF.md). No held-out
 result, repeated-run stability of the latest gate or deployed UI acceptance is
 claimed.
@@ -131,7 +131,7 @@ Source: [full PA4 rubric](<PA4/PA#4 rubric — Eval, guardrails, human gate and 
 | ✅ | Add five own labelled/tagged Accepted cases separately from official data | `eval/extra/`; PA4 requires at least ten and the history/coverage checks below |
 | ✅ | Generate fresh real-model predictions inside CI for official and own cases | Actual [baseline CI](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/45968971182) generated both sets and failed on own-case recall; unit tests remain fake/offline |
 | ✅ | Make the live eval job a required check on main and run it for PRs | Active ruleset, secret and failing fork policy; [settings evidence](PA4/evidence/repository-protection-after.json) |
-| ⬜ | Prove a red eval blocks merging, then fix the checker | Link the blocked PR and fixing commit; do not change labels/data or suppress failures |
+| ✅ | Prove a red eval blocks merging, then fix the checker | PR #27: failed required runs 45968971182/45987925317, fixes cd3374d/e592bf7, green run 46009732306; [report](../PA4.md) |
 | ✅ | Extend own cases from five to at least ten, covering trap, injection and disguised | Five new cases committed in f1510fa before checker fixes; original cases/history preserved; [rationale](../eval/extra/README.md) |
 | ✅ | Record three real dev-set runs of the same commit | Two preserved series, variability and cost in [PA4.md](../PA4.md); both include failures and do not prove latest-gate stability |
 | ⬜ | Meet all three thresholds on the lecturer's held-out run | 0 wrongful, recall ≥90%, unsure ≤20%; ≥95% recall reaches the top of the held-out band; dev results are only an estimate |

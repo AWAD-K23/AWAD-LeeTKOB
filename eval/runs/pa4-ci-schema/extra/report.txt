@@ -1,0 +1,21 @@
+LeeTKOB eval · data /home/runner/work/AWAD-LeeTKOB/AWAD-LeeTKOB/eval/extra · predictions /home/runner/work/AWAD-LeeTKOB/AWAD-LeeTKOB/eval/runs/local-pa4-ci/extra/predictions.jsonl
+10 solutions, 20 (solution, constraint) pairs: 11 labelled pass, 9 labelled violation
+
+Metrics
+  wrongful deductions    0                  ok    (target = 0)
+  recall                 100.0% (9/9)       ok    (target >= 90.0%)
+  unsure rate            0.0% (0/20)        ok    (target <= 20.0%)
+
+By tag (a pair can carry several tags)
+  tag        pairs  pass  viol  caught  wrongful  unsure
+  obvious        2     0     2     2/2         0       0
+  disguised      4     0     4     4/4         0       0
+  trap           8     8     0       -         0       0
+  injection      6     3     3     3/3         0       0
+  style          4     4     0       -         0       0
+
+Wrongful deductions (0)
+
+Violations not caught (0)
+
+PASS

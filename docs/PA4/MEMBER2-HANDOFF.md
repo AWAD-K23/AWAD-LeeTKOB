@@ -1,7 +1,8 @@
-# PA4 Member 2 handoff — provider-schema correction awaiting live validation
+# PA4 Member 2 handoff — CI verified; release acceptance pending
 
-November 27, 2026 (Asia/Saigon). This is a partial acceptance record with explicit
-failing performance evidence. Do not present the checker candidate as passing.
+November 27, 2026 (Asia/Saigon). The latest checker passes the required combined
+CI evaluation. Earlier failures remain preserved; latest-code repeated-run
+stability, held-out performance and Member 3 acceptance are not claimed.
 
 ## Delivered
 
@@ -85,9 +86,21 @@ evidence guard: pass/violation require a nonempty evidence array, while unsure
 can stay empty. A real JSON Schema engine tests the actual wire schema and
 counterexamples offline. The test failed before the correction and passes now;
 all seven guard bypasses fail their regressions. Go format/vet/unit tests pass.
-This fix is **untested against the real provider**. After the four-run batch,
-the user said “continue”; one further CI evaluation (estimated about US$0.04)
-is now authorized. It is not a green or complete final handoff until verified.
+After the four-run batch, the user said “continue” and one further CI evaluation
+was executed. [Run 46009732306](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/46009732306)
+passed all five jobs. Official metrics: 0 wrongful, 36/37 recall (97.3%), 1/102
+unsure (1.0%). Own metrics: 0 wrongful, 9/9 recall (100%), 0/20 unsure.
+[Saved call/cost summary](evidence/schema-ci-summary.json) and
+[complete artifact](../../eval/runs/pa4-ci-schema/run-summary.json) contain all
+77 provider IDs/known usages: 49 primary calls and 28 confirmation calls. Cost
+US$0.045214 estimated; unknown reservations, provider errors and retries zero.
+Tested head `07d14e0` includes schema fix `e592bf7`; Actions used merge SHA
+`87f1dd8eae8b86f177a48f83b14a397a947a18e6`. No cases, labels or thresholds changed.
+
+PR #27 remains a draft requiring human review. No merge, deployment or additional
+paid run followed this result. This is one passing run of the latest method,
+not three repeated passing runs or the lecturer's held-out result. Final evidence
+updates are committed locally without a push to avoid an unauthorized extra CI.
 
 ## Acceptance commands
 
@@ -122,11 +135,11 @@ receive no key, host mount, Docker socket or network. Unit tests never use it.
 
 ## Remaining
 
-1. Use the single newly authorized CI run to validate `e592bf7` and the stricter
-   provider schema in one live CI evaluation. Do not weaken evidence/labels or
-   suppress the required check. Latest-code repeated-run stability is unproven.
-2. Obtain a green required evaluation and supply its complete evidence to
-   Member 3. Preserve all failing baselines and measured costs.
+1. Member 3 reviews and accepts the supplied evidence. The required live gate is
+   green, while human review/draft state still blocks merging.
+2. If repeated-run stability of the latest method is required, authorize new
+   runs first. Existing same-commit series remain honestly reported, including
+   their wrongful results. Do not alter labels or weaken the gate.
 3. Supply a dedicated private marking key/credentials outside Git and the ZIP;
    verify proxy access in the marking environment and revoke after marking.
 4. Member 3 accepts the handoff and supplies deployed UI/injection checks, target

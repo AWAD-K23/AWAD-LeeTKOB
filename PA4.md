@@ -161,11 +161,31 @@ A regression checks the actual serialized schema using a real JSON Schema
 validator; it failed before the fix and passes after. Existing local validation
 is unchanged. [Seven mutation checks](docs/PA4/evidence/provider-schema-guard-mutations.json)
 pass normally and fail when each guard is bypassed, including this schema bound.
-This follow-up **has not yet had a real provider/CI run**. After the user said
-“continue,” one further CI evaluation (estimated about US$0.04) was authorized
-and is being prepared. No passing final handoff or held-out performance is
-claimed. [Computed prior CI cost/call summary](docs/PA4/evidence/confirmation-ci-summary.json)
-and all failures are preserved. See the
+After the user said “continue,” the single further
+[schema-fix CI evaluation](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/46009732306)
+**passed all five jobs**, including required live-eval on both datasets:
+
+| Dataset | Wrongful | Recall | Unsure | Evaluator |
+| --- | ---: | ---: | ---: | --- |
+| [Official](eval/runs/pa4-ci-schema/official/report.txt) | 0 | 36/37 (97.3%) | 1/102 (1.0%) | PASS |
+| [Own](eval/runs/pa4-ci-schema/extra/report.txt) | 0 | 9/9 (100%) | 0/20 (0%) | PASS |
+
+Cost: **US$0.045214 estimated**, comprising US$0.038785 official and US$0.006429
+own cases. All **77 calls** (49 primary, 28 confirmation) have provider IDs and
+known usage; there were no provider errors, unknown reservations or retries.
+The tested PR head was `07d14e0`, Actions merge SHA
+`87f1dd8eae8b86f177a48f83b14a397a947a18e6`; provider-schema fix `e592bf7` is included.
+[Call/cost summary](docs/PA4/evidence/schema-ci-summary.json),
+[all-green checks](docs/PA4/evidence/schema-ci-checks.json) and the complete
+[run artifact](eval/runs/pa4-ci-schema/run-summary.json) preserve this result.
+The PR remains draft and requires a human owner review; no merge or deployment
+was performed. Earlier failed required-check runs remain linked above.
+
+This is **one passing combined CI run** of the latest schema, not three repeated
+passing runs or a held-out result. The two earlier same-commit studies and all
+their failures remain disclosed. No further paid run was started after this
+single follow-up. Final evidence updates are committed locally without a push
+that would trigger another paid evaluation. See the
 [Member 2 handoff](docs/PA4/MEMBER2-HANDOFF.md).
 
 ## Marking command and model host

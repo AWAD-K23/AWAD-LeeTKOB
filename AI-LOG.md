@@ -1,5 +1,12 @@
 # AI log
 
+## 2026-11-27 — Passing schema-fix live CI and final evidence
+
+- **Tool / task:** Codex; complete the single schema follow-up authorized by “continue.”
+- **Verified:** Run 46009732306 passed all five jobs. Official: 0 wrongful, 36/37 recall (97.3%), 1/102 unsure (1.0%). Own: 0 wrongful, 9/9 recall, 0/20 unsure. All 77 successful calls have provider IDs and known usage: 49 primary plus 28 confirmation, with no provider errors, unknown reservations or retries. Estimated cost US$0.045214 (official 0.038785, own 0.006429). Tested PR head 07d14e0 includes schema fix e592bf7; Actions merge SHA is preserved in metadata.
+- **Changed:** Downloaded the complete passing artifact, saved check/review snapshots and computed cost/call summary, updated PA4.md and the Member 2 handoff, and retained all earlier failures. No cases, labels, thresholds or required checks changed to obtain the passing result.
+- **Limits:** One passing combined run is not proof of latest-code three-run stability or held-out performance. The two older same-commit studies remain disclosed with their failures. PR #27 is still draft and requires human review; no merge or deployment occurred. Final evidence is committed locally without pushing another commit that would start an unapproved paid CI run. No further model calls were made after this follow-up.
+
 ## 2026-11-27 — Single provider-schema follow-up after “continue”
 
 - **Tool / task:** Codex; continue after disclosing that the four-run batch was exhausted and the schema fix was local.
