@@ -261,30 +261,33 @@ func (g *Gemini) Generate(ctx context.Context, request Request) (result []byte, 
 
 // Local validation remains mandatory even with provider-side structured output.
 func responseSchema() map[string]any {
+	point := map[string]any{
+		"type": "object", "additionalProperties": false,
+		"required": []string{"line", "text"},
+		"properties": map[string]any{
+			"line": map[string]any{"type": "integer", "minimum": 1},
+			"text": map[string]string{"type": "string"},
+		},
+	}
+	finding := func(verdicts []string, minimumEvidence int) map[string]any {
+		return map[string]any{
+			"type": "object", "additionalProperties": false,
+			"required": []string{"constraintId", "verdict", "evidence"},
+			"properties": map[string]any{
+				"constraintId": map[string]string{"type": "string"},
+				"verdict":      map[string]any{"type": "string", "enum": verdicts},
+				"evidence":     map[string]any{"type": "array", "minItems": minimumEvidence, "items": point},
+			},
+		}
+	}
 	return map[string]any{
 		"type": "object", "required": []string{"verdicts"},
 		"additionalProperties": false,
 		"properties": map[string]any{"verdicts": map[string]any{
-			"type": "array", "items": map[string]any{
-				"type": "object", "additionalProperties": false,
-				"required": []string{"constraintId", "verdict", "evidence"},
-				"properties": map[string]any{
-					"constraintId": map[string]string{"type": "string"},
-					"verdict": map[string]any{
-						"type": "string", "enum": []string{"pass", "violation", "unsure"},
-					},
-					"evidence": map[string]any{
-						"type": "array", "items": map[string]any{
-							"type": "object", "additionalProperties": false,
-							"required": []string{"line", "text"},
-							"properties": map[string]any{
-								"line": map[string]any{"type": "integer", "minimum": 1},
-								"text": map[string]string{"type": "string"},
-							},
-						},
-					},
-				},
-			},
+			"type": "array", "items": map[string]any{"anyOf": []any{
+				finding([]string{"pass", "violation"}, 1),
+				finding([]string{"unsure"}, 0),
+			}},
 		}},
 	}
 }

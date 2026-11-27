@@ -1,5 +1,13 @@
 # AI log
 
+## 2026-11-27 — Final authorized CI result and provider-schema mismatch
+
+- **Tool / task:** Codex; finish the four newly authorized evaluations and preserve the actual outcome.
+- **Observed:** Confirmation CI run 45987925317 passed the official set (0 wrongful, 35/37 recall, 5/102 unsure) but failed own cases (0 wrongful, 8/9 recall, 1/20 unsure). The missed own finding was a model violation with an empty evidence array; local validation correctly converted it to unsure before confirmation. All 75 calls had provider IDs/known usage, with zero unknown reservations, costing US$0.041354. The new four-run batch totals US$0.109932. The required check remains red and PR #27 blocked; all other jobs passed.
+- **Changed:** Found that the provider schema allowed empty evidence for decisive verdicts even though local validation forbids it. Added conditional `anyOf` branches requiring `minItems: 1` for pass/violation while still allowing unsure with empty evidence. This tightens provider output without relaxing local G1/G2. Added a test-only pinned JSON Schema validator (v6.0.3) to check the actual transmitted schema against valid/invalid counterexamples, rather than duplicating its implementation. The regression failed before the correction and passes after it. Added a bypass mutation for this schema bound.
+- **Verified / sources:** Targeted guardrail tests, Go vet and the backend unit suite passed offline. [Google's structured-output documentation](https://ai.google.dev/gemini-api/docs/structured-output) documents conditional anyOf schemas and enforced minItems; the validator API/version was checked against its official repository/package documentation. Cases, labels and evaluator thresholds remain unchanged.
+- **Limits:** The schema correction is local and has not been tested with the real provider. The four additional evaluations are fully used; no fifth evaluation, push-triggered rerun or paid retry was started. One further live CI evaluation would need new authorization. This is not a passing Member 2 handoff or held-out result.
+
 ## 2026-11-27 — Preserve the confirmation candidate's pre-CI evidence
 
 - **Tool / task:** Codex; prepare the last authorized combined evaluation for Member 2.

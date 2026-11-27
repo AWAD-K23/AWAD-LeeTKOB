@@ -57,6 +57,10 @@ const mutations = [
       'validated = c.confirmViolations(ctx, timeout, Request{\n\t\tStatement: statement, Constraints: pending, Source: cleaned,\n\t}, string(source), validated)',
       '// Mutation: skip confirmation of semantic violations'),
   },
+  {
+    guard: 'Provider decisive evidence schema', file: 'backend/internal/semantic/gemini.go', pkg: './internal/semantic', test: '^TestProviderSchemaRequiresDecisiveEvidence',
+    mutate: source => replace(source, '"minItems": minimumEvidence', '"minItems": 0'),
+  },
 ];
 const env = { ...process.env, MODEL_OFF: '1', MODEL_API_KEY: '' };
 const results = [];
