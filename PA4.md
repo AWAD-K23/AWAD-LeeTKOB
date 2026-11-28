@@ -217,10 +217,52 @@ is created or committed here. The model must be enabled with `MODEL_OFF=0`.
 
 ## Where we stop it
 
-Pending Member 3: explain the error/fairness cost using the team's own measured
-numbers and configuration, and demonstrate the deployed Publish/student flow.
-The [Member 1 contract](docs/contract/publication.md) and
-[handoff](docs/PA4/MEMBER1-HANDOFF.md) describe the implemented server gate.
+The student pays for a false violation if a TA accepts it: the server applies
+the constraint's configured deduction. In main CI run 46101044500, one of the
+65 labelled-pass pairs was wrongly flagged (1/65, about 1.5%). Of 37 true
+violations, two were missed (35/37 recall); an innocent student can lose marks
+while a missed violation gives another student an unfair advantage. These are
+dev-set observations, not measured classroom or held-out error rates.
+
+Publish is the stopping point. The server requires TA decisions on every
+violation and unsure finding, plus a persisted random sample of
+`ceil(passCount / 10)` passes. The TA can reject the model's suggestion; the
+model cannot select a deduction or publish a mark. All deductions come from
+the configured constraint values and independent TA decisions. Population
+changes invalidate old reviews/publication; stale or incomplete publication is
+denied even through a direct API call. See the [contract](docs/contract/publication.md)
+and [backend tests](backend/internal/api/publication_test.go).
+
+Sampling does not eliminate missed violations. A wrong pass outside the sample
+may remain unreviewed and contribute zero deduction. Increasing review coverage
+costs TA time but reduces that fairness risk. A second model call also costs
+tokens and can repeat the same error; the later identical-source PR/main results
+show that confirmation is not a correctness guarantee. The lab/course weight
+and actual class constraint deductions have not been supplied for this report,
+so no course-grade loss is invented. The browser fixture uses a configured
+deduction of 3 solely to test that injected text cannot change the displayed
+value; mocked UI evidence is separate from deployed live evidence.
+
+The local review UI exposes sampled-pass requirements, review progress, Publish
+denials and the student's published deduction. Deployed verification remains
+pending; no model finding alone is presented as a published mark.
+
+## PR versus main repeat (November 28)
+
+[PR run 46038997206](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/46038997206)
+passed, but [main run 46101044500](https://github.com/AWAD-K23/AWAD-LeeTKOB/actions/runs/46101044500)
+failed. GitHub's comparison of PR head `4ff675f` with main `0ac368e` returned
+zero changed files. Main official metrics were 1 wrongful, 35/37 recall and
+4/102 unsure; own metrics were 0 wrongful, 8/9 recall and 1/20 unsure. The
+changing model responses, rather than a source difference or push-specific
+evaluator, explain this observed failure. The independent-confirmation change
+therefore did not eliminate wrongful findings. No new model call was made to
+investigate these existing runs.
+
+The local workflow now runs paid evaluation for PRs and any tagged release,
+while ordinary main pushes keep free checks and skip duplicate live evaluation.
+This is a general event policy, not a milestone-specific exception; the required
+PR gate and evaluator thresholds are unchanged. It has not been pushed here.
 
 ## Remaining release evidence
 

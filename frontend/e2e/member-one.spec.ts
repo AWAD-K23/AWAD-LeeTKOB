@@ -62,6 +62,10 @@ test("TA creates a lab with tests and chosen deductions", async ({ page }) => {
 test("student submits code and sees the polled judge result", async ({
   page,
 }) => {
+  await page.route(
+    "**/api/submissions/submission-a/published-result",
+    (route) => route.fulfill({ status: 404, json: {} }),
+  );
   await page.route("**/api/me", (route) =>
     route.fulfill({ json: { id: "student-a", role: "student" } }),
   );

@@ -1,5 +1,11 @@
 # AI log
 
+## 2026-11-28 - Publication UI and identical-source CI variability
+
+- **Tool / task:** Codex; continue remaining PA4 work without new paid calls. Compared successful PR run 46038997206 with failed main run 46101044500: GitHub reports zero source-file changes. Main had one wrongful finding and 8/9 own-case recall, so independent confirmation has not established reliability.
+- **Changed:** Added sampled/required-review labels, publication progress and server-error handling, Publish, and polling student published results with 404/invalidation hiding. Added a mocked browser regression covering pending review, stale denial, configured deduction despite injection text, publication and later invalidation. Existing browser fixtures now stub the added reads without removing assertions. Expanded PA4 fairness analysis and updated the plan. Generalized paid CI to PRs/tags, skipping duplicate main runs while preserving the required PR gate.
+- **Verified / limits:** Frontend lint/format/types/build and the full twelve-test browser suite passed; only existing lint/bundle warnings. Browser tests use mocked APIs, not deployed authorization or real-model evidence. User confirmed no red-team assignment yet; target/results remain empty. No deployment, external attacks, paid call, push, merge or release was performed.
+
 ## 2026-11-27 - Follow-up CI failure and independent confirmation
 
 - **Tool / task:** Codex; diagnose reported job 140631667610 without new paid calls. Existing run 46036066453 failed: official 1 wrongful, 36/37 recall, 2/102 unsure; own cases passed. All 77 calls have IDs/known usage, US$0.043797 estimated. Downloaded raw artifacts locally and retained a [compact audit](docs/PA4/evidence/confirmation-repeat-failure.json).

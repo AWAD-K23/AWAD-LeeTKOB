@@ -27,6 +27,10 @@ type Finding = {
   decision: "" | "pass" | "violation";
   reviewEvidence: Evidence[];
   appliedDeduction: number;
+  reviewRevision: number;
+  reviewRequired: boolean;
+  sampledPass: boolean;
+  reviewReason: string;
 };
 
 type EarlierSubmission = {
@@ -110,6 +114,7 @@ function FindingDecision({
     },
     onSuccess: () => {
       void cache.invalidateQueries({ queryKey: ["review-queue", labId] });
+      void cache.invalidateQueries({ queryKey: ["publication", labId] });
     },
   });
   const maxLine = finding.sourceCode.split("\n").length;
@@ -117,6 +122,13 @@ function FindingDecision({
   return (
     <li className="panel form-section">
       <h3>{finding.constraint}</h3>
+      <p>
+        {finding.sampledPass
+          ? "Sampled pass - review required"
+          : finding.reviewRequired
+            ? "Review required"
+            : "Optional review"}
+      </p>
       <p>
         Checker: <strong>{finding.verdict}</strong> ({finding.source}) ·
         Configured deduction: <strong>{finding.deduction}</strong>
@@ -186,6 +198,30 @@ function FindingDecision({
 
 export function ReviewQueuePage() {
   const { id = "" } = useParams();
+  const cache = useQueryClient();
+  const publication = useQuery({
+    queryKey: ["publication", id],
+    queryFn: () =>
+      api<{
+        reviewRevision: number;
+        required: number;
+        reviewed: number;
+        pending: number;
+        incompleteSubmissions: number;
+        published: boolean;
+      }>(`/labs/${id}/publication`),
+    refetchInterval: 5000,
+  });
+  const publish = useMutation({
+    mutationFn: () =>
+      api(`/labs/${id}/publish`, {
+        reviewRevision: publication.data?.reviewRevision,
+      }),
+    onSettled: () => {
+      void cache.invalidateQueries({ queryKey: ["publication", id] });
+      void cache.invalidateQueries({ queryKey: ["review-queue", id] });
+    },
+  });
   const queue = useQuery({
     queryKey: ["review-queue", id],
     queryFn: () => api<Finding[]>(`/labs/${id}/review-queue`),
@@ -210,8 +246,47 @@ export function ReviewQueuePage() {
       <Breadcrumb parent="Labs" to="/labs" current="TA review" />
       <PageHeader
         title="TA review queue"
-        description="Findings stay private until a TA decides. No mark is published here."
+        description="Review the required findings, then Publish to release deductions to students."
       />
+      <section className="panel form-section" aria-label="Publication">
+        <h2>Publication</h2>
+        <Feedback
+          error={publication.error}
+          retry={() => void publication.refetch()}
+        />
+        {publication.isPending && <Loading />}
+        {publication.data && !publication.error && (
+          <>
+            <p role="status">
+              {publication.data.reviewed} / {publication.data.required} required
+              reviews complete; {publication.data.pending} pending;{" "}
+              {publication.data.incompleteSubmissions} submissions awaiting
+              complete judging.
+            </p>
+            <p>
+              {publication.data.published
+                ? "Results published."
+                : "Results are not published."}
+            </p>
+          </>
+        )}
+        <Feedback error={publish.error} />
+        <button
+          className="btn btn-primary"
+          disabled={
+            !publication.data ||
+            !!publication.error ||
+            publication.isFetching ||
+            publish.isPending ||
+            publication.data.published ||
+            publication.data.pending > 0 ||
+            publication.data.incompleteSubmissions > 0
+          }
+          onClick={() => publish.mutate()}
+        >
+          Publish results
+        </button>
+      </section>
       <Feedback error={queue.error} retry={() => void queue.refetch()} />
       {!queue.error && !queue.data?.length && (
         <EmptyState title="No counted Accepted submissions yet">

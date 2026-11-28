@@ -5,6 +5,18 @@ import { expect, test } from "@playwright/test";
 test("TA review shows earlier submissions read-only, outside the queue", async ({
   page,
 }) => {
+  await page.route("**/api/labs/lab-a/publication", (route) =>
+    route.fulfill({
+      json: {
+        reviewRevision: 1,
+        required: 1,
+        reviewed: 0,
+        pending: 1,
+        incompleteSubmissions: 0,
+        published: false,
+      },
+    }),
+  );
   await page.route("**/api/me", (route) =>
     route.fulfill({ json: { id: "ta-a", role: "ta" } }),
   );

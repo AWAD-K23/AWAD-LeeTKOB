@@ -13,7 +13,7 @@ import {
   Send,
   Search,
 } from "lucide-react";
-import { api, type Lab, type Submission, type User } from "@/lib/api";
+import { api, ApiError, type Lab, type Submission, type User } from "@/lib/api";
 import {
   Breadcrumb,
   EmptyState,
@@ -79,6 +79,42 @@ function SourceEditor({
   );
 }
 
+function PublishedResult({ id }: { id: string }) {
+  const query = useQuery({
+    queryKey: ["published-result", id],
+    queryFn: async () => {
+      try {
+        return await api<{ deduction: number; publishedAt: string }>(
+          `/submissions/${id}/published-result`,
+        );
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 404) return null;
+        throw error;
+      }
+    },
+    retry: false,
+    refetchInterval: 5000,
+  });
+  return (
+    <section aria-label="Published result">
+      <Feedback error={query.error} retry={() => void query.refetch()} />
+      {query.isPending ? (
+        <p>Checking publication status...</p>
+      ) : (
+        !query.error &&
+        (query.data ? (
+          <p>
+            Published deduction: <strong>{query.data.deduction}</strong>{" "}
+            (published {query.data.publishedAt})
+          </p>
+        ) : (
+          <p>No published result is available.</p>
+        ))
+      )}
+    </section>
+  );
+}
+
 function Result({ id }: { id: string }) {
   const query = useQuery({
     queryKey: ["submission", id],
@@ -110,6 +146,7 @@ function Result({ id }: { id: string }) {
           <Link className="text-link" to={`/submissions/${id}`}>
             View submission
           </Link>
+          <PublishedResult id={id} />
         </>
       )}
     </div>
@@ -511,6 +548,7 @@ export function SubmissionPage() {
               <p className="help-text">
                 Judge results and published marks are separate.
               </p>
+              {id && <PublishedResult id={id} />}
               <Link className="text-link" to={`/labs/${query.data.labId}`}>
                 Return to lab
               </Link>

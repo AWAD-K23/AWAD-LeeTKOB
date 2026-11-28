@@ -103,6 +103,14 @@ Detailed ownership and delivery history remain in the [PA3 plan](PA3/PA3-PLAN.md
 
 ## PA4 — evaluation, guardrails, human gate and red-team
 
+**November 28 update:** Local TA sampling/progress/Publish UI and student published
+deduction views are implemented with offline browser coverage; deployment acceptance
+remains pending. PR run 46038997206 passed, but identical-source main run 46101044500
+failed (one wrongful official finding, own recall 8/9). Confirmation is therefore
+not a proven reliability fix. The local CI policy now gates PRs/tags without a
+duplicate paid main run. No additional paid calls were made. The red-team target
+has not been assigned; target details/results remain empty. See [PA4 plan](PA4/PA4-PLAN.md).
+
 **November 27 Member 2 update:** Required real-model CI, ten own Accepted cases,
 G1–G5 regression/mutation audits, two three-run studies and measured CI cost are
 implemented. The baseline required check failed and blocked PR #27. The first

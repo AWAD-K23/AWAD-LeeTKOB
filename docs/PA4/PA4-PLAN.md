@@ -55,7 +55,7 @@ Backend implementation and local verification: [Member 1 handoff](MEMBER1-HANDOF
 - [x] Audit G1–G5 below against actual code/tests. Add missing tests before or with each guardrail change, in separate genuine commits. Check that each test fails when its guardrail is removed; record any PA3 mixed-history limitation honestly.
 - [x] Extend `eval/extra/` to at least ten Accepted solutions with labels and tags, covering trap, injection and disguised. Verify they compile and pass their problem tests. Keep these cases separate from the official set and commit them before related checker fixes.
 - [x] Investigate remaining missed violations with generic algorithm/evidence reasoning. Preserve exact source validation, hard-rule-first routing and safe unsure fallback; no problem-specific fixes or label changes.
-- [x] Add a live evaluation job for PRs, main and `pa4`. Generate fresh predictions for both official and own cases inside the job using the real model, then run the unchanged evaluator on both. Every nonzero evaluator exit must fail the job.
+- [x] Add a required live evaluation job for PRs and tagged releases. Generate fresh predictions for both official and own cases inside the job using the real model, then run the unchanged evaluator on both. Every nonzero evaluator exit must fail the job. Local workflow update skips duplicate paid evaluation on ordinary main pushes; free checks still run there.
 - [x] Keep unit/guardrail tests offline with fake models. Retain the separate model-off checker job; its expected semantic threshold failure is not the live gate.
 - [x] Store the CI key only in repository secrets; preserve provider request IDs, model/version, tokens, timings and estimated cost in safe artifacts. Do not expose the key to student-code containers.
 - [x] Document a fork policy in `PA4.md`: secretless fork PRs must not count as a passing live eval. Require a maintainer-reviewed same-repository branch/run before merge; never execute untrusted fork code with secrets through `pull_request_target`.
@@ -69,6 +69,12 @@ Backend implementation and local verification: [Member 1 handoff](MEMBER1-HANDOF
 - [x] **Handoff:** Demonstrate G1–G5 with no network, a fresh real-model CI run, case history and three saved runs. Supply the report artifacts, cost arithmetic, blocked-PR/fix links and checker/marking instructions to Member 3.
 
 Implementation/evidence: [Member 2 candidate handoff](MEMBER2-HANDOFF.md). The first correction passed two of three dev runs but still had one wrongful violation. Confirmation CI passed official metrics but failed own-case recall at 8/9 because one primary violation lacked evidence. Provider-schema fix e592bf7 passed required CI run 46009732306 on both datasets. Earlier failures and both same-commit studies remain disclosed; latest-method three-run stability is unproven. Evidence is supplied; teammate acceptance, marking credentials/proxy verification and release work remain open.
+
+November 28 update: PR run 46038997206 passed, but main run 46101044500
+failed despite identical source trees. The independent-confirmation candidate
+still produced a wrongful finding and own-case recall was 8/9. See
+[current analysis](../../PA4.md#pr-versus-main-repeat-november-28).
+Earlier green evidence does not establish a reliable final gate.
 
 ### Guardrail acceptance matrix
 
@@ -85,10 +91,10 @@ Hard rules still decide ban-list constraints before the model. Deployed injectio
 ## Member 3 — review UI, red-team report and submission
 
 - [ ] Accept Member 1's publication/review contract and Member 2's guardrail/evaluation evidence; run the documented handoff checks before claiming integration complete.
-- [ ] Update the TA queue to show all required findings, persisted sampled-pass status, review progress, exact evidence, configured deduction and local unsure reasons including budget exhaustion.
-- [ ] Add the Publish flow and published student result view. Show pending-review errors returned by the server; verify a direct API request is blocked even when the UI is bypassed.
-- [ ] Add focused browser coverage for review completion → Publish → owning student sees the deduction, plus pending reviews and injection attempts that leave the TA-configured deduction unchanged.
-- [ ] Write `PA4.md` section **Where we stop it** using the team's own evaluation numbers, configured deductions and lab/course weighting where known. Explain who pays when wrong, how errors are detected, why Publish is the stopping point, and the missed-violation/fairness cost of unsampled passes. Do not present a brief example's weight as the team's measured configuration.
+- [x] Update the TA queue to show all required findings, persisted sampled-pass status, review progress, exact evidence, configured deduction and local unsure reasons including budget exhaustion. Local UI implemented; deployed acceptance remains pending.
+- [x] Add the Publish flow and published student result view. Show server publication errors. Browser tests cover pending and stale-review handling; existing Member 1 API tests independently cover direct-request denials. Fresh deployed verification remains pending.
+- [x] Add focused browser coverage for review completion → Publish → student result, pending reviews, source injection text leaving the configured deduction unchanged, and hiding the result after invalidation. Tests use mocked APIs; they do not claim deployed model or server authorization evidence.
+- [x] Write `PA4.md` section **Where we stop it** using measured evaluation numbers and deduction logic. Explain who pays, error detection, Publish and unsampled-pass fairness. Actual lab/course weighting is unavailable and disclosed; fixture deduction 3 is explicitly test-only.
 - [ ] Obtain the lecturer-assigned target from Classroom after PA3. Use only that deployment/public repository and its PA3 test accounts; do not guess the target or start attacks against other teams.
 - [ ] Read the target code and derive at least one attack from a concrete file/behavior. Record the target commit and code location.
 - [ ] Execute at least eight reproducible attacks across the five categories below. Save exact inputs, timestamps with timezone, expected and observed responses/logs/screenshots, held/broke status, applicable rule, who pays and proposed fixes for breaks.
@@ -103,6 +109,10 @@ Hard rules still decide ban-list constraints before the model. Deployed injectio
 - [ ] Create the ZIP including `.git`, named `<ascending-student-IDs>_<claimed-total>.zip`; include the self-assessment and red-team evidence, exclude secrets/local configuration. One member submits the ZIP plus separate `marking.env` before the deadline and records the receipt privately.
 
 ### Red-team coverage plan
+
+Target assignment and attack results are intentionally empty: the user confirmed
+on November 28 that the lecturer has not assigned the target yet. No external
+attacks have been executed or claimed.
 
 These are proposed attacks to adapt to the assigned target; none is claimed as executed.
 
