@@ -1,0 +1,36 @@
+{
+  "commit": "77ef5b0aa57c5e019ce0d6d34712151ac3b648c9",
+  "finishedAt": "2026-11-27T08:47:46.177Z",
+  "results": [
+    {
+      "dataset": "official",
+      "evaluatorExit": 1,
+      "model": "gemini-3.5-flash-lite",
+      "reservedCalls": 39,
+      "recordedCalls": 39,
+      "knownUsageCalls": 39,
+      "unknownUsageCalls": 0,
+      "unfinishedReservations": 0,
+      "successfulResponses": 39,
+      "errors": [],
+      "providerRequestIds": 39,
+      "inputTokens": 37838,
+      "outputTokens": 4036,
+      "thinkingTokens": 0,
+      "knownEstimatedCostMicroUsd": 21454,
+      "unknownUsageReservedMicroUsd": 0,
+      "estimatedUsdFor80SimilarCalls": 0.04400820512820512,
+      "minimumStartGapMs": 5000,
+      "peakRequestsIn60Seconds": 12,
+      "predictionPairs": 102,
+      "verdictCounts": {
+        "pass": 66,
+        "violation": 36,
+        "unsure": 0
+      }
+    }
+  ],
+  "knownEstimatedCostMicroUsd": 21454,
+  "unknownUsageReservedMicroUsd": 0,
+  "exit": 1
+}

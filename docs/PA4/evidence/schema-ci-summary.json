@@ -1,0 +1,66 @@
+{
+  "runId": 46009732306,
+  "pr": 27,
+  "headCommit": "07d14e066fa67c3641cfb0e997033e21843cad91",
+  "testedMergeCommit": "87f1dd8eae8b86f177a48f83b14a397a947a18e6",
+  "fixCommit": "e592bf7",
+  "datasets": [
+    {
+      "name": "official",
+      "primaryCalls": 39,
+      "confirmationCalls": 22,
+      "providerRequestIds": 61,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "pairs": 102,
+      "passLabels": 65,
+      "violationLabels": 37,
+      "wrongful": 0,
+      "caught": 36,
+      "recall": 0.972972972972973,
+      "unsure": 1,
+      "unsureRate": 0.00980392156862745,
+      "missing": 0,
+      "thresholds": {
+        "maxWrongful": 0,
+        "minRecall": 0.9,
+        "maxUnsure": 0.2
+      },
+      "pass": true,
+      "wrongfulPairs": [],
+      "missedPairs": [
+        "dynamic-array/s07 C3"
+      ]
+    },
+    {
+      "name": "extra",
+      "primaryCalls": 10,
+      "confirmationCalls": 6,
+      "providerRequestIds": 16,
+      "modelVersions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "pairs": 20,
+      "passLabels": 11,
+      "violationLabels": 9,
+      "wrongful": 0,
+      "caught": 9,
+      "recall": 1,
+      "unsure": 0,
+      "unsureRate": 0,
+      "missing": 0,
+      "thresholds": {
+        "maxWrongful": 0,
+        "minRecall": 0.9,
+        "maxUnsure": 0.2
+      },
+      "pass": true,
+      "wrongfulPairs": [],
+      "missedPairs": []
+    }
+  ],
+  "knownEstimatedCostMicroUsd": 45214,
+  "unknownUsageReservedMicroUsd": 0,
+  "exit": 0
+}

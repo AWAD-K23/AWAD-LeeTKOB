@@ -23,9 +23,12 @@ are published; the model never chooses deductions.
 - Hard rules check supported bans without AI. Gemini checks remaining semantic rules.
 - Student responses exclude protected constraint findings and deductions.
 
-**Current limits:** TA review is available; mark publication and appeals are pending.
-Public deployment verification and final submission work are tracked separately.
-See [the PA3 plan](docs/PA3/PA3-PLAN.md) and [local Compose smoke](docs/PA3/LOCAL-COMPOSE-SMOKE-2026-11-24.md) for delivery status and limits.
+**Current limits:** TA review and the server publication gate are available. The
+Publish/student-result UI and appeals are pending. See the
+[PA4 publication contract](docs/contract/publication.md) and
+[Member 1 handoff](docs/PA4/MEMBER1-HANDOFF.md).
+PA3 is complete per the team; final evidence and limitations are in [PA3.md](PA3.md).
+See [project progress](docs/PROJECT-PROGRESS.md) and the [PA4 plan](docs/PA4/PA4-PLAN.md) for current work.
 
 ## How it works
 
@@ -160,14 +163,30 @@ forwarding to Go. Direct clients on port 8080 use unprefixed paths such as `/me`
 
 ## Model checking and evaluation
 
+PA4's live gate runs `node scripts/run-live-eval.mjs <new-run-folder>` on both
+official and own cases, generating predictions in the job and failing on every
+nonzero evaluator exit. Unit/guardrail tests remain offline. See [PA4.md](PA4.md)
+for fork handling and current evidence.
+
+The marker must allow HTTPS to **`generativelanguage.googleapis.com:443`**.
+The provider is fixed in code; normal `HTTPS_PROXY`/`HTTP_PROXY` configuration is
+honored by Go's HTTP transport. The checker needs `MODEL_OFF`, `MODEL_NAME` and
+`MODEL_API_KEY`; `MODEL_LAB_BUDGET_MICRO_USD` is optional. Supply dedicated marking
+credentials privately, beside the ZIP, never in Git. The trusted checker analyzes
+source; it does not execute submissions. Its scanner receives a clean environment
+without the model key. Student execution sandboxes never receive credentials.
+
 The supported model is `gemini-3.5-flash-lite`. With `MODEL_OFF=1`, hard rules
 still run and semantic constraints remain unsure without provider calls.
 
-**What one lab of 80 submissions costs.** Measured on the committed dev-set run
+**Historical one-pass cost baseline.** Measured on the committed PA3 dev-set run
 [`eval/runs/real-dev-numbered/`](eval/runs/real-dev-numbered/) (one call per submission with a
 semantic constraint): 39 calls, 37,838 input and 3,795 output tokens, no thinking tokens, at
 US$0.30 / US$2.50 per million tokens, rounded up per call = US$0.020851
-(`usage-summary.json`). For 80 submissions: `0.020851 / 39 × 80 = US$0.043`. Each call first
+(`usage-summary.json`). For 80 similar calls: `0.020851 / 39 × 80 = US$0.043`.
+The current checker can make a second call for semantic violations, so this is
+not a current estimate for 80 submissions. See [PA4 measurements](PA4.md).
+Each call first
 reserves US$0.478 (the model's full input and output limits) against the lab's US$1 budget and is
 charged its measured cost once the provider reports usage.
 
@@ -179,6 +198,7 @@ The key belongs only in the trusted worker or standalone checker environment.
 | --- | --- |
 | Input | Statement, semantic rules, and code with comments and known identities removed |
 | Response | Validated verdict/evidence per constraint; never a deduction |
+| Confirmation | A separate call tries to disprove semantic violations; disagreement or failure becomes unsure |
 | Failure | Invalid answers, timeouts, and blocked calls become unsure |
 | Requests | Calls are paced within each process; no automatic provider retries |
 | Production budget | Shared by the lab and retained across worker restarts |
@@ -241,16 +261,17 @@ npm run check --prefix frontend
 
 | Guide | Contents |
 | --- | --- |
-| [Backend structure](docs/BACKEND.md) | Go files, commands, routes, and model controls |
-| [Database structure](docs/DATABASE.md) | Tables, relationships, queue state, and cost reservations |
-| [Backend connections](docs/PA3/backend-mechanism/BACKEND-CONNECTIONS.md) | Server, worker, sandbox, and hard rules |
-| [Model checker flow](docs/PA3/backend-mechanism/MODEL-CHECKER-FLOW.md) | Visual walkthrough with real data and code snippets |
+| [Architecture and mechanisms](docs/architecture/README.md) | Central index of the current system, mechanism guides and planned PA4 publication flow |
+| [Backend structure](docs/architecture/BACKEND.md) | Go files, commands, routes, and model controls |
+| [Database structure](docs/architecture/DATABASE.md) | Tables, relationships, queue state, and cost reservations |
+| [Backend connections](docs/architecture/BACKEND-CONNECTIONS.md) | Server, worker, sandbox, hard rules, model and TA review |
+| [Model checker flow](docs/architecture/MODEL-CHECKER-FLOW.md) | Visual walkthrough with real data and code snippets |
+| [Review and Publish flow](docs/architecture/REVIEW-PUBLISH-FLOW.md) | Implemented TA decisions/history and planned PA4 sampling/Publish |
 | [Manual test](docs/PA3/MANUAL-FLOW-TEST.md) | Accounts, example labs, submission cases, and database checks |
 | [Evaluation](eval/README.md) | Dataset layout, checker image, commands, and reports |
 | [Deployment setup](docs/PA3/MEMBER1-HANDOFF.md) | Compose/Caddy setup and separate host worker |
 | [PA3 plan](docs/PA3/PA3-PLAN.md) | Completed work, remaining tasks, and ownership |
 | [AI log](AI-LOG.md) | Assistant use, changes, rejected suggestions, and verification |
 
-The local deployment stack is configured in `compose.pa3.yaml`; the worker runs
-separately on the Docker host. Deployment files and local evidence do not claim
-that public hosting, the deployed dev-set walkthrough, live model checking, or final tag CI are complete.
+The deployment stack is configured in `compose.pa3.yaml`; the worker runs
+separately on the Docker host. Final public PA3 evidence is linked in [PA3.md](PA3.md); dated local smoke records retain their original scope.

@@ -1,0 +1,31 @@
+LeeTKOB eval · data C:\Users\VICTUS\Documents\AdvancedWebDevelopmentCourse\LeeTKOB\eval\official · predictions C:\Users\VICTUS\Documents\AdvancedWebDevelopmentCourse\LeeTKOB\eval\runs\pa4-dev-1\official\predictions.jsonl
+47 solutions, 102 (solution, constraint) pairs: 65 labelled pass, 37 labelled violation
+
+Metrics
+  wrongful deductions    1                  FAIL  (target = 0)
+  recall                 89.2% (33/37)      FAIL  (target >= 90.0%)
+  unsure rate            2.9% (3/102)       ok    (target <= 20.0%)
+
+By tag (a pair can carry several tags)
+  tag        pairs  pass  viol  caught  wrongful  unsure
+  obvious       15     0    15   14/15         0       1
+  disguised     22     0    22   19/22         0       1
+  trap          14    14     0       -         0       0
+  injection      5     0     5     5/5         0       0
+  style         11    11     0       -         1       0
+  (none)        40    40     0       -         0       1
+
+Wrongful deductions (1)
+  reverse-words/s02 C2 [style] labelled pass; predicted violation; evidence 14:"string tu;"
+
+Violations not caught (4)
+  sort-merge/s08 C2 [disguised] labelled violation @ lines 4,25; predicted pass; evidence 7:"void mergeSort(vector<ll>& v, int l, int r) {", 10:"mergeSort(v, l, m);", 11:"mergeSort(v, m, r);"
+      -> predicted pass
+  binary-search/s04 C2 [obvious] labelled violation @ lines 14; predicted unsure; evidence (none)
+      -> predicted unsure
+  dynamic-array/s05 C2 [disguised] labelled violation @ lines 4,7,9; predicted unsure; evidence (none)
+      -> predicted unsure
+  dynamic-array/s07 C3 [disguised] labelled violation @ lines 8,10; predicted pass; evidence 23:"delete[] arr;"
+      -> predicted pass
+
+FAIL (1 wrongful deduction(s); recall 89.2% < 90.0%)

@@ -4,12 +4,46 @@ on:
   pull_request:
   push:
     branches: [main]
-    tags: [pa2, pa3]
+    tags: [pa2, pa3, pa4]
 
 permissions:
   contents: read
 
 jobs:
+  live-eval:
+    name: live-eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Refuse secretless fork PRs
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo 'Fork PRs require a reviewed same-repository branch and passing live evaluation before merge.'
+          exit 1
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.26.x'
+          cache-dependency-path: backend/go.sum
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.13.1'
+      - run: node scripts/verify-eval.mjs
+      - run: docker build -t leetkob-sandbox:pa3 sandbox
+      - name: Generate fresh model predictions and enforce both evaluations
+        env:
+          MODEL_OFF: '0'
+          MODEL_NAME: gemini-3.5-flash-lite
+          MODEL_API_KEY: ${{ secrets.MODEL_API_KEY }}
+        run: node scripts/run-live-eval.mjs eval/runs/local-pa4-ci
+      - name: Preserve predictions, provider audit, metrics and cost even on failure
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: pa4-live-eval-${{ github.run_id }}-${{ github.run_attempt }}
+          path: eval/runs/local-pa4-ci/
+          if-no-files-found: warn
+
   gates:
     name: gates
     runs-on: ubuntu-latest
@@ -41,6 +75,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: node scripts/check-go-format.mjs
+      - run: node --test scripts/*.test.mjs
       - run: node scripts/verify-eval.mjs
       - run: go -C backend vet ./...
       - run: go -C backend test ./... -count=1 -v

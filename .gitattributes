@@ -8,6 +8,10 @@
 *.yaml text eol=lf
 *.html text eol=lf
 *.sh text eol=lf
+*.css text eol=lf
+
+# Keep our cross-platform evidence line numbers and output fixtures reproducible.
+eval/extra/** text eol=lf
 
 # Preserve the lecturer's published files byte for byte on every platform.
 eval/official/** -text

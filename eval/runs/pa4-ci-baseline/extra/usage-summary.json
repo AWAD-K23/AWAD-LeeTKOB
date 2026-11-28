@@ -1,0 +1,25 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "reservedCalls": 10,
+  "recordedCalls": 10,
+  "knownUsageCalls": 10,
+  "unknownUsageCalls": 0,
+  "unfinishedReservations": 0,
+  "successfulResponses": 10,
+  "errors": [],
+  "providerRequestIds": 10,
+  "inputTokens": 4465,
+  "outputTokens": 556,
+  "thinkingTokens": 0,
+  "knownEstimatedCostMicroUsd": 2734,
+  "unknownUsageReservedMicroUsd": 0,
+  "estimatedUsdFor80SimilarCalls": 0.021872,
+  "minimumStartGapMs": 5000,
+  "peakRequestsIn60Seconds": 10,
+  "predictionPairs": 20,
+  "verdictCounts": {
+    "pass": 12,
+    "violation": 8,
+    "unsure": 0
+  }
+}

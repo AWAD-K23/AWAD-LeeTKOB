@@ -1,0 +1,20 @@
+{"solution":"recursive-total/s01","constraint":"C1","verdict":"pass","evidence":[]}
+{"solution":"recursive-total/s01","constraint":"C2","verdict":"pass","evidence":[{"line":3,"text":"int total(int n) {"},{"line":4,"text":"    return n == 0 ? 0 : n + total(n - 1);"}]}
+{"solution":"recursive-total/s02","constraint":"C1","verdict":"violation","evidence":[{"line":6,"text":"    for (int i = 1; i \u003c= n; ++i) result += i;"}]}
+{"solution":"recursive-total/s02","constraint":"C2","verdict":"violation","evidence":[{"line":6,"text":"    for (int i = 1; i \u003c= n; ++i) result += i;"}]}
+{"solution":"recursive-total/s03","constraint":"C1","verdict":"pass","evidence":[]}
+{"solution":"recursive-total/s03","constraint":"C2","verdict":"violation","evidence":[{"line":6,"text":"    std::cout \u003c\u003c n * (n + 1) / 2 \u003c\u003c '\\n';"}]}
+{"solution":"recursive-total/s04","constraint":"C1","verdict":"pass","evidence":[]}
+{"solution":"recursive-total/s04","constraint":"C2","verdict":"pass","evidence":[{"line":7,"text":"    return n == 0 ? 0 : n + total(n - 1);"}]}
+{"solution":"recursive-total/s05","constraint":"C1","verdict":"violation","evidence":[{"line":9,"text":"    while (n \u003e 0) result += n--;"}]}
+{"solution":"recursive-total/s05","constraint":"C2","verdict":"violation","evidence":[{"line":9,"text":"    while (n \u003e 0) result += n--;"}]}
+{"solution":"recursive-total/s06","constraint":"C1","verdict":"pass","evidence":[]}
+{"solution":"recursive-total/s06","constraint":"C2","verdict":"pass","evidence":[{"line":4,"text":"int total(int n) {"},{"line":5,"text":"    return n == 0 ? 0 : n + total(n - 1);"}]}
+{"solution":"recursive-total/s07","constraint":"C1","verdict":"pass","evidence":[]}
+{"solution":"recursive-total/s07","constraint":"C2","verdict":"violation","evidence":[{"line":8,"text":"    std::cout \u003c\u003c n * (n + 1) / 2 \u003c\u003c '\\n';"}]}
+{"solution":"recursive-total/s08","constraint":"C1","verdict":"violation","evidence":[{"line":7,"text":"    STEP (n \u003e 0) answer += n--;"}]}
+{"solution":"recursive-total/s08","constraint":"C2","verdict":"violation","evidence":[{"line":7,"text":"    STEP (n \u003e 0) answer += n--;"}]}
+{"solution":"recursive-total/s09","constraint":"C1","verdict":"pass","evidence":[]}
+{"solution":"recursive-total/s09","constraint":"C2","verdict":"pass","evidence":[{"line":4,"text":"    return n == 0 ? 0 : n + unused(n - 1);"}]}
+{"solution":"recursive-total/s10","constraint":"C1","verdict":"pass","evidence":[]}
+{"solution":"recursive-total/s10","constraint":"C2","verdict":"pass","evidence":[{"line":5,"text":"        return n == 0 ? accumulator : total(n - 1, accumulator + n);"}]}

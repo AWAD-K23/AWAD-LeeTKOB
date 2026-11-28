@@ -1,0 +1,54 @@
+{
+  "commit": "cd3374d3eb5b6fc5152ce0312197cc1f89c582fd",
+  "generatedAt": "2026-11-27T11:04:35.508Z",
+  "results": [
+    {
+      "guard": "G1 schema",
+      "test": "^TestG1",
+      "baselineExit": 0,
+      "mutatedExit": 1,
+      "failure": "--- FAIL: TestG1SchemaFailsClosed (0.00s)\n    --- FAIL: TestG1SchemaFailsClosed/invalid_JSON (0.00s)\n        guardrail_schema_test.go:31: schema guard failed: [{ConstraintID:a Verdict:pass Reason: Evidence:[] Source:model}], calls=1\n    --- FAIL: TestG1SchemaFailsClosed/unknown_verdict (0.00s)\n        guardrail_schema_test.go:31: schema guard failed: [{ConstraintID:a Verdict:pass Reason: Evidence:[] Source:model}], calls=1\n    --- FAIL: TestG1SchemaFailsClosed/missing_constraint (0.00s)\n        guardrail_schema_test.go:31: schema guard failed: [{ConstraintID:a Verdict:pass Reason: Evidence:[] Source:model}], calls=1\n    --- FAIL: TestG1SchemaFailsClosed/fenced_JSON (0.00s)\n        guardrail_schema_test.go:31: schema guard failed: [{ConstraintID:a Verdict:pass Reason: Evidence:[] Source:model}], calls=1\n    --- FAIL: TestG1SchemaFailsClosed/prose_prefix (0.00s)\n        guardrail_schema_test.go:31: schema guard failed: [{ConstraintID:a Verdict:pass Reason: Evidence:[] Source:model}], calls=1\n    guardrail_schema_test.go:52: duplicate ID accepted: [{ConstraintID:a Verdict:pass Reason: Evidence:[] Source:model} {ConstraintID:b Verdict:pass Reason: Evidence:[] Source:model}]\nFAIL\nFAIL\tleetkob/backend/internal/semantic\t2.479s\nFAIL",
+      "stderr": ""
+    },
+    {
+      "guard": "G2 exact numbered evidence",
+      "test": "^TestG2",
+      "baselineExit": 0,
+      "mutatedExit": 1,
+      "failure": "--- FAIL: TestG2ExactEvidenceAndOriginalMapping (0.00s)\n    --- FAIL: TestG2ExactEvidenceAndOriginalMapping/invented_text (0.00s)\n        guardrail_evidence_test.go:27: invalid evidence accepted: {ConstraintID:a Verdict:violation Reason: Evidence:[{Line:2 Text:int first = 1; /* explanatory comment */}] Source:model}\n    --- FAIL: TestG2ExactEvidenceAndOriginalMapping/right_text_wrong_line (0.00s)\n        guardrail_evidence_test.go:27: invalid evidence accepted: {ConstraintID:a Verdict:violation Reason: Evidence:[{Line:3 Text:int second = 2;}] Source:model}\n    --- FAIL: TestG2ExactEvidenceAndOriginalMapping/stripped_comment_only (0.00s)\n        guardrail_evidence_test.go:27: invalid evidence accepted: {ConstraintID:a Verdict:violation Reason: Evidence:[{Line:1 Text:// int invented = 9;}] Source:model}\nFAIL\nFAIL\tleetkob/backend/internal/semantic\t2.959s\nFAIL",
+      "stderr": ""
+    },
+    {
+      "guard": "G3 discard late success",
+      "test": "^TestG3",
+      "baselineExit": 0,
+      "mutatedExit": 1,
+      "failure": "--- FAIL: TestG3DeadlineDiscardsLateSuccess (0.01s)\n    guardrail_timeout_test.go:26: late result escaped timeout guard: [{ConstraintID:a Verdict:pass Reason: Evidence:[{Line:1 Text:int value = 1;}] Source:model}]\nFAIL\nFAIL\tleetkob/backend/internal/semantic\t3.748s\nFAIL",
+      "stderr": ""
+    },
+    {
+      "guard": "G4 persistent reservation",
+      "test": "TestDurableWorker/G4",
+      "baselineExit": 0,
+      "mutatedExit": 1,
+      "failure": "--- FAIL: TestDurableWorker (0.14s)\n    --- FAIL: TestDurableWorker/G4_exhausted_persistent_cap_stops_provider_and_explains_all_pending_constraints (0.02s)\n        worker_test.go:367: exhausted cap made 1 provider calls\nFAIL\nFAIL\tleetkob/backend/internal/worker\t0.597s\nFAIL",
+      "stderr": ""
+    },
+    {
+      "guard": "G5 unknown mark fields",
+      "test": "^TestG5",
+      "baselineExit": 0,
+      "mutatedExit": 1,
+      "failure": "--- FAIL: TestG5ModelCannotSupplyMarks (0.00s)\n    guardrail_deduction_test.go:27: model mark accepted: [{ConstraintID:a Verdict:pass Reason: Evidence:[{Line:1 Text:int value = 1;}] Source:model}]\nFAIL\nFAIL\tleetkob/backend/internal/semantic\t2.392s\nFAIL",
+      "stderr": ""
+    },
+    {
+      "guard": "Semantic violation confirmation",
+      "test": "^TestViolationConfirmation",
+      "baselineExit": 0,
+      "mutatedExit": 1,
+      "failure": "--- FAIL: TestViolationConfirmationFailsClosed (0.00s)\n    --- FAIL: TestViolationConfirmationFailsClosed/confirmed (0.00s)\n        confirmation_test.go:60: confirmation calls=1\n    --- FAIL: TestViolationConfirmationFailsClosed/disagreed (0.00s)\n        confirmation_test.go:57: unconfirmed violation escaped: [{ConstraintID:a Verdict:violation Reason: Evidence:[{Line:1 Text:int quantity = 1; // private comment}] Source:model}]\n    --- FAIL: TestViolationConfirmationFailsClosed/uncertain (0.00s)\n        confirmation_test.go:57: unconfirmed violation escaped: [{ConstraintID:a Verdict:violation Reason: Evidence:[{Line:1 Text:int quantity = 1; // private comment}] Source:model}]\n    --- FAIL: TestViolationConfirmationFailsClosed/malformed (0.00s)\n        confirmation_test.go:57: unconfirmed violation escaped: [{ConstraintID:a Verdict:violation Reason: Evidence:[{Line:1 Text:int quantity = 1; // private comment}] Source:model}]\n    --- FAIL: TestViolationConfirmationFailsClosed/budget (0.00s)\n        confirmation_test.go:57: unconfirmed violation escaped: [{ConstraintID:a Verdict:violation Reason: Evidence:[{Line:1 Text:int quantity = 1; // private comment}] Source:model}]\n    --- FAIL: TestViolationConfirmationFailsClosed/provider_error (0.00s)\n        confirmation_test.go:57: unconfirmed violation escaped: [{ConstraintID:a Verdict:violation Reason: Evidence:[{Line:1 Text:int quantity = 1; // private comment}] Source:model}]\nFAIL\nFAIL\tleetkob/backend/internal/semantic\t1.605s\nFAIL",
+      "stderr": ""
+    }
+  ]
+}

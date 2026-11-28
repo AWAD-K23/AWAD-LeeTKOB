@@ -1,0 +1,29 @@
+{
+  "note": "Compact records retained when redundant offline predictions/reports were removed; full original files remain in Git history through 1b8fdb3.",
+  "rehearsals": [
+    {
+      "commit": "77ef5b0aa57c5e019ce0d6d34712151ac3b648c9",
+      "image": "leetkob-checker:pa4",
+      "network": "none",
+      "credentials": false,
+      "dataPath": "/tmp/arbitrary-dataset",
+      "durationMs": 2799,
+      "pairs": 20,
+      "evaluatorExit": 1,
+      "modelOff": true,
+      "note": "Semantic threshold failure is expected offline; this is command/output validity evidence only."
+    },
+    {
+      "commit": "61d9c89e5d0de250572fef86a82dbe6df9c8e78a",
+      "image": "sha256:57e166af8c741e274f153ce616efc39a0bd4521accb7fc2380fa4d9670a8baa7",
+      "network": "none",
+      "credentials": false,
+      "dataPath": "/tmp/arbitrary-dataset",
+      "durationMs": 4817,
+      "pairs": 20,
+      "evaluatorExit": 1,
+      "modelOff": true,
+      "note": "Output/command validity only; semantic threshold failure is expected offline."
+    }
+  ]
+}

@@ -620,7 +620,7 @@ func TestSubmissionContract(t *testing.T) {
 		expectProblem(t, request("POST", path, `{"source":"x"}`, expired, "expired-session", origin), 401, "unauthenticated", "Authentication required")
 	})
 	t.Run("TA review is class scoped and cannot leak into student marks", func(t *testing.T) {
-		for _, name := range []string{"00006_reviews.sql"} {
+		for _, name := range []string{"00006_reviews.sql", "00008_publication.sql"} {
 			migration, err := os.ReadFile(filepath.Join("..", "..", "migrations", name))
 			if err != nil {
 				t.Fatal(err)
